@@ -1,0 +1,19 @@
+# 줄바꿈: 저장소에는 LF, Windows 작업 폴더에서는 CRLF로 자동 변환
+* text=auto
+
+# Windows 전용 파일은 항상 CRLF
+*.rc       text eol=crlf
+*.def      text eol=crlf
+*.ps1      text eol=crlf
+*.iss      text eol=crlf
+
+# 바이너리
+*.dll      binary
+*.exe      binary
+*.lib      binary
+*.tif      binary
+*.raw      binary
+*.emf      binary
+*.docx     binary
+*.zip      binary
+*.pdf      binary

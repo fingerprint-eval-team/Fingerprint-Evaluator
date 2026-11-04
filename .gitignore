@@ -1,0 +1,28 @@
+# 빌드 산출물
+build/
+bin/
+dist/
+out/
+
+# 평가 결과 (실행할 때마다 생성)
+results/
+
+# FVC 테스트 DB 이미지: 재배포 제한 데이터라 저장소에 올리지 않는다.
+# 공유 자료의 FVC*.zip을 testdb/ 아래에 압축 해제해서 사용
+testdb/FVC*/
+
+# 실행 시 생성되는 사용자 설정
+last_config.json
+
+# IDE
+.vs/
+.vscode/
+*.user
+*.aps
+*.suo
+*.sdf
+*.ncb
+
+# OS
+.DS_Store
+Thumbs.db
