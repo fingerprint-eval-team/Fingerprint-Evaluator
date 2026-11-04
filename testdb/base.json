@@ -1,0 +1,1 @@
+{"rules":{"enroll":"All","genuine":"Symmetric","impostor":"FirstOne","impostorSymmetric":true,"seed":20261104},"run":{"workers":4,"timeoutSec":5,"anonymizeNames":true}}
