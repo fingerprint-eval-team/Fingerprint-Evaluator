@@ -1,0 +1,5 @@
+LIBRARY FPAlgo
+EXPORTS
+  KISA_Enroll
+  KISA_Attempt
+  KISA_Compare
