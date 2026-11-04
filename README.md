@@ -3,6 +3,14 @@
 지문인식 알고리즘 성능 평가 프로그램과 K-NBTC 규격 지문인식 DLL.
 고급객체지향프로그래밍(SME3007) 2026-2학기 팀프로젝트.
 
+> **소스 코드는 `develop` 브랜치에 있다.** `main`에는 발표·제출 시점의 안정 버전만 병합한다.
+>
+> ```bash
+> git clone -b develop https://github.com/fingerprint-eval-team/Fingerprint-Evaluator.git
+> ```
+>
+> 이미 클론했다면 `git switch develop`
+
 ## 개발 대상
 
 | 산출물 | 설명 |
