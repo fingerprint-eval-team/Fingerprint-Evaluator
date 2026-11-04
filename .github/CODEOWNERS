@@ -1,0 +1,26 @@
+# 경로별 담당 팀: 해당 경로를 수정한 PR에 담당 팀이 자동으로 리뷰어로 지정된다.
+# 팀(algorithm, engine, ui-release)은 Organization 설정의 Teams에서 먼저 만들어야 한다.
+
+# 공용 헤더와 빌드 설정은 세 팀 모두 검토
+*                         @fingerprint-eval-team/algorithm @fingerprint-eval-team/engine @fingerprint-eval-team/ui-release
+
+# A · 알고리즘
+/src/algo/                @fingerprint-eval-team/algorithm
+/src/testdlls/            @fingerprint-eval-team/algorithm
+/tools/                   @fingerprint-eval-team/algorithm
+
+# B · 평가 엔진
+/src/worker/              @fingerprint-eval-team/engine
+/src/core/exec/           @fingerprint-eval-team/engine
+/src/core/plan/           @fingerprint-eval-team/engine
+/src/core/db/             @fingerprint-eval-team/engine
+/src/core/result/         @fingerprint-eval-team/engine
+/src/cli/                 @fingerprint-eval-team/engine
+
+# C · UI·리포트·배포
+/src/gui/                 @fingerprint-eval-team/ui-release
+/src/core/metrics/        @fingerprint-eval-team/ui-release
+/src/core/chart/          @fingerprint-eval-team/ui-release
+/src/core/report/         @fingerprint-eval-team/ui-release
+/src/core/config/         @fingerprint-eval-team/ui-release
+/installer/               @fingerprint-eval-team/ui-release
