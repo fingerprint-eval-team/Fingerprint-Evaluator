@@ -1,0 +1,371 @@
+<title>SME3007 지문인식 팀프로젝트 계획</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: sticky section index on the left, one reading column on the right; stacks to one column on phones */
+:root{
+  --bg:#f6f7f9; --surface:#ffffff; --fg:#1b2230; --muted:#5a6475; --line:#dde1e8;
+  --accent:#1f5fae; --accent-soft:#e6eefa; --warn:#9a5b00; --warn-soft:#fff3df; --ok:#1d7a4f;
+  --code-bg:#eef1f5;
+  --f-body:"IBM Plex Sans KR","Malgun Gothic","Apple SD Gothic Neo",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",Consolas,ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#12161d; --surface:#1a2029; --fg:#e4e8ef; --muted:#9aa4b4; --line:#2c3440;
+  --accent:#7fb0f0; --accent-soft:#1d2b3f; --warn:#f0b35a; --warn-soft:#33281a; --ok:#5fd09a;
+  --code-bg:#222a35; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12161d; --surface:#1a2029; --fg:#e4e8ef; --muted:#9aa4b4; --line:#2c3440;
+  --accent:#7fb0f0; --accent-soft:#1d2b3f; --warn:#f0b35a; --warn-soft:#33281a; --ok:#5fd09a;
+  --code-bg:#222a35; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15.5px;line-height:1.7;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 64px}
+.wrap{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:220px minmax(0,1fr);gap:48px}
+header.top{grid-column:1/-1;padding-block:48px 8px;border-bottom:1px solid var(--line)}
+.eyebrow{font-family:var(--f-mono);font-size:12.5px;letter-spacing:.06em;color:var(--accent);text-transform:uppercase}
+h1{font-size:clamp(26px,4vw,36px);line-height:1.25;margin:8px 0 10px;text-wrap:balance;font-weight:700}
+.meta{color:var(--muted);font-size:13.5px;margin:0 0 24px}
+nav.toc{position:sticky;top:env(safe-area-inset-top,0px);align-self:start;padding-top:32px;font-size:13.5px}
+nav.toc ol{list-style:none;margin:0;padding:0;display:grid;gap:2px;counter-reset:t}
+nav.toc a{display:block;padding:5px 10px;border-radius:6px;color:var(--muted);text-decoration:none;counter-increment:t}
+nav.toc a::before{content:counter(t) ". ";font-family:var(--f-mono);font-size:12px}
+nav.toc a:hover,nav.toc a:focus-visible{background:var(--accent-soft);color:var(--fg);outline:none}
+main{min-width:0;padding-top:24px}
+section{padding-block:24px;border-bottom:1px solid var(--line)}
+section:last-child{border-bottom:0}
+h2{font-size:22px;margin:0 0 14px;text-wrap:balance;display:flex;gap:10px;align-items:baseline}
+h2 .n{font-family:var(--f-mono);font-size:14px;color:var(--accent);font-weight:500}
+h3{font-size:16.5px;margin:22px 0 8px}
+p,li{max-width:72ch}
+a{color:var(--accent)}
+code,pre{font-family:var(--f-mono);font-size:13px}
+code{background:var(--code-bg);padding:1px 5px;border-radius:4px}
+pre{background:var(--code-bg);padding:14px 16px;border-radius:8px;overflow-x:auto;line-height:1.55;margin:12px 0}
+pre code{background:none;padding:0}
+.tbl{overflow-x:auto;margin:12px 0;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{padding:9px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+tr:last-child td{border-bottom:0}
+th{background:var(--code-bg);font-weight:600;font-size:13px;white-space:nowrap}
+td.num{font-variant-numeric:tabular-nums;font-family:var(--f-mono);white-space:nowrap}
+.callout{background:var(--warn-soft);border:1px solid color-mix(in srgb,var(--warn) 35%,transparent);border-radius:8px;padding:12px 16px;margin:14px 0}
+.callout b{color:var(--warn)}
+.note{background:var(--accent-soft);border-radius:8px;padding:12px 16px;margin:14px 0}
+.weights{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:16px 0}
+.w{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 14px}
+.w .pct{font-family:var(--f-mono);font-size:24px;font-weight:500;color:var(--accent)}
+.w .lbl{font-size:13px;color:var(--muted)}
+.bar{height:6px;border-radius:3px;background:var(--line);margin-top:8px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent)}
+.pill{display:inline-block;font-size:12px;font-weight:600;padding:1px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent);white-space:nowrap}
+.pill.m{background:var(--warn-soft);color:var(--warn)}
+.roles{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:12px 0}
+.role{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:14px 16px}
+.role h4{margin:0 0 6px;font-size:15px}
+.role p{margin:0;font-size:14px;color:var(--muted)}
+ul.check{list-style:none;padding:0}
+ul.check li{padding-left:26px;position:relative;margin:4px 0}
+ul.check li::before{content:"";position:absolute;left:2px;top:6px;width:13px;height:13px;border:1.5px solid var(--muted);border-radius:3px}
+.formula{font-family:var(--f-mono);font-size:13px;white-space:nowrap}
+@media (max-width:860px){.wrap{grid-template-columns:minmax(0,1fr);gap:0}nav.toc{position:static;padding-top:16px}nav.toc ol{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+<header class="top">
+  <div class="eyebrow">Advanced OOP · SME3007 · 팀프로젝트</div>
+  <h1>지문인식 알고리즘 평가 프로그램 &amp; 지문인식 DLL — 전체 과제 계획</h1>
+  <p class="meta">작성 2026-11-04 · 근거: 과제 안내 자료, K-NBTC 생체인식 시험·인증 안내서(25.11) p26–31, IndustryAlgorithm(지문) 예제, FVC 테스트 DB 3종 · 상세 구현: <a href="코드작성계획_동작명세.html">코드 작성 계획과 동작 명세</a> · 현재 상태·남은 일: <a href="프로젝트_통합문서.html">통합 문서</a></p>
+</header>
+
+<nav class="toc" aria-label="목차"><ol>
+  <li><a href="#s1">과제 요약</a></li><li><a href="#s2">입력 자료 분석</a></li><li><a href="#s3">요구사항</a></li>
+  <li><a href="#s4">시스템 설계</a></li><li><a href="#s5">알고리즘 DLL</a></li><li><a href="#s6">역할 분담</a></li>
+  <li><a href="#s7">일정</a></li><li><a href="#s8">검증 계획</a></li><li><a href="#s9">리스크</a></li>
+  <li><a href="#s10">제출물</a></li><li><a href="#s11">질의 사항</a></li>
+</ol></nav>
+
+<main>
+<section id="s1"><h2><span class="n">01</span>과제 요약</h2>
+<div class="tbl"><table>
+<tr><th>목표</th><td>C/C++로 Windows 응용프로그램을 개발하고 설치 패키지 배포까지, SW 개발 전 과정 수행</td></tr>
+<tr><th>팀</th><td>3인 1팀 (총 6팀)</td></tr>
+<tr><th>산출물 1</th><td><b>지문인식 알고리즘 평가 프로그램</b> (Windows GUI)</td></tr>
+<tr><th>산출물 2</th><td><b>지문인식 알고리즘</b> (Windows DLL, K-NBTC <code>KISA_Enroll</code> / <code>KISA_Attempt</code> / <code>KISA_Compare</code> 규격)</td></tr>
+<tr><th>제약</th><td>C/C++만 사용. 공개 라이브러리는 단위 기능에 한해 허용(출처 명시). 독자 동작 SW 연동 방식은 불허</td></tr>
+</table></div>
+<div class="weights">
+  <div class="w"><div class="pct">70%</div><div class="lbl">평가 SW · 기능 완성도, 평가 완결성, 소스 코드</div><div class="bar"><i style="width:70%"></i></div></div>
+  <div class="w"><div class="pct">20%</div><div class="lbl">알고리즘 인식 성능</div><div class="bar"><i style="width:20%"></i></div></div>
+  <div class="w"><div class="pct">10%</div><div class="lbl">발표 · 발표자료 · 시연</div><div class="bar"><i style="width:10%"></i></div></div>
+  <div class="w"><div class="pct">±</div><div class="lbl">팀원 평가 (총점에 가감)</div><div class="bar"><i style="width:0"></i></div></div>
+</div>
+<p class="note"><b>전략:</b> 배점의 70%가 평가 프로그램이므로 평가 프로그램을 먼저, 견고하게 만든다. 알고리즘 DLL은 병행 개발하며 점진적으로 성능을 올린다.</p>
+</section>
+
+<section id="s2"><h2><span class="n">02</span>입력 자료 분석</h2>
+<h3>테스트 DB (8-bit grayscale TIFF)</h3>
+<div class="tbl"><table>
+<tr><th>DB</th><th>iType</th><th>해상도 (W×H)</th><th>구성</th><th>파일명</th></tr>
+<tr><td>FVC2000_DB3_B</td><td class="num">1</td><td class="num">448 × 478</td><td>10손가락 × 8장 = 80장</td><td><code>101_1.tif</code> ~ <code>110_8.tif</code></td></tr>
+<tr><td>FVC2002_DB3_B</td><td class="num">2</td><td class="num">300 × 300</td><td>10 × 8 = 80장</td><td>동일</td></tr>
+<tr><td>FVC2004_DB1_B</td><td class="num">2</td><td class="num">640 × 480</td><td>10 × 8 = 80장</td><td>동일</td></tr>
+</table></div>
+<p>평가 프로그램은 TIFF를 디코딩해 <b>헤더 없는 raw 픽셀 버퍼</b>(1 byte/pixel, 좌상단부터)로 DLL에 넘긴다.</p>
+<div class="callout"><b>확인 필요:</b> FVC2002_DB3_B와 FVC2004_DB1_B는 iType이 둘 다 2인데 해상도가 다르다. DLL 함수에는 이미지 크기 인자가 없어 DLL이 크기를 알 방법이 없다. 10주차 안에 교수님께 질의한다.</div>
+
+<h3>DLL 규격 (안내서 p26–29, 예제 BioApi.h)</h3>
+<pre><code>extern "C" __declspec(dllexport)
+int KISA_Enroll (int iType, unsigned char* pImage, unsigned char* pEnroll,
+                 int* piEnrollSize, int* piErrorCode, char arErrorMessage[256]);
+int KISA_Attempt(int iType, unsigned char* pImage, unsigned char* pAttempt,
+                 int* piAttemptSize, int* piErrorCode, char arErrorMessage[256]);
+int KISA_Compare(unsigned char* pEnroll, unsigned char* pAttempt,
+                 double* pdScore, int* piErrorCode, char arErrorMessage[256]);</code></pre>
+<ul>
+  <li>반환값: 성공 1, 실패 0 이하. 실패 시 에러코드와 메시지를 로그에 기록</li>
+  <li>템플릿 크기 &lt; 1,000,000 byte, 점수는 0(타인)~1(동일), 소수 셋째 자리까지. 범위 밖 점수는 비교 거부(FNMR에 반영)</li>
+  <li><code>KISA_Compare</code>에는 템플릿 크기가 넘어오지 않으므로 템플릿 헤더에 크기·버전을 담는다</li>
+  <li>부속 파일은 DLL과 같은 폴더에 두고 <code>GetModuleFileName(g_hDLL)</code>로 경로를 구한다 (안내서 p31)</li>
+  <li>예제 DLL은 VC2005/2010 프로젝트라 32bit(x86)일 가능성이 높다. 평가 프로그램은 x86/x64 DLL을 모두 로드할 수 있어야 한다</li>
+</ul>
+
+<h3>시험 조합 규모 (DB 1개, 동일 이미지 비교 제외)</h3>
+<div class="tbl"><table>
+<tr><th>규칙</th><th>계산</th><th>시도 수</th></tr>
+<tr><td>본인비교, 모든 조합 (순서 있음)</td><td class="num">10 × 8 × 7</td><td class="num">560</td></tr>
+<tr><td>본인비교, 대칭 제거 (FVC 방식)</td><td class="num">10 × C(8,2)</td><td class="num">280</td></tr>
+<tr><td>타인비교, 모든 조합</td><td class="num">80 × 72</td><td class="num">5,760</td></tr>
+<tr><td>타인비교, 각 손가락 첫 1장끼리</td><td class="num">10 × 9</td><td class="num">90 (대칭 제거 45)</td></tr>
+</table></div>
+<p>공개 DB는 작아서 전수 평가도 수 초~수 분이면 끝난다. 실제 K-NBTC DB(센서당 7,500장)를 고려해 병렬·부분 평가 구조를 갖춘다.</p>
+</section>
+
+<section id="s3"><h2><span class="n">03</span>요구사항</h2>
+<h3>평가 프로그램 기능 (과제 PDF p3–p5)</h3>
+<div class="tbl"><table>
+<tr><th>ID</th><th>구분</th><th>요구사항</th></tr>
+<tr><td class="num">F-01</td><td>입력</td><td>알고리즘 DLL 파일 선택</td></tr>
+<tr><td class="num">F-02</td><td>입력</td><td>테스트 DB 폴더 선택 (+ iType 지정)</td></tr>
+<tr><td class="num">F-03</td><td>입력</td><td>알고리즘 생성물(템플릿) 저장 폴더 선택</td></tr>
+<tr><td class="num">F-04</td><td>설정</td><td>등록용 지문 결정 규칙 (각 손가락 1번 / 지정 순번 / 전체 / random N)</td></tr>
+<tr><td class="num">F-05</td><td>설정</td><td>본인비교 조합 규칙 (모든 조합, 대칭 제거, random N)</td></tr>
+<tr><td class="num">F-06</td><td>설정</td><td>타인비교 조합 규칙 (모든 조합, 첫 1개, 선택 순번만, random N)</td></tr>
+<tr><td class="num">F-07</td><td>설정</td><td>리포트 항목 on/off, 항목별 적용 수식 선택</td></tr>
+<tr><td class="num">F-08</td><td>설정</td><td>로그·리포트 저장 폴더 선택</td></tr>
+<tr><td class="num">F-09</td><td>공통</td><td>비교 순서 무작위화 (알고리즘이 규칙을 유추하지 못하게)</td></tr>
+<tr><td class="num">F-10</td><td>공통</td><td>등록 이미지와 동일 이미지 비교 금지</td></tr>
+<tr><td class="num">F-11</td><td>공통</td><td>알고리즘 오류 감지: timeout, crash, 출력과 동작 불일치</td></tr>
+<tr><td class="num">F-12</td><td>공통</td><td>알고리즘 강제 종료</td></tr>
+<tr><td class="num">F-13</td><td>공통</td><td>병렬 평가 (동시 수행 개수 선택)</td></tr>
+<tr><td class="num">F-14</td><td>공통</td><td>부분 평가 (파일에 나열된 matching 쌍만 시험)</td></tr>
+<tr><td class="num">F-15</td><td>재현성</td><td>random 조합·순서를 seed와 쌍 목록으로 저장·불러오기</td></tr>
+<tr><td class="num">F-16</td><td>리포트</td><td>MS-Word(.docx), HTML 리포트 생성</td></tr>
+<tr><td class="num">F-17</td><td>리포트</td><td>그래프를 벡터 형식(SVG/EMF 또는 PDF)으로 별도 저장</td></tr>
+<tr><td class="num">F-18</td><td>배포</td><td>Windows 설치 패키지</td></tr>
+<tr><td class="num">F-19</td><td>권장</td><td>진행률·남은 시간 표시, 설정 저장·불러오기</td></tr>
+<tr><td class="num">F-20</td><td>권장</td><td>기존 로그로 리포트만 다시 생성</td></tr>
+</table></div>
+
+<h3>성능 리포트 항목 (과제 PDF p7–p10)</h3>
+<div class="tbl"><table>
+<tr><th>항목</th><th>정의</th></tr>
+<tr><td>FTE</td><td><span class="formula">N_EF / N_Enroll</span> — FAIL·Timeout·Crash 포함, 횟수도 기재</td></tr>
+<tr><td>REJ<sub>genuine</sub></td><td><span class="formula">N_G,MF / N_G,match attempted</span></td></tr>
+<tr><td>REJ<sub>impostor</sub></td><td><span class="formula">N_I,MF / N_I,match attempted</span></td></tr>
+<tr><td>FMR(t)</td><td><span class="formula">N_I,s≥t / N_I</span> — N_I: 사전 정의된 전체 impostor 시도 수</td></tr>
+<tr><td>FNMR(t)</td><td><span class="formula">(N_G,EF + N_G,MF + N_G,s&lt;t) / N_G</span></td></tr>
+<tr><td>EER</td><td>FMR(t)=FNMR(t)인 t가 있으면 그 값, 없으면 t1·t2로 추정</td></tr>
+<tr><td>EER*</td><td>알고리즘이 OK로 반환한 점수만으로 계산한 EER (실패가 없으면 EER과 같음)</td></tr>
+<tr><td>ZeroFMR / ZeroFNMR</td><td>FMR=0%에서 최저 FNMR / FNMR=0%에서 최저 FMR</td></tr>
+<tr><td>FMR100 / FMR1000</td><td>FMR ≤ 1% / ≤ 0.1%에서 최저 FNMR</td></tr>
+<tr><td>시간·크기</td><td>평균 등록 시간, 평균 비교 시간(전체·genuine·impostor), 템플릿 크기(평균·최대)</td></tr>
+<tr><td>그래프</td><td>DET Curve(log-log, EER·FMR100·FMR1000 표시), Score Distribution(genuine/impostor), FMR(t)·FNMR(t) 곡선</td></tr>
+</table></div>
+<p><b>EER 추정 (FVC 정의)</b><br>
+t1 = max{ t | FNMR(t) ≤ FMR(t) }, t2 = min{ t | FNMR(t) ≥ FMR(t) }.
+FMR(t1)+FNMR(t1) ≤ FMR(t2)+FNMR(t2)이면 [EER<sub>low</sub>, EER<sub>high</sub>] = [FNMR(t1), FMR(t1)], 아니면 [FMR(t2), FNMR(t2)].
+EER = (EER<sub>low</sub> + EER<sub>high</sub>) / 2.</p>
+</section>
+
+<section id="s4"><h2><span class="n">04</span>시스템 설계</h2>
+<h3>개발 환경</h3>
+<div class="tbl"><table>
+<tr><th>구분</th><th>선택</th><th>비고</th></tr>
+<tr><td>IDE</td><td>Visual Studio 2022, C++17</td><td>솔루션 하나, 프로젝트 여러 개</td></tr>
+<tr><td>GUI</td><td>MFC (Dialog + Tab/Property Page)</td><td>VS 기본 포함, 라이브러리 규정상 안전</td></tr>
+<tr><td>이미지</td><td>WIC 또는 자체 TIFF 파서</td><td>FVC TIFF는 비압축</td></tr>
+<tr><td>docx</td><td>OOXML 직접 작성 + miniz(zip)</td><td>출처 명시</td></tr>
+<tr><td>그래프</td><td>자체 렌더러 → SVG + EMF</td><td>벡터 형식, EMF는 Word 삽입용</td></tr>
+<tr><td>설치</td><td>Inno Setup 또는 WiX</td><td>VC++ 재배포 패키지 포함</td></tr>
+<tr><td>형상 관리</td><td>Git + GitHub (private)</td><td><code>main</code> / <code>dev</code> / <code>feature/*</code>, PR 리뷰</td></tr>
+<tr><td>테스트</td><td>GoogleTest + 오류 유발용 DLL</td><td></td></tr>
+</table></div>
+
+<h3>프로세스 격리 구조</h3>
+<p>평가 대상 DLL이 crash하거나 무한 루프에 빠져도 평가 프로그램은 살아 있어야 한다. 그래서 DLL은 <b>별도 Worker 프로세스에서만</b> 로드한다.</p>
+<pre class="mermaid">
+flowchart LR
+  subgraph GUI["FPEval.exe (GUI, 64bit)"]
+    UI[MFC UI] --> CFG[EvalConfig]
+    CFG --> PG[PairGenerator]
+    PG --> SCH[EvalScheduler]
+    SCH --> RS[ResultStore CSV]
+    RS --> MC[MetricsCalculator]
+    MC --> RB[Report HTML/DOCX]
+    MC --> CR[Charts SVG/EMF]
+  end
+  SCH <-->|Named Pipe| W1["FPWorker #1<br/>LoadLibrary(DLL)"]
+  SCH <-->|Named Pipe| W2["FPWorker #2"]
+  SCH <-->|Named Pipe| WN["FPWorker #N"]
+</pre>
+<ul>
+  <li><b>Timeout:</b> 작업별 마감 시각 감시 → 초과 시 <code>TerminateProcess</code>, TIMEOUT 기록 후 Worker 재기동</li>
+  <li><b>Crash:</b> 프로세스 종료·파이프 끊김 감지 + Worker 내부 SEH(<code>__try/__except</code>)로 예외 코드 기록</li>
+  <li><b>강제 종료:</b> 중지 버튼 → 모든 Worker 종료, 지금까지 결과는 보존해 이어하기 가능</li>
+  <li><b>병렬:</b> Worker 개수 = 사용자가 지정한 동시 수행 수</li>
+  <li><b>bitness 자동 판별:</b> DLL의 PE 헤더(Machine 필드)를 읽어 x86/x64 Worker 선택</li>
+</ul>
+
+<h3>출력과 동작 불일치 감지</h3>
+<div class="tbl"><table>
+<tr><th>상황</th><th>판정</th></tr>
+<tr><td>반환 1인데 템플릿 크기 ≤ 0 또는 ≥ 1,000,000</td><td><span class="pill m">MISMATCH</span> 등록 실패 처리</td></tr>
+<tr><td>반환 1인데 점수가 NaN이거나 [0,1] 밖</td><td><span class="pill m">MISMATCH</span> 비교 거부 처리</td></tr>
+<tr><td>출력 버퍼 뒤 가드 바이트(canary) 훼손</td><td><span class="pill m">OVERFLOW</span> 실패 처리</td></tr>
+<tr><td>입력 이미지 범위 밖 읽기</td><td>버퍼 끝에 <code>PAGE_NOACCESS</code> 가드 페이지 → <span class="pill m">CRASH</span></td></tr>
+<tr><td>반환 0 이하</td><td><span class="pill">FAIL</span> 에러코드·메시지 기록</td></tr>
+<tr><td>같은 입력에 결과가 달라짐 (옵션)</td><td>일부 쌍 재실행으로 결정성 검사</td></tr>
+</table></div>
+
+<h3>주요 클래스</h3>
+<div class="tbl"><table>
+<tr><th>클래스</th><th>책임</th></tr>
+<tr><td><code>FingerprintDB</code>, <code>FingerprintImage</code></td><td>폴더 스캔, 파일명 파싱(손가락ID·순번), raw 버퍼 로딩</td></tr>
+<tr><td><code>EvalConfig</code></td><td>설정값 전체, JSON 저장·불러오기</td></tr>
+<tr><td><code>IEnrollRule</code> / <code>IGenuineRule</code> / <code>IImpostorRule</code></td><td>전략 패턴: AllPairs, Symmetric, FirstOne, SelectedIndex, RandomN(seed), FromFile</td></tr>
+<tr><td><code>PairList</code></td><td>쌍 목록 + seed, CSV 저장·불러오기 (재현성, 부분 평가)</td></tr>
+<tr><td><code>AlgorithmProxy</code></td><td>Worker 통신을 감싼 Enroll/Attempt/Compare 호출, 상태 반환</td></tr>
+<tr><td><code>EvalScheduler</code></td><td>작업 큐, Worker 풀, timeout 감시, 진행률 이벤트, 중지·재개</td></tr>
+<tr><td><code>ResultStore</code></td><td>등록 로그·비교 로그 CSV 기록·로드</td></tr>
+<tr><td><code>MetricsCalculator</code></td><td>FTE, REJ, FMR/FNMR 곡선, EER/EER*, ZeroFMR 등 (수식 선택 가능)</td></tr>
+<tr><td><code>ChartRenderer</code> (+ <code>SvgCanvas</code>, <code>EmfCanvas</code>)</td><td>그래프 3종, 같은 그리기 코드를 두 출력 형식으로</td></tr>
+<tr><td><code>IReportWriter</code> → Html / Docx</td><td>선택 항목만 담은 리포트 생성</td></tr>
+</table></div>
+
+<h3>출력 폴더 예시</h3>
+<pre><code>&lt;결과폴더&gt;/&lt;DB명&gt;_&lt;날짜시간&gt;/
+ ├─ config.json          이번 평가 설정 전체
+ ├─ pairs_genuine.csv    실제 수행한 쌍 + seed (재현용)
+ ├─ pairs_impostor.csv
+ ├─ log_enroll.csv       이미지, 상태, 에러코드, 메시지, 시간(ms), 템플릿 크기
+ ├─ log_match.csv        등록ID, 비교ID, G/I, 상태, 점수, 시간(ms)
+ ├─ report.html / report.docx
+ └─ figures/  det.svg, det.emf, score_dist.svg, fmr_fnmr.svg …</code></pre>
+</section>
+
+<section id="s5"><h2><span class="n">05</span>지문인식 알고리즘 DLL</h2>
+<h3>처리 과정 (미뉴셔 기반)</h3>
+<ol>
+  <li>iType → (W, H) 표로 이미지 크기 결정 (질의 결과 반영)</li>
+  <li>정규화(평균·분산), 블록 단위 전경 분할</li>
+  <li>gradient 기반 방향장 + 융선 주파수 추정</li>
+  <li>Gabor 필터 강조 → 이진화 → 세선화(Zhang–Suen)</li>
+  <li>Crossing Number로 끝점·분기점 추출 (위치·방향·품질)</li>
+  <li>거짓 미뉴셔 제거: 경계 근처, 짧은 가지, 너무 가까운 쌍</li>
+  <li>템플릿 직렬화 <code>[magic|version|W|H|count|minutiae…]</code> (수 KB)</li>
+  <li>매칭: Hough 투표로 회전·이동 정렬 → 허용 오차 안 대응점 수 → 0~1 점수 (소수 3자리)</li>
+  <li>개선 단계: 로컬 디스크립터(MCC 계열)나 이웃 미뉴셔 구조 매칭으로 교체·병합</li>
+</ol>
+<h3>품질 기준</h3>
+<ul>
+  <li>어떤 입력에도 crash 없음. 실패 시 0 반환과 의미 있는 에러코드</li>
+  <li>전역 상태 없이 스레드 안전 (병렬 평가 대응)</li>
+  <li>부속 파일 없는 단일 DLL 원칙, x86/x64 둘 다 빌드</li>
+  <li>내부 목표: 3개 DB 평균 EER 10% 이하 → 개선 단계에서 5% 이하</li>
+</ul>
+<h3>시험용 불량 DLL (평가 프로그램 검증·시연용)</h3>
+<div class="tbl"><table>
+<tr><th>DLL</th><th>동작</th></tr>
+<tr><td><code>Dummy_OK.dll</code></td><td>안내서 예제 그대로 (고정 점수 0.8), 파이프라인 검증</td></tr>
+<tr><td><code>Bad_Crash.dll</code></td><td>일정 확률로 NULL 접근</td></tr>
+<tr><td><code>Bad_Timeout.dll</code></td><td>일정 확률로 무한 루프</td></tr>
+<tr><td><code>Bad_Score.dll</code></td><td>1.5 / -0.1 / NaN 점수 반환</td></tr>
+<tr><td><code>Bad_Size.dll</code></td><td>템플릿 크기 0 또는 2,000,000 보고, 버퍼 오버런</td></tr>
+<tr><td><code>Bad_Random.dll</code></td><td>무작위 점수, EER ≈ 50% 확인용</td></tr>
+</table></div>
+<p>중간·최종 시연에서 오류 감지 기능을 직접 보여줄 수 있다.</p>
+</section>
+
+<section id="s6"><h2><span class="n">06</span>역할 분담</h2>
+<div class="roles">
+  <div class="role"><h4>A · 알고리즘</h4><p>지문인식 DLL 전체, 시험용 불량 DLL, 성능 튜닝, 지표 수식 교차 검증</p></div>
+  <div class="role"><h4>B · 평가 엔진</h4><p>Worker 프로세스·IPC, Scheduler(병렬·timeout·중지), 조합 규칙·PairList, 로그</p></div>
+  <div class="role"><h4>C · UI·리포트</h4><p>MFC GUI, MetricsCalculator, 그래프(SVG/EMF), HTML/DOCX 리포트, 설치 패키지</p></div>
+</div>
+<p>공통: PR마다 1인 이상 코드 리뷰, 테스트, 발표자료, 주간 회의록. 인터페이스 헤더는 첫 주에 셋이 합의해 고정하고 병렬로 개발한다.</p>
+</section>
+
+<section id="s7"><h2><span class="n">07</span>일정</h2>
+<p class="meta">개강일을 2026-09-01로 가정해 현재(11/4)를 약 10주차로 잡았다. 실제 학사일정에 맞춰 날짜만 조정한다.</p>
+<div class="tbl"><table>
+<tr><th>주차</th><th>기간</th><th>마일스톤</th><th>평가 프로그램 (B·C)</th><th>알고리즘 (A)</th></tr>
+<tr><td class="num">10</td><td class="num">11/3–11/9</td><td><span class="pill">착수</span></td><td>요구사항 확정, 아키텍처·클래스 설계, 인터페이스 고정, Git·솔루션 구성, iType 질의</td><td>이미지 로더·시각화 도구, 예제 DLL x86/x64 빌드, Dummy_OK</td></tr>
+<tr><td class="num">11</td><td class="num">11/10–11/16</td><td><span class="pill">코어 구현</span></td><td>DB 스캔·TIFF 로딩, Worker + Named Pipe, 단일 흐름 등록→비교, CSV 로그</td><td>정규화·분할·방향장·Gabor·이진화·세선화</td></tr>
+<tr><td class="num">12</td><td class="num">11/17–11/23</td><td><span class="pill m">진도 보고</span></td><td>조합 규칙, 무작위 순서, 동일 이미지 제외, timeout/crash 감지, 기본 GUI</td><td>미뉴셔 추출·제거, 템플릿 직렬화</td></tr>
+<tr><td class="num">13</td><td class="num">11/24–11/30</td><td><span class="pill m">중간 시연</span></td><td>전 과정 시연: DLL 선택 → 평가 → FTE/FMR/FNMR/EER + HTML 리포트 초안 + 불량 DLL 감지</td><td>매칭 v1 → DLL v1, 3개 DB EER 측정</td></tr>
+<tr><td class="num">14</td><td class="num">12/1–12/7</td><td><span class="pill m">진도 보고</span></td><td>병렬, 강제 종료·이어하기, seed 저장·불러오기, 부분 평가, 전체 지표, 그래프 3종, DOCX</td><td>매칭 v2, 파라미터 튜닝, 속도 최적화, 견고성 테스트</td></tr>
+<tr><td class="num">15</td><td class="num">12/8–12/14</td><td><span class="pill m">최종 발표·시연</span></td><td>설치 패키지, 버그 수정, 사용자 매뉴얼, 소스 정리</td><td>최종 DLL 동결, 성능 결과 정리</td></tr>
+</table></div>
+<p>주 2회 짧은 회의, 매주 일요일 <code>dev</code> → <code>main</code> 통합 빌드와 3개 DB 전체 평가 1회.</p>
+</section>
+
+<section id="s8"><h2><span class="n">08</span>검증 계획</h2>
+<div class="tbl"><table>
+<tr><th>대상</th><th>방법</th></tr>
+<tr><td>지표 계산</td><td>손으로 계산 가능한 소형 점수 세트로 단위 테스트 (EER t1·t2 경계, ZeroFMR 등). 별도 스크립트 결과와 교차 비교 (검증용, 제출물 아님)</td></tr>
+<tr><td>조합 규칙</td><td>규칙별 쌍 개수 (본인 전체 560, 타인 전체 5,760), 동일 이미지 0건, 같은 seed → 같은 순서</td></tr>
+<tr><td>오류 감지</td><td>불량 DLL로 TIMEOUT / CRASH / MISMATCH / OVERFLOW가 정확히 기록되는지</td></tr>
+<tr><td>병렬</td><td>Worker 1/2/4/8개 결과가 같은지, 처리 시간 비교</td></tr>
+<tr><td>부분 평가·이어하기</td><td>중간에 멈췄다가 재개한 결과 = 한 번에 수행한 결과</td></tr>
+<tr><td>리포트</td><td>항목 on/off 반영, Word·브라우저에서 열림, 벡터 그래프 확대 시 깨짐 없음</td></tr>
+<tr><td>설치</td><td>깨끗한 Windows PC 또는 VM에서 설치 → 실행 → 제거</td></tr>
+</table></div>
+</section>
+
+<section id="s9"><h2><span class="n">09</span>리스크와 대응</h2>
+<div class="tbl"><table>
+<tr><th>리스크</th><th>영향</th><th>대응</th></tr>
+<tr><td>iType 2의 크기 모호성</td><td>DLL 오동작</td><td>10주차 질의, 답변 전에는 iType→크기 표를 설정으로 둠</td></tr>
+<tr><td>평가 DLL이 32bit</td><td>64bit 프로세스에서 로드 불가</td><td>Worker 32/64bit 이중 빌드 + PE 헤더 판별</td></tr>
+<tr><td>알고리즘 성능 미달</td><td>배점 20% 손실</td><td>13주차까지 v1 확보 후 튜닝, 평가 SW 우선 원칙 유지</td></tr>
+<tr><td>DOCX 생성 복잡도</td><td>일정 지연</td><td>HTML 먼저 완성, DOCX는 최소 OOXML 템플릿(표·그림)</td></tr>
+<tr><td>라이브러리 규정 위반</td><td>감점</td><td>사용 라이브러리·라이선스·출처를 README와 리포트에 명시</td></tr>
+<tr><td>팀원 일정 충돌</td><td>병목</td><td>인터페이스 선고정, 이슈 단위 작업, 주간 통합</td></tr>
+</table></div>
+</section>
+
+<section id="s10"><h2><span class="n">10</span>최종 제출물</h2>
+<ul class="check">
+  <li>평가 프로그램 설치 패키지 (<code>FPEval_Setup.exe</code>)</li>
+  <li>지문인식 DLL (x86/x64) + 3개 DB 성능 리포트 (HTML/DOCX, 벡터 그래프)</li>
+  <li>전체 소스 코드 (VS 솔루션, 빌드 방법 README, 사용 라이브러리 출처)</li>
+  <li>사용자 매뉴얼, 설계 문서 (클래스 다이어그램, 프로세스 구조)</li>
+  <li>12·14주 진도 보고, 13주 중간 시연, 15주 최종 발표·시연 자료</li>
+  <li>시험용 불량 DLL 세트</li>
+  <li>팀원별 기여 내역 (커밋 로그, 회의록)</li>
+</ul>
+</section>
+
+<section id="s11"><h2><span class="n">11</span>교수님께 확인할 사항</h2>
+<ol>
+  <li>FVC2002_DB3_B(300×300)와 FVC2004_DB1_B(640×480)가 모두 iType=2인데, DLL이 이미지 크기를 어떻게 알아야 하는지</li>
+  <li>알고리즘 성능 평가에 쓰는 DB와 규칙 (공개 3개 DB와 같은지, 본인·타인 조합 규칙)</li>
+  <li>제출 DLL의 플랫폼 (x86/x64)</li>
+  <li>GUI 프레임워크(MFC 외 Qt 등)와 docx/zip 라이브러리 허용 범위</li>
+  <li>각 발표 회차의 제출 형식과 분량</li>
+</ol>
+</section>
+</main>
+</div>

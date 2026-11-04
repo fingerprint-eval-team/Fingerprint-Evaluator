@@ -1,0 +1,594 @@
+<title>SME3007 코드 작성 계획</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: sticky section index on the left, one reading column on the right; stacks to one column on phones */
+:root{
+  --bg:#f6f7f9; --surface:#ffffff; --fg:#1b2230; --muted:#5a6475; --line:#dde1e8;
+  --accent:#1f5fae; --accent-soft:#e6eefa; --warn:#9a5b00; --warn-soft:#fff3df; --ok:#1d7a4f; --ok-soft:#e3f4ea;
+  --code-bg:#eef1f5;
+  --f-body:"IBM Plex Sans KR","Malgun Gothic","Apple SD Gothic Neo",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",Consolas,ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#12161d; --surface:#1a2029; --fg:#e4e8ef; --muted:#9aa4b4; --line:#2c3440;
+  --accent:#7fb0f0; --accent-soft:#1d2b3f; --warn:#f0b35a; --warn-soft:#33281a; --ok:#5fd09a; --ok-soft:#173226;
+  --code-bg:#222a35; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12161d; --surface:#1a2029; --fg:#e4e8ef; --muted:#9aa4b4; --line:#2c3440;
+  --accent:#7fb0f0; --accent-soft:#1d2b3f; --warn:#f0b35a; --warn-soft:#33281a; --ok:#5fd09a; --ok-soft:#173226;
+  --code-bg:#222a35; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15.5px;line-height:1.7;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 64px}
+.wrap{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:220px minmax(0,1fr);gap:48px}
+header.top{grid-column:1/-1;padding-block:48px 8px;border-bottom:1px solid var(--line)}
+.eyebrow{font-family:var(--f-mono);font-size:12.5px;letter-spacing:.06em;color:var(--accent);text-transform:uppercase}
+h1{font-size:clamp(26px,4vw,36px);line-height:1.25;margin:8px 0 10px;text-wrap:balance;font-weight:700}
+.meta{color:var(--muted);font-size:13.5px;margin:0 0 24px}
+nav.toc{position:sticky;top:env(safe-area-inset-top,0px);align-self:start;padding-top:32px;font-size:13.5px}
+nav.toc ol{list-style:none;margin:0;padding:0;display:grid;gap:2px;counter-reset:t}
+nav.toc a{display:block;padding:5px 10px;border-radius:6px;color:var(--muted);text-decoration:none;counter-increment:t}
+nav.toc a::before{content:counter(t) ". ";font-family:var(--f-mono);font-size:12px}
+nav.toc a:hover,nav.toc a:focus-visible{background:var(--accent-soft);color:var(--fg);outline:none}
+main{min-width:0;padding-top:24px}
+section{padding-block:24px;border-bottom:1px solid var(--line)}
+section:last-child{border-bottom:0}
+h2{font-size:22px;margin:0 0 14px;text-wrap:balance;display:flex;gap:10px;align-items:baseline}
+h2 .n{font-family:var(--f-mono);font-size:14px;color:var(--accent);font-weight:500}
+h3{font-size:16.5px;margin:24px 0 8px}
+p,li{max-width:74ch}
+a{color:var(--accent)}
+code,pre{font-family:var(--f-mono);font-size:13px}
+code{background:var(--code-bg);padding:1px 5px;border-radius:4px}
+pre{background:var(--code-bg);padding:14px 16px;border-radius:8px;overflow-x:auto;line-height:1.55;margin:12px 0}
+pre code{background:none;padding:0}
+.tbl{overflow-x:auto;margin:12px 0;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{padding:9px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+tr:last-child td{border-bottom:0}
+th{background:var(--code-bg);font-weight:600;font-size:13px;white-space:nowrap}
+td.num{font-variant-numeric:tabular-nums;font-family:var(--f-mono);white-space:nowrap}
+td code{white-space:nowrap}
+.callout{background:var(--warn-soft);border:1px solid color-mix(in srgb,var(--warn) 35%,transparent);border-radius:8px;padding:12px 16px;margin:14px 0}
+.callout b{color:var(--warn)}
+.note{background:var(--accent-soft);border-radius:8px;padding:12px 16px;margin:14px 0}
+.pill{display:inline-block;font-size:12px;font-weight:600;padding:1px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent);white-space:nowrap}
+.pill.m{background:var(--warn-soft);color:var(--warn)}
+.pill.g{background:var(--ok-soft);color:var(--ok)}
+.steps{display:grid;gap:12px;margin:12px 0}
+.step{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:14px 16px;min-width:0}
+.step h4{margin:0 0 6px;font-size:15px;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.step h4 .k{font-family:var(--f-mono);font-size:12.5px;color:var(--accent)}
+.step ul,.step ol{margin:6px 0 0;padding-left:20px}
+.step p{margin:4px 0}
+@media (max-width:860px){.wrap{grid-template-columns:minmax(0,1fr);gap:0}nav.toc{position:static;padding-top:16px}nav.toc ol{grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}}
+</style>
+
+<div class="wrap">
+<header class="top">
+  <div class="eyebrow">Advanced OOP · SME3007 · 구현 설계</div>
+  <h1>코드 작성 계획과 동작 명세 — 평가 프로그램 · Worker · 지문인식 DLL</h1>
+  <p class="meta">작성 2026-11-04 · 전체 과제 계획서(요구사항 F-01~F-20, 리포트 항목)를 코드 수준으로 내린 문서. 1부는 "어떻게 작동해야 하는가", 2부는 "무엇을 어떤 순서로 짤 것인가". 구현 결과와 남은 일은 <a href="프로젝트_통합문서.html">통합 문서</a> 참고.</p>
+</header>
+
+<nav class="toc" aria-label="목차"><ol>
+  <li><a href="#overview">한눈에 보기</a></li>
+  <li><a href="#flow">평가 전체 흐름</a></li>
+  <li><a href="#worker">Worker 동작</a></li>
+  <li><a href="#sched">Scheduler·오류 처리</a></li>
+  <li><a href="#rules">조합·재현성</a></li>
+  <li><a href="#metrics">지표 계산</a></li>
+  <li><a href="#report">리포트·그래프</a></li>
+  <li><a href="#gui">GUI 동작</a></li>
+  <li><a href="#algo">알고리즘 DLL 동작</a></li>
+  <li><a href="#files">파일·데이터 형식</a></li>
+  <li><a href="#tree">솔루션 구조</a></li>
+  <li><a href="#classes">클래스 설계</a></li>
+  <li><a href="#order">코드 작성 순서</a></li>
+  <li><a href="#rulesdev">코딩 규칙·테스트</a></li>
+</ol></nav>
+
+<main>
+
+<section id="overview"><h2><span class="n">01</span>한눈에 보기</h2>
+<p>프로그램은 실행 파일 3종과 DLL로 나뉜다.</p>
+<div class="tbl"><table>
+<tr><th>산출물</th><th>종류</th><th>하는 일</th></tr>
+<tr><td><code>FPEval.exe</code></td><td>MFC GUI (x64)</td><td>설정, 평가 계획 생성, 작업 분배, 결과 수집, 지표 계산, 리포트 생성. <b>평가 대상 DLL을 직접 로드하지 않는다.</b></td></tr>
+<tr><td><code>FPWorker32.exe</code> / <code>FPWorker64.exe</code></td><td>콘솔 프로세스 (창 없음)</td><td>평가 대상 DLL을 로드해 <code>KISA_*</code> 함수를 호출하고 결과·시간을 돌려준다. 동시 수행 수만큼 띄운다.</td></tr>
+<tr><td><code>FPAlgo.dll</code></td><td>우리 팀 지문인식 DLL (x86/x64)</td><td>K-NBTC 규격 3개 함수 구현</td></tr>
+<tr><td><code>Bad_*.dll</code></td><td>시험용 DLL</td><td>crash·timeout·잘못된 출력을 일부러 내서 평가 프로그램의 오류 감지를 검증</td></tr>
+</table></div>
+<pre class="mermaid">
+flowchart LR
+  U((사용자)) --> GUI[FPEval.exe<br/>설정·진행·리포트]
+  GUI -->|1. TIFF → raw 캐시| C[(cache/*.raw)]
+  GUI -->|2. 작업 요청<br/>Named Pipe| W1[FPWorker #1]
+  GUI --> W2[FPWorker #2]
+  GUI --> WN[FPWorker #N]
+  W1 -->|LoadLibrary| D[평가 대상 DLL]
+  W1 -->|템플릿 저장| T[(templates/*.tpl)]
+  W1 -->|3. 결과 응답| GUI
+  GUI -->|4. 로그| L[(log_*.csv)]
+  L --> M[지표 계산] --> R[report.html / .docx<br/>figures/*.svg *.emf]
+</pre>
+<p class="note"><b>핵심 원칙:</b> ① DLL은 Worker 안에서만 돈다 ② 결과는 한 줄씩 즉시 CSV에 기록한다(중단돼도 이어하기) ③ 무작위는 전부 seed 하나에서 나온다(재현 가능) ④ GUI 스레드는 계산을 하지 않는다.</p>
+</section>
+
+<!-- ===================== 1부 동작 ===================== -->
+
+<section id="flow"><h2><span class="n">02</span>평가 전체 흐름</h2>
+<p>"평가 시작" 버튼을 누르면 아래 6단계가 순서대로 진행된다. 각 단계는 진행률 표시줄에 단계명으로 표시된다.</p>
+<div class="steps">
+  <div class="step"><h4><span class="k">STEP 0</span>사전 검증 (Validate)</h4>
+    <ul>
+      <li>DLL 파일 존재 확인, PE 헤더의 Machine 필드로 x86/x64 판별 → 사용할 Worker 결정</li>
+      <li>Worker 1개를 띄워 <code>HELLO</code> 전송 → DLL 로드 및 <code>KISA_Enroll/Attempt/Compare</code> 3개 export 확인. 하나라도 없으면 오류 대화상자 후 중단</li>
+      <li>DB 폴더 스캔: <code>{손가락ID}_{순번}.tif</code> 형식만 채택, 형식이 틀린 파일은 경고 목록에 표시</li>
+      <li>모든 이미지 크기가 같고, iType의 기대 크기(설정 표)와 맞는지 확인</li>
+      <li>출력 폴더 쓰기 권한 확인, 결과 폴더 <code>&lt;DB명&gt;_&lt;yyyyMMdd_HHmmss&gt;</code> 생성</li>
+    </ul></div>
+  <div class="step"><h4><span class="k">STEP 1</span>이미지 캐시 (Prepare)</h4>
+    <ul>
+      <li>TIFF를 디코딩해 헤더 없는 8-bit raw 파일로 <code>cache/</code>에 저장 (W×H 바이트, 좌상단부터)</li>
+      <li>Worker는 TIFF를 몰라도 되고, 같은 이미지를 여러 번 디코딩하지 않는다</li>
+    </ul></div>
+  <div class="step"><h4><span class="k">STEP 2</span>평가 계획 생성 (Plan)</h4>
+    <ul>
+      <li>등록 규칙 → 등록 이미지 집합 E, 본인·타인 규칙 → 비교 쌍 목록 G, I</li>
+      <li>비교에 쓰이는 이미지 집합 A (각 쌍의 비교 쪽 이미지)를 모아 Attempt 추출 대상으로 삼는다</li>
+      <li><b>동일 이미지 쌍 제거</b>, 중복 쌍 제거</li>
+      <li>seed로 작업 순서를 섞는다 (5장 참고). 계획 전체를 <code>plan.json</code>, <code>pairs_genuine.csv</code>, <code>pairs_impostor.csv</code>로 저장</li>
+      <li>부분 평가 모드면 규칙 대신 사용자가 준 쌍 파일을 읽어 G, I를 만든다</li>
+    </ul></div>
+  <div class="step"><h4><span class="k">STEP 3</span>특징 추출 (Enroll + Attempt)</h4>
+    <ul>
+      <li>E의 각 이미지 → <code>ENROLL</code> 작업, A의 각 이미지 → <code>ATTEMPT</code> 작업. 두 종류를 섞은 무작위 순서로 Worker들에 분배</li>
+      <li>성공하면 템플릿을 <code>templates/E_101_1.tpl</code>, <code>templates/A_101_2.tpl</code>로 저장하고 <code>log_enroll.csv</code>에 한 줄 기록</li>
+    </ul></div>
+  <div class="step"><h4><span class="k">STEP 4</span>비교 (Compare)</h4>
+    <ul>
+      <li>G ∪ I의 각 쌍 → <code>COMPARE</code> 작업 (무작위 순서, genuine/impostor 섞임)</li>
+      <li>등록 템플릿이 없으면 DLL을 호출하지 않고 <code>SKIP_EF</code>로 기록 (N<sub>EF</sub>에 집계)</li>
+      <li>비교 템플릿(Attempt)이 없으면 <code>SKIP_AF</code>로 기록, matching 실패(N<sub>MF</sub>)로 집계</li>
+      <li>결과는 <code>log_match.csv</code>에 한 줄씩 기록</li>
+    </ul></div>
+  <div class="step"><h4><span class="k">STEP 5</span>지표·리포트 (Report)</h4>
+    <ul>
+      <li>두 로그 CSV만으로 지표를 계산한다 (그래서 나중에 로그만 가지고 리포트 재생성 가능)</li>
+      <li>선택된 항목만 HTML·DOCX에 담고, 그래프는 <code>figures/</code>에 SVG와 EMF로 따로 저장</li>
+    </ul></div>
+</div>
+<div class="callout"><b>Enroll과 Attempt를 분리하는 이유:</b> 규격상 비교는 "등록 템플릿(KISA_Enroll) ↔ 인식 템플릿(KISA_Attempt)"이다. 같은 이미지라도 Enroll과 Attempt 결과는 다를 수 있으므로 각각 따로 추출해 저장한다.</div>
+</section>
+
+<section id="worker"><h2><span class="n">03</span>Worker 동작</h2>
+<h3>생명주기</h3>
+<ol>
+  <li>GUI가 <code>CreateProcess</code>로 실행: <code>FPWorker32.exe --pipe \\.\pipe\fpeval_&lt;pid&gt;_&lt;slot&gt;</code>. 모든 Worker는 GUI가 만든 <b>Job Object</b>(KILL_ON_JOB_CLOSE)에 넣어, GUI가 죽으면 같이 종료된다</li>
+  <li>파이프 연결 → <code>HELLO{dllPath}</code> 수신 → <code>SetDllDirectory(DLL 폴더)</code> 후 <code>LoadLibrary</code>, <code>GetProcAddress</code> 3개 → 결과 응답</li>
+  <li>명령 루프: 요청 1개 받기 → 실행 → 응답 1개 보내기 (한 번에 작업 하나)</li>
+  <li><code>QUIT</code> 수신 시 <code>FreeLibrary</code> 후 종료</li>
+</ol>
+
+<h3>명령 하나를 처리하는 순서 (ENROLL 예)</h3>
+<ol>
+  <li><code>cache/101_1.raw</code>를 읽어 <b>가드 페이지 버퍼</b>에 넣는다: <code>VirtualAlloc</code>로 (이미지 크기를 페이지 단위로 올림 + 1페이지)를 잡고, 마지막 페이지를 <code>PAGE_NOACCESS</code>로 바꾼 뒤 이미지 끝이 가드 페이지 바로 앞에 오도록 배치. DLL이 이미지 범위를 넘어 읽으면 즉시 Access Violation이 난다</li>
+  <li>출력 버퍼: 1,000,000 바이트 + 4,096 바이트 canary(고정 패턴 <code>0xCD</code>)</li>
+  <li><code>QueryPerformanceCounter</code> → <code>__try { ret = KISA_Enroll(...) } __except(...)</code> → 시간 측정 종료</li>
+  <li>검사: 반환값, 크기 범위(0 &lt; size &lt; 1,000,000), canary 훼손 여부</li>
+  <li>성공이면 템플릿을 <code>outPath</code>에 정확히 size 바이트만 저장</li>
+  <li>응답: <code>{status, retVal, errCode, errMsg[256], size, elapsedUs}</code></li>
+</ol>
+<p><b>COMPARE</b>는 두 템플릿 파일을 읽어 각각 "파일 크기만큼 + 가드 페이지" 버퍼에 넣고 <code>KISA_Compare</code>를 호출한다. 점수가 NaN이거나 [0,1] 밖이면 <code>MISMATCH</code>. 점수는 소수 셋째 자리까지 그대로 기록한다(반올림은 지표 단계에서 옵션).</p>
+
+<h3>예외가 났을 때</h3>
+<p>SEH로 예외를 잡으면 예외 코드(예: <code>0xC0000005</code>)를 담아 <code>CRASH</code> 응답을 보내고 <b>스스로 종료</b>한다. DLL 내부 상태가 망가졌을 수 있으므로 같은 프로세스를 재사용하지 않는다. 응답조차 못 보내고 죽으면 GUI 쪽이 파이프 끊김으로 감지한다.</p>
+
+<h3>파이프 메시지 형식</h3>
+<pre><code>struct MsgHeader { uint32_t magic = 'FPEV'; uint32_t type; uint32_t jobId; uint32_t bodyLen; };
+
+enum MsgType : uint32_t { HELLO=1, ENROLL=2, ATTEMPT=3, COMPARE=4, QUIT=9, REPLY=100 };
+
+struct ExtractReq { int32_t iType; int32_t width, height; wchar_t rawPath[260]; wchar_t outPath[260]; };
+struct CompareReq { wchar_t enrollPath[260]; wchar_t attemptPath[260]; };
+
+struct Reply {
+  int32_t  status;        // Status enum (아래)
+  int32_t  retVal;        // DLL 반환값 그대로
+  int32_t  errCode;       // piErrorCode
+  char     errMsg[256];   // arErrorMessage (NUL 보장 처리)
+  int32_t  outSize;       // 템플릿 크기
+  double   score;         // Compare 점수
+  int64_t  elapsedUs;     // DLL 호출 시간만
+  uint32_t sehCode;       // CRASH일 때 예외 코드
+};</code></pre>
+<p>x86·x64 Worker가 같은 GUI와 통신하므로 구조체는 <code>#pragma pack(push,1)</code>와 고정 크기 타입만 쓴다(포인터·<code>size_t</code> 금지).</p>
+</section>
+
+<section id="sched"><h2><span class="n">04</span>Scheduler와 오류 처리</h2>
+<h3>구조</h3>
+<ul>
+  <li><code>EvalScheduler</code>는 작업 큐 하나와 <b>WorkerSlot N개</b>를 가진다. 각 슬롯은 자기 스레드에서 "큐에서 꺼냄 → 요청 → 응답 대기 → 결과 기록"을 반복한다</li>
+  <li>응답 대기는 overlapped <code>ReadFile</code> + <code>WaitForMultipleObjects({readEvent, cancelEvent}, timeout)</code></li>
+  <li>결과는 <code>ResultStore</code>(mutex로 보호)에 넘기고, 진행 정보는 GUI 창에 <code>PostMessage(WM_APP_PROGRESS)</code>로 알린다. 작업 스레드는 UI 객체를 직접 건드리지 않는다</li>
+</ul>
+<h3>WorkerSlot 상태 전이</h3>
+<pre class="mermaid">
+stateDiagram-v2
+  [*] --> Starting: CreateProcess
+  Starting --> Ready: HELLO OK
+  Starting --> Failed: 로드 실패
+  Ready --> Busy: 작업 전송
+  Busy --> Ready: 응답 수신 (OK/FAIL/MISMATCH)
+  Busy --> Restarting: timeout → TerminateProcess
+  Busy --> Restarting: 파이프 끊김 / CRASH 응답
+  Restarting --> Starting
+  Ready --> Stopped: 큐 비었음 → QUIT
+  Busy --> Stopped: 강제 종료
+  Stopped --> [*]
+</pre>
+<h3>결과 상태 (Status enum)</h3>
+<div class="tbl"><table>
+<tr><th>상태</th><th>언제</th><th>지표 반영</th></tr>
+<tr><td><span class="pill g">OK</span></td><td>반환 1, 출력 검사 통과</td><td>점수 사용</td></tr>
+<tr><td><span class="pill">FAIL</span></td><td>반환 ≤ 0</td><td>Enroll: N<sub>EF</sub> / Compare: N<sub>MF</sub></td></tr>
+<tr><td><span class="pill m">TIMEOUT</span></td><td>제한 시간 초과 (기본 10초, 설정 가능)</td><td>FAIL과 동일 + 횟수 별도 표기</td></tr>
+<tr><td><span class="pill m">CRASH</span></td><td>예외, 프로세스 비정상 종료</td><td>FAIL과 동일 + 예외 코드 기록</td></tr>
+<tr><td><span class="pill m">MISMATCH</span></td><td>반환 1인데 크기·점수가 규격 밖</td><td>FAIL과 동일</td></tr>
+<tr><td><span class="pill m">OVERFLOW</span></td><td>출력 버퍼 canary 훼손</td><td>FAIL과 동일</td></tr>
+<tr><td><span class="pill">SKIP_EF / SKIP_AF</span></td><td>필요한 템플릿이 없어 호출 안 함</td><td>N<sub>G,EF</sub>(·N<sub>I,EF</sub>) / N<sub>MF</sub></td></tr>
+<tr><td><span class="pill">ABORTED</span></td><td>사용자 강제 종료 순간 진행 중</td><td>집계 제외, 이어하기 때 다시 수행</td></tr>
+</table></div>
+<h3>강제 종료와 이어하기</h3>
+<ul>
+  <li><b>중지</b>: 큐에 새 작업 배분을 멈추고 진행 중인 작업이 끝나기를 기다린다</li>
+  <li><b>강제 종료</b>: <code>cancelEvent</code> → 모든 Worker <code>TerminateProcess</code>, 진행 중이던 작업은 <code>ABORTED</code></li>
+  <li><b>이어하기</b>: 결과 폴더를 열면 <code>plan.json</code>과 로그를 읽어, 로그에 OK~SKIP 상태로 남은 jobId는 건너뛰고 나머지만 실행. 같은 계획이므로 결과는 한 번에 돌린 것과 같다</li>
+</ul>
+<h3>병렬 실행 시 주의</h3>
+<ul>
+  <li>Worker는 프로세스가 분리되어 있어 평가 대상 DLL이 스레드 안전하지 않아도 문제없다</li>
+  <li>COMPARE는 필요한 템플릿이 만들어진 뒤에만 실행되도록 STEP 3이 끝난 후 시작한다 (단계 사이 barrier)</li>
+  <li>시간 측정은 Worker 안의 DLL 호출 구간만 재므로 병렬 수와 무관하게 비교 가능. 단, CPU 경쟁이 있으므로 리포트에 동시 수행 수를 함께 적는다</li>
+</ul>
+</section>
+
+<section id="rules"><h2><span class="n">05</span>조합 규칙과 재현성</h2>
+<h3>규칙 목록</h3>
+<div class="tbl"><table>
+<tr><th>종류</th><th>규칙</th><th>동작</th></tr>
+<tr><td rowspan="4">등록</td><td>FirstImpression</td><td>각 손가락의 1번 이미지 등록</td></tr>
+<tr><td>SelectedIndex(k)</td><td>각 손가락의 k번 이미지 등록</td></tr>
+<tr><td>All</td><td>모든 이미지를 각각 등록 (FVC 방식)</td></tr>
+<tr><td>RandomPerFinger(seed)</td><td>손가락마다 무작위 1장</td></tr>
+<tr><td rowspan="3">본인비교</td><td>AllPairs</td><td>같은 손가락, 등록 이미지 ↔ 나머지 모든 이미지 (순서 있음)</td></tr>
+<tr><td>Symmetric</td><td>(a,b)와 (b,a) 중 하나만 (FVC: 10×28=280)</td></tr>
+<tr><td>RandomN(n, seed)</td><td>AllPairs 중 무작위 n개</td></tr>
+<tr><td rowspan="5">타인비교</td><td>AllPairs</td><td>등록 이미지 ↔ 다른 손가락의 모든 이미지</td></tr>
+<tr><td>FirstOne</td><td>다른 손가락의 1번 이미지만 (FVC: 각 손가락 첫 장끼리)</td></tr>
+<tr><td>SelectedIndex(list)</td><td>다른 손가락의 지정 순번만</td></tr>
+<tr><td>RandomN(n, seed)</td><td>AllPairs 중 무작위 n개</td></tr>
+<tr><td>Symmetric 옵션</td><td>위 규칙 결과에서 대칭 쌍 제거</td></tr>
+<tr><td>공통</td><td>FromFile(path)</td><td>CSV에 적힌 쌍만 (부분 평가)</td></tr>
+</table></div>
+<h3>재현성 규칙</h3>
+<ul>
+  <li>난수는 <code>std::mt19937_64</code> 하나 (seed는 사용자 입력 또는 시각으로 생성 후 표시·저장)</li>
+  <li><code>std::shuffle</code>, <code>std::uniform_int_distribution</code>은 컴파일러마다 결과가 다를 수 있으므로 쓰지 않고 <b>Fisher–Yates와 정수 범위 변환을 직접 구현</b>한다 (mt19937_64 자체 출력은 표준으로 고정)</li>
+  <li>규칙마다 하위 seed를 <code>seed ^ hash("genuine")</code>처럼 파생해, 한 규칙을 바꿔도 다른 규칙 결과는 그대로 유지</li>
+  <li>"계획 저장"은 쌍 목록과 실행 순서를 그대로 파일로 저장, "계획 불러오기"는 이 파일을 읽어 STEP 2를 건너뛴다</li>
+</ul>
+<h3>무작위 순서의 목적</h3>
+<p>등록·비교 순서가 파일명 순이면 DLL이 "다음 비교는 같은 손가락"처럼 규칙을 유추할 수 있다. 그래서 STEP 3·4의 작업 순서를 섞고, Worker에 넘기는 경로에도 원본 파일명 대신 jobId 기반 이름(<code>cache/000123.raw</code>)을 쓰는 옵션을 둔다.</p>
+</section>
+
+<section id="metrics"><h2><span class="n">06</span>지표 계산 방법</h2>
+<h3>집계 변수</h3>
+<div class="tbl"><table>
+<tr><th>변수</th><th>의미</th></tr>
+<tr><td><code>N_Enroll</code>, <code>N_EF</code></td><td>등록 시도 수, 등록 실패 수 (FAIL·TIMEOUT·CRASH·MISMATCH·OVERFLOW)</td></tr>
+<tr><td><code>N_G</code>, <code>N_I</code></td><td>계획에 정의된 전체 genuine / impostor 시도 수</td></tr>
+<tr><td><code>N_G,EF</code>, <code>N_G,MF</code></td><td>등록 실패로 못 한 genuine 수 / 비교 실패 genuine 수 (Attempt 추출 실패 포함)</td></tr>
+<tr><td><code>gScores</code>, <code>iScores</code></td><td>OK인 genuine / impostor 점수 배열 (정렬해 둠)</td></tr>
+</table></div>
+<h3>계산</h3>
+<ul>
+  <li>FMR(t) = |{s ∈ iScores : s ≥ t}| / N_I, FNMR(t) = (N_G,EF + N_G,MF + |{s ∈ gScores : s &lt; t}|) / N_G — 정렬 배열에 이진 탐색으로 O(log n)</li>
+  <li>후보 임계값 t: 모든 점수의 고유값 + 0 + (1+ε). 소수 3자리 점수이므로 0.000~1.000을 0.001 간격으로 돌아도 1,001개면 충분 → 두 방식 중 <b>설정에서 선택</b></li>
+  <li>EER: FVC 정의(t1, t2 → EER<sub>low</sub>, EER<sub>high</sub>의 중간) 기본, "가장 가까운 교차점" 방식 선택 가능</li>
+  <li>EER*: 분모를 OK인 시도 수(|gScores|, |iScores|)로 바꾸고 실패 항을 뺀 같은 계산</li>
+  <li>ZeroFMR = FMR(t)=0인 t 중 최소 FNMR, ZeroFNMR = FNMR(t)=0인 t 중 최소 FMR, FMR100/FMR1000 = FMR ≤ 1% / 0.1%인 t 중 최소 FNMR</li>
+  <li>시간: 상태 OK인 작업의 <code>elapsedUs</code> 평균 (Enroll, Attempt, Compare 전체·genuine·impostor). 템플릿 크기: Enroll OK의 평균·최대</li>
+</ul>
+<p class="note">항목별 "적용 수식 선택"은 <code>MetricOptions</code> 구조체 하나에 모은다: FMR/FNMR 분모(사전 정의 수 / 실제 수행 수), EER 방식, 임계값 후보 방식, 점수 반올림 여부.</p>
+</section>
+
+<section id="report"><h2><span class="n">07</span>리포트와 그래프</h2>
+<h3>그래프 3종</h3>
+<div class="tbl"><table>
+<tr><th>그래프</th><th>축</th><th>표시 요소</th></tr>
+<tr><td>DET Curve</td><td>x: FMR, y: FNMR (둘 다 log, 10⁻⁵~1)</td><td>곡선, y=x 대각선, EER 점, FMR100·FMR1000·FMR10000 세로선과 교차점. 0 값은 축 최솟값으로 클램프</td></tr>
+<tr><td>Score Distribution</td><td>x: 점수 0~1 (100구간), y: 비율</td><td>genuine·impostor 히스토그램 반투명 겹침, 범례에 n 표기</td></tr>
+<tr><td>FMR(t)·FNMR(t)</td><td>x: 임계값, y: 오류율 0~100%</td><td>두 곡선, EER 점과 t 값, 점선 세로선</td></tr>
+</table></div>
+<h3>그리는 방식</h3>
+<ul>
+  <li><code>ICanvas</code> 인터페이스(<code>line</code>, <code>polyline</code>, <code>rect</code>, <code>text</code>, <code>setColor</code>)를 두고, <code>SvgCanvas</code>(문자열로 SVG 작성)와 <code>EmfCanvas</code>(GDI+ <code>Metafile</code>에 그리기) 두 구현을 만든다</li>
+  <li><code>ChartRenderer</code>는 축 계산·눈금·범례를 담당하고 <code>ICanvas</code>에만 그린다 → 같은 코드로 SVG와 EMF가 동시에 나온다</li>
+</ul>
+<h3>리포트 문서</h3>
+<ul>
+  <li>공통 구성: 표지(DLL 이름·해시·날짜·DB·seed·동시 수행 수) → 평가 설정 → 요약 지표 표 → 그래프 → 오류 목록(상위 50건) → 부록(쌍 수, 로그 파일 위치)</li>
+  <li><code>ReportModel</code>(지표 + 설정 + 그래프 경로)을 만들고 <code>IReportWriter</code>가 형식별로 출력. 선택하지 않은 항목은 <code>ReportModel</code> 단계에서 빠진다</li>
+  <li>HTML: 하나의 파일, SVG를 <code>&lt;img src="figures/det.svg"&gt;</code>로 참조</li>
+  <li>DOCX: <code>[Content_Types].xml</code>, <code>_rels/.rels</code>, <code>word/document.xml</code>, <code>word/_rels/document.xml.rels</code>, <code>word/media/*.emf</code>를 만들어 miniz로 zip. 표는 <code>w:tbl</code>, 그림은 <code>w:drawing</code> 인라인</li>
+</ul>
+</section>
+
+<section id="gui"><h2><span class="n">08</span>GUI 동작</h2>
+<p>메인 창은 탭 4개와 하단 실행 영역으로 구성한다.</p>
+<div class="tbl"><table>
+<tr><th>탭</th><th>컨트롤</th><th>동작</th></tr>
+<tr><td>1. 대상</td><td>DLL 경로·찾아보기, DB 폴더·찾아보기, iType 콤보, 템플릿 저장 폴더, 결과 폴더</td><td>DLL 선택 즉시 x86/x64 표시, DB 선택 즉시 "손가락 10 · 이미지 80 · 300×300" 요약 표시</td></tr>
+<tr><td>2. 시험 규칙</td><td>등록/본인/타인 규칙 콤보 + 파라미터, seed 입력·생성, 부분 평가 파일, 계획 저장/불러오기</td><td>값이 바뀌면 예상 시도 수(등록 n, 본인 n, 타인 n)를 바로 다시 계산해 표시</td></tr>
+<tr><td>3. 실행 옵션</td><td>동시 수행 수(1~CPU 수), timeout(초), 무작위 파일명 옵션</td><td></td></tr>
+<tr><td>4. 리포트</td><td>항목 체크리스트, 수식 선택 콤보, 형식(HTML/DOCX) 체크</td><td>"로그로 리포트만 생성" 버튼</td></tr>
+<tr><td>하단</td><td>시작 / 중지 / 강제 종료 / 이어하기, 진행률 표시줄, 단계명·ETA, 실시간 로그 목록(OK·실패 건수)</td><td>실행 중에는 설정 탭 잠금</td></tr>
+</table></div>
+<p>설정은 <code>config.json</code>으로 저장·불러오기하고, 마지막 설정은 실행 시 자동으로 불러온다.</p>
+</section>
+
+<section id="algo"><h2><span class="n">09</span>지문인식 DLL 동작</h2>
+<h3>함수별 처리</h3>
+<div class="steps">
+  <div class="step"><h4><span class="k">KISA_Enroll / KISA_Attempt</span>같은 추출 경로</h4>
+    <ol>
+      <li>iType → (W, H) 확인, 모르는 iType이면 0 반환 + 에러코드 1</li>
+      <li><code>pImage</code>를 W×H 범위 안에서만 읽어 내부 <code>Image</code>(float)로 복사</li>
+      <li>정규화 → 분할(전경 마스크) → 방향장·주파수 → Gabor 강조 → 이진화 → 세선화</li>
+      <li>미뉴셔 추출 → 거짓 미뉴셔 제거 → 품질이 낮으면(미뉴셔 &lt; 8개) 0 반환 + 에러코드 10</li>
+      <li>템플릿 직렬화해 <code>pEnroll</code>에 쓰고 크기 기록, 1 반환</li>
+    </ol>
+    <p>모든 처리는 <code>try { } catch (...)</code>로 감싸 예외가 DLL 밖으로 나가지 않게 하고, 실패 시 0과 에러 메시지를 돌려준다.</p></div>
+  <div class="step"><h4><span class="k">KISA_Compare</span>매칭</h4>
+    <ol>
+      <li>두 템플릿의 magic·version·count 검증 (손상 시 0 반환)</li>
+      <li>미뉴셔 쌍마다 회전·이동 후보를 계산해 Hough 누적 → 최다 득표 변환으로 정렬</li>
+      <li>거리·각도 허용 오차 안에서 1:1 대응 찾기 (탐욕적 매칭)</li>
+      <li>점수 = 대응 수² / (n<sub>E</sub> × n<sub>A</sub>) 등으로 정규화, [0,1]로 자르고 소수 3자리로 반올림</li>
+    </ol></div>
+</div>
+<h3>템플릿 형식</h3>
+<pre><code>#pragma pack(push,1)
+struct TemplateHeader { uint32_t magic = 'FPT1'; uint16_t version = 1; uint16_t width, height;
+                        uint16_t count; uint8_t  quality; uint8_t reserved; };
+struct Minutia        { uint16_t x, y; uint16_t angle; /* 0..359 */ uint8_t type; /* 1=끝점 2=분기 */ uint8_t quality; };
+#pragma pack(pop)
+// 전체 크기 = sizeof(TemplateHeader) + count * sizeof(Minutia)  (count ≤ 255 → 2KB 이하)</code></pre>
+<h3>DLL 지켜야 할 것</h3>
+<ul>
+  <li>전역 가변 상태 없음 (스레드 안전), 함수 내부 지역 버퍼 또는 <code>std::vector</code> 사용</li>
+  <li><code>/MT</code>로 정적 링크해 VC++ 런타임 의존을 없앤다 (시험 PC에 런타임이 없을 수 있음)</li>
+  <li>x86/x64 두 구성 모두 빌드, export 이름이 장식되지 않도록 <code>extern "C"</code> + <code>.def</code> 파일 사용</li>
+</ul>
+<div class="callout"><b>미정 사항:</b> iType=2가 300×300(FVC2002)과 640×480(FVC2004) 두 가지라 DLL이 크기를 구분할 수 없다. 답변 전까지 iType→크기 표는 한곳(<code>SensorTable.h</code>)에만 두어 쉽게 바꿀 수 있게 한다.</div>
+</section>
+
+<section id="files"><h2><span class="n">10</span>파일·데이터 형식</h2>
+<h3>config.json</h3>
+<pre><code>{
+  "dllPath": "D:/algo/FPAlgo.dll",
+  "db": { "path": "D:/db/FVC2002_DB3_B", "iType": 2 },
+  "templateDir": "D:/eval/tpl", "outputDir": "D:/eval/out",
+  "rules": {
+    "enroll":   { "type": "All" },
+    "genuine":  { "type": "Symmetric" },
+    "impostor": { "type": "FirstOne", "symmetric": true },
+    "pairsFile": null, "seed": 20261104
+  },
+  "run": { "workers": 4, "timeoutSec": 10, "anonymizeNames": true },
+  "report": { "formats": ["html","docx"],
+              "items": ["FTE","REJ","EER","EERstar","ZeroFMR","ZeroFNMR","FMR100","FMR1000","Time","Size","DET","Dist","FMRFNMR"],
+              "eerMethod": "FVC", "denominator": "predefined" }
+}</code></pre>
+<h3>log_enroll.csv</h3>
+<pre><code>jobId,kind,image,status,retVal,errCode,errMsg,elapsedUs,size,sehCode
+17,E,101_1,OK,1,0,,8421,1236,
+18,A,104_3,TIMEOUT,,,,10000000,,
+19,E,108_2,FAIL,0,10,"too few minutiae",5120,,</code></pre>
+<h3>log_match.csv</h3>
+<pre><code>jobId,enroll,attempt,type,status,score,errCode,errMsg,elapsedUs
+301,101_1,101_4,G,OK,0.812,0,,412
+302,103_1,107_1,I,OK,0.031,0,,398
+303,108_2,108_5,G,SKIP_EF,,,,</code></pre>
+<h3>pairs 파일 (부분 평가 입력 겸용)</h3>
+<pre><code># seed=20261104 rule=Symmetric
+enroll,attempt,type
+101_1,101_2,G
+101_1,102_1,I</code></pre>
+</section>
+
+<!-- ===================== 2부 코드 ===================== -->
+
+<section id="tree"><h2><span class="n">11</span>솔루션 구조</h2>
+<pre><code>FPEval.sln
+├─ src/
+│  ├─ FPCommon/            (static lib, x86·x64)  GUI·Worker 공용
+│  │   ├─ KisaApi.h            KISA 함수 포인터 typedef
+│  │   ├─ Protocol.h           MsgHeader, 요청/응답 구조체, MsgType
+│  │   ├─ Status.h             Status enum + 문자열 변환
+│  │   ├─ Pipe.h/.cpp          NamedPipe RAII 래퍼 (overlapped read/write)
+│  │   ├─ Handle.h             UniqueHandle (CloseHandle RAII)
+│  │   └─ PathUtil.h/.cpp      UTF-8 ↔ UTF-16, 경로 결합
+│  ├─ FPWorker/            (console exe, x86·x64)
+│  │   ├─ main.cpp             인자 파싱, 파이프 연결, 명령 루프
+│  │   ├─ DllHost.h/.cpp       LoadLibrary, export 확인
+│  │   ├─ GuardedBuffer.h/.cpp 가드 페이지·canary 버퍼
+│  │   └─ CommandExecutor.h/.cpp  ENROLL/ATTEMPT/COMPARE 실행 + SEH + 시간 측정
+│  ├─ FPEvalCore/          (static lib, x64)  UI 없는 평가 로직 전부
+│  │   ├─ db/        FingerprintDB, FingerprintImage, TiffReader, RawCache
+│  │   ├─ plan/      Rule 인터페이스·구현들, RuleFactory, PairList, EvalPlan, Rng
+│  │   ├─ exec/      WorkerProcess, WorkerSlot, EvalScheduler, JobQueue, IProgressListener
+│  │   ├─ result/    ResultStore, CsvWriter/Reader, ResumeState
+│  │   ├─ metrics/   MetricsCalculator, MetricOptions, ErrorCurve, MetricsResult
+│  │   ├─ chart/     ICanvas, SvgCanvas, EmfCanvas, ChartRenderer
+│  │   ├─ report/    ReportModel, IReportWriter, HtmlReportWriter, DocxReportWriter, ZipWriter(miniz)
+│  │   └─ config/    EvalConfig, Json (경량 파서 또는 nlohmann/json, 출처 명시)
+│  ├─ FPEval/              (MFC app, x64)
+│  │   ├─ FPEvalApp, MainDlg
+│  │   ├─ TargetPage, RulePage, RunPage, ReportPage   (CPropertyPage 또는 탭 자식 대화상자)
+│  │   └─ ProgressBridge      IProgressListener → PostMessage 변환
+│  ├─ FPAlgo/              (DLL, x86·x64)  우리 알고리즘
+│  │   ├─ BioApi.h / BioApi.cpp / FPAlgo.def / DllMain.cpp
+│  │   ├─ SensorTable.h
+│  │   ├─ image/     Image, Normalize, Segment
+│  │   ├─ enhance/   Orientation, Frequency, Gabor, Binarize, Thinning
+│  │   ├─ minutiae/  Extract, Filter
+│  │   ├─ templ/     Template (직렬화)
+│  │   └─ match/     HoughAlign, Matcher, Score
+│  └─ TestDlls/            Dummy_OK, Bad_Crash, Bad_Timeout, Bad_Score, Bad_Size, Bad_Random
+├─ tests/
+│  ├─ CoreTests/           GoogleTest: Rng, Rule, PairList, Metrics, Csv, Svg
+│  └─ AlgoTests/           GoogleTest: 템플릿 직렬화, 같은 이미지 점수 ≈ 1
+├─ third_party/            miniz, (json), googletest  + LICENSES.md
+├─ installer/FPEval.iss    Inno Setup 스크립트
+└─ docs/                   설계 문서, 사용자 매뉴얼</code></pre>
+<p class="note">평가 로직을 <code>FPEvalCore</code>로 분리하면 GUI 없이 단위 테스트와 콘솔 실행(<code>FPEvalCli.exe</code>, 선택)이 가능하다. GUI(<code>FPEval</code>)는 설정을 모아 Core를 호출하고 진행을 보여주기만 한다.</p>
+</section>
+
+<section id="classes"><h2><span class="n">12</span>핵심 클래스 설계</h2>
+<pre class="mermaid">
+classDiagram
+  class EvalConfig
+  class FingerprintDB { +scan(path) +images() +fingers() }
+  class IEnrollRule { <<interface>> +select(db, rng) }
+  class IPairRule { <<interface>> +generate(db, enrollSet, rng) }
+  class RuleFactory { +createEnroll(cfg) +createGenuine(cfg) +createImpostor(cfg) }
+  class EvalPlan { +enrollJobs +attemptJobs +compareJobs +save() +load() }
+  class EvalScheduler { +run(plan) +stop() +abort() }
+  class WorkerSlot { -WorkerProcess proc +execute(job) }
+  class WorkerProcess { +start() +request() +terminate() }
+  class IProgressListener { <<interface>> +onProgress() +onResult() +onPhase() }
+  class ResultStore { +append() +load() }
+  class MetricsCalculator { +compute(store, options) }
+  class ChartRenderer { +drawDET(ICanvas) +drawDist(ICanvas) +drawRates(ICanvas) }
+  class ICanvas { <<interface>> }
+  class IReportWriter { <<interface>> +write(ReportModel) }
+  IEnrollRule <|.. AllEnroll
+  IEnrollRule <|.. FirstEnroll
+  IPairRule <|.. AllPairs
+  IPairRule <|.. RandomN
+  IPairRule <|.. FromFile
+  RuleFactory ..> IEnrollRule
+  RuleFactory ..> IPairRule
+  EvalScheduler o-- WorkerSlot
+  WorkerSlot *-- WorkerProcess
+  EvalScheduler --> ResultStore
+  EvalScheduler --> IProgressListener
+  ICanvas <|.. SvgCanvas
+  ICanvas <|.. EmfCanvas
+  IReportWriter <|.. HtmlReportWriter
+  IReportWriter <|.. DocxReportWriter
+</pre>
+<h3>객체지향 설계 포인트 (발표·코드 평가용)</h3>
+<div class="tbl"><table>
+<tr><th>기법</th><th>적용 위치</th><th>얻는 것</th></tr>
+<tr><td>전략 패턴</td><td>조합 규칙 (<code>IEnrollRule</code>, <code>IPairRule</code>)</td><td>규칙 추가 시 기존 코드 수정 없음</td></tr>
+<tr><td>팩토리</td><td><code>RuleFactory</code>, Worker bitness 선택</td><td>설정 → 객체 생성을 한곳에</td></tr>
+<tr><td>옵저버</td><td><code>IProgressListener</code></td><td>Core가 MFC를 몰라도 됨</td></tr>
+<tr><td>브리지/어댑터</td><td><code>ICanvas</code> ← SVG/EMF</td><td>그래프 코드 하나로 두 형식</td></tr>
+<tr><td>템플릿 메서드</td><td><code>IReportWriter</code> 기반 클래스의 섹션 순서</td><td>형식별로 섹션 출력만 구현</td></tr>
+<tr><td>RAII</td><td><code>UniqueHandle</code>, <code>GuardedBuffer</code>, <code>WorkerProcess</code></td><td>핸들·메모리·프로세스 누수 방지</td></tr>
+</table></div>
+<h3>주요 인터페이스 초안</h3>
+<pre><code>struct ImageId { int finger; int index; std::wstring name() const; };   // 101, 3 → L"101_3"
+
+class IPairRule {
+public:
+  virtual ~IPairRule() = default;
+  virtual std::vector&lt;Pair&gt; generate(const FingerprintDB&amp; db,
+                                     const std::vector&lt;ImageId&gt;&amp; enrollSet,
+                                     Rng&amp; rng) const = 0;
+  virtual std::wstring describe() const = 0;          // 리포트에 표시
+};
+
+class IProgressListener {
+public:
+  virtual ~IProgressListener() = default;
+  virtual void onPhase(Phase p, size_t total) = 0;
+  virtual void onResult(const JobResult&amp; r, size_t done, size_t total) = 0;
+  virtual void onFinished(RunOutcome o) = 0;
+};
+
+class EvalScheduler {
+public:
+  EvalScheduler(const EvalConfig&amp;, ResultStore&amp;, IProgressListener&amp;);
+  RunOutcome run(const EvalPlan&amp; plan, const ResumeState* resume = nullptr); // 블로킹, 백그라운드 스레드에서 호출
+  void requestStop();    // 진행 중 작업 끝나면 멈춤
+  void abort();          // 즉시 Worker 종료
+};
+
+struct MetricsResult {
+  double fte; int nEF, nEnroll;
+  double rejG, rejI; int nGMF, nIMF;
+  double eer, eerLow, eerHigh, eerT, eerStar;
+  double zeroFMR, zeroFNMR, fmr100, fmr1000;
+  TimeStats enrollTime, matchAll, matchG, matchI; SizeStats tplSize;
+  std::vector&lt;CurvePoint&gt; curve;      // t, FMR, FNMR
+  Histogram genuineHist, impostorHist;
+};</code></pre>
+</section>
+
+<section id="order"><h2><span class="n">13</span>코드 작성 순서</h2>
+<p>의존성이 낮은 것부터 짜고, 매 단계 끝에 "돌려볼 수 있는 상태"를 만든다. 담당 A(알고리즘) · B(평가 엔진) · C(UI·리포트).</p>
+<div class="tbl"><table>
+<tr><th>단계</th><th>주차</th><th>담당</th><th>작성할 코드</th><th>완료 기준</th></tr>
+<tr><td class="num">0</td><td class="num">10</td><td>전원</td><td>솔루션·프로젝트 생성, 빌드 구성(x86/x64, Debug/Release), <code>FPCommon</code>의 <code>Protocol.h</code>·<code>Status.h</code>·<code>KisaApi.h</code> 합의</td><td>빈 프로젝트 전체 빌드 성공, 헤더 고정</td></tr>
+<tr><td class="num">1</td><td class="num">10</td><td>A</td><td><code>TestDlls/Dummy_OK</code>, <code>Bad_*</code> 6종</td><td>각 DLL이 의도대로 동작 (간단한 콘솔 호출로 확인)</td></tr>
+<tr><td class="num">2</td><td class="num">10–11</td><td>B</td><td><code>TiffReader</code>, <code>FingerprintDB</code>, <code>RawCache</code></td><td>3개 DB 스캔·raw 변환, 크기 검사 테스트 통과</td></tr>
+<tr><td class="num">3</td><td class="num">11</td><td>B</td><td><code>FPWorker</code>: <code>Pipe</code>, <code>DllHost</code>, <code>GuardedBuffer</code>, <code>CommandExecutor</code></td><td>Dummy_OK로 ENROLL/COMPARE 왕복, Bad_Crash에서 CRASH 응답</td></tr>
+<tr><td class="num">4</td><td class="num">11</td><td>B</td><td><code>WorkerProcess</code>, <code>WorkerSlot</code>(단일), <code>ResultStore</code>, CSV</td><td>Worker 1개로 80장 등록 + 전체 비교, 로그 생성</td></tr>
+<tr><td class="num">5</td><td class="num">11–12</td><td>B</td><td><code>Rng</code>, 규칙 클래스들, <code>RuleFactory</code>, <code>PairList</code>, <code>EvalPlan</code></td><td>쌍 개수 테스트(560/280/5,760/90), 같은 seed 같은 순서</td></tr>
+<tr><td class="num">6</td><td class="num">11–12</td><td>C</td><td><code>EvalConfig</code>(JSON), MFC 메인 창·탭 4개, 설정 저장·불러오기</td><td>설정 입력 → config.json 왕복</td></tr>
+<tr><td class="num">7</td><td class="num">12</td><td>B·C</td><td><code>EvalScheduler</code> + timeout 처리, <code>ProgressBridge</code>, 시작/중지 버튼</td><td>GUI에서 Dummy_OK 평가 끝까지, Bad_Timeout에서 TIMEOUT 기록 <span class="pill m">12주 진도 보고</span></td></tr>
+<tr><td class="num">8</td><td class="num">11–12</td><td>A</td><td><code>FPAlgo</code>: Image, Normalize, Segment, Orientation, Gabor, Binarize, Thinning + 디버그용 중간 영상 저장</td><td>3개 DB에서 세선화 영상이 눈으로 봐도 정상</td></tr>
+<tr><td class="num">9</td><td class="num">12–13</td><td>C</td><td><code>MetricsCalculator</code>, <code>MetricOptions</code></td><td>손계산 예제 단위 테스트 통과 (A가 교차 검토)</td></tr>
+<tr><td class="num">10</td><td class="num">12–13</td><td>A</td><td>Extract, Filter, Template, HoughAlign, Matcher → <b>FPAlgo v1</b></td><td>3개 DB EER 측정 가능</td></tr>
+<tr><td class="num">11</td><td class="num">13</td><td>C</td><td><code>ReportModel</code>, <code>HtmlReportWriter</code>, 요약 표</td><td>평가 → HTML 리포트 <span class="pill m">13주 중간 시연</span></td></tr>
+<tr><td class="num">12</td><td class="num">13–14</td><td>B</td><td>병렬 슬롯 N개, 강제 종료, 이어하기(<code>ResumeState</code>), 부분 평가(FromFile), 무작위 파일명</td><td>Worker 1/4개 결과 동일, 중단 후 재개 결과 동일</td></tr>
+<tr><td class="num">13</td><td class="num">14</td><td>C</td><td><code>ICanvas</code>, <code>SvgCanvas</code>, <code>EmfCanvas</code>, <code>ChartRenderer</code> 3종</td><td>그래프 SVG/EMF 파일이 확대해도 깨지지 않음</td></tr>
+<tr><td class="num">14</td><td class="num">14</td><td>C</td><td><code>ZipWriter</code>, <code>DocxReportWriter</code>, 항목 on/off</td><td>Word에서 표·그림 포함 문서 열림 <span class="pill m">14주 진도 보고</span></td></tr>
+<tr><td class="num">15</td><td class="num">14</td><td>A</td><td>FPAlgo v2: 매칭 개선, 파라미터 튜닝, 속도 최적화</td><td>v1 대비 EER 개선, 평균 비교 시간 기록</td></tr>
+<tr><td class="num">16</td><td class="num">15</td><td>전원</td><td>설치 스크립트(<code>FPEval.iss</code>: exe 2~3개, VC++ 재배포, 샘플 설정), 매뉴얼, 리팩터링·주석</td><td>깨끗한 PC에서 설치→평가→제거 <span class="pill m">15주 최종 발표</span></td></tr>
+</table></div>
+<div class="callout"><b>병렬 작업 경계:</b> A는 <code>FPAlgo</code>·<code>TestDlls</code>, B는 <code>FPWorker</code>·<code>exec/</code>·<code>plan/</code>·<code>db/</code>·<code>result/</code>, C는 <code>FPEval</code>·<code>metrics/</code>·<code>chart/</code>·<code>report/</code>·<code>config/</code>만 수정한다. <code>FPCommon</code> 변경은 PR에서 3명 모두 승인.</div>
+</section>
+
+<section id="rulesdev"><h2><span class="n">14</span>코딩 규칙과 테스트</h2>
+<h3>코딩 규칙</h3>
+<ul>
+  <li>C++17, 네임스페이스 <code>fpe::</code>(평가), <code>fpa::</code>(알고리즘). 클래스 PascalCase, 함수 camelCase, 멤버 <code>m_</code> 접두사(MFC 관례)</li>
+  <li>문자열은 내부 <code>std::wstring</code>(Windows API), 파일 출력은 UTF-8(BOM 없음, CSV는 Excel용 BOM 옵션)</li>
+  <li><code>new/delete</code> 직접 사용 금지, <code>std::unique_ptr</code>·RAII 래퍼 사용</li>
+  <li>Core 라이브러리는 MFC 헤더를 include하지 않는다</li>
+  <li>예외는 Core 내부에서만, Worker·DLL 경계 밖으로는 상태 코드로만 전달</li>
+  <li>경고 수준 <code>/W4</code>, 경고 0개 유지. 외부 라이브러리는 <code>third_party/</code>에만 두고 <code>LICENSES.md</code>에 출처 기록</li>
+</ul>
+<h3>테스트 목록</h3>
+<div class="tbl"><table>
+<tr><th>대상</th><th>테스트</th></tr>
+<tr><td>Rng</td><td>같은 seed → 같은 수열, Fisher–Yates 결과 고정값 비교</td></tr>
+<tr><td>Rule</td><td>규칙별 쌍 수, 동일 이미지 0건, 대칭 제거, FromFile 잘못된 이름 거부</td></tr>
+<tr><td>Metrics</td><td>점수 10개짜리 예제로 FMR/FNMR/EER(t1=t2 경우, t1≠t2 경우), ZeroFMR, 실패 포함 시 EER ≠ EER*</td></tr>
+<tr><td>Worker</td><td>Bad_* 각각에 대해 기대 상태(CRASH/TIMEOUT/MISMATCH/OVERFLOW) 기록</td></tr>
+<tr><td>Scheduler</td><td>Worker 1개와 4개의 점수 일치, 중단 후 재개 일치</td></tr>
+<tr><td>Report</td><td>항목을 끈 리포트에 해당 섹션 없음, DOCX zip 구조 검사</td></tr>
+<tr><td>FPAlgo</td><td>템플릿 직렬화 왕복, 같은 이미지 Enroll↔Attempt 점수 높음, 빈(흰색) 이미지 → 0 반환·crash 없음</td></tr>
+</table></div>
+<p>매주 일요일 통합 빌드 때 3개 DB 전체 평가를 돌려 <code>docs/history.csv</code>에 EER·시간을 누적해, 알고리즘 성능 변화와 회귀를 추적한다.</p>
+</section>
+
+</main>
+</div>
