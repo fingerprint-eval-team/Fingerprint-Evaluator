@@ -1,0 +1,180 @@
+// FPEval 리소스 (UTF-8)
+#pragma code_page(65001)
+#include <winres.h>
+#include "resource.h"
+
+LANGUAGE LANG_KOREAN, SUBLANG_DEFAULT
+
+/////////////////////////////////////////////////////////////////////////////
+// 메인 대화상자
+
+IDD_FPEVAL DIALOGEX 0, 0, 470, 400
+STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX
+EXSTYLE WS_EX_APPWINDOW
+CAPTION "FPEval — 지문인식 알고리즘 평가 프로그램"
+FONT 9, "맑은 고딕", 400, 0, 0x81
+BEGIN
+    CONTROL         "", IDC_TAB, "SysTabControl32", WS_TABSTOP, 7, 7, 456, 185
+    PUSHBUTTON      "평가 시작", IDC_START, 7, 198, 50, 15
+    PUSHBUTTON      "중지", IDC_STOP, 61, 198, 35, 15
+    PUSHBUTTON      "강제 종료", IDC_ABORT, 100, 198, 45, 15
+    PUSHBUTTON      "이어하기…", IDC_RESUME, 149, 198, 45, 15
+    PUSHBUTTON      "리포트만 생성…", IDC_REPORT_ONLY, 198, 198, 60, 15
+    PUSHBUTTON      "설정 저장…", IDC_SAVE_CFG, 262, 198, 48, 15
+    PUSHBUTTON      "설정 불러오기…", IDC_LOAD_CFG, 314, 198, 58, 15
+    PUSHBUTTON      "리포트 열기", IDC_OPEN_REPORT, 376, 198, 50, 15
+    PUSHBUTTON      "폴더", IDC_OPEN_FOLDER, 430, 198, 33, 15
+    CONTROL         "", IDC_PROGRESS, "msctls_progress32", 0x0, 7, 219, 456, 9
+    LTEXT           "대기 중", IDC_STATUS, 7, 232, 456, 10
+    LISTBOX         IDC_LOG, 7, 245, 456, 148, LBS_NOINTEGRALHEIGHT | LBS_NOSEL | WS_VSCROLL | WS_HSCROLL
+END
+
+/////////////////////////////////////////////////////////////////////////////
+// 탭 1: 대상
+
+IDD_PAGE_TARGET DIALOGEX 0, 0, 450, 165
+STYLE DS_SETFONT | DS_CONTROL | WS_CHILD
+FONT 9, "맑은 고딕", 400, 0, 0x81
+BEGIN
+    LTEXT           "알고리즘 DLL", IDC_STATIC, 10, 11, 70, 10
+    EDITTEXT        IDC_DLL, 85, 8, 300, 14, ES_AUTOHSCROLL
+    PUSHBUTTON      "찾아보기", IDC_DLL_BROWSE, 390, 8, 50, 14
+    LTEXT           "", IDC_DLL_INFO, 85, 25, 355, 10
+
+    LTEXT           "테스트 DB 폴더", IDC_STATIC, 10, 45, 70, 10
+    EDITTEXT        IDC_DB, 85, 42, 300, 14, ES_AUTOHSCROLL
+    PUSHBUTTON      "찾아보기", IDC_DB_BROWSE, 390, 42, 50, 14
+    LTEXT           "", IDC_DB_INFO, 85, 59, 355, 10
+
+    LTEXT           "iType", IDC_STATIC, 10, 79, 70, 10
+    EDITTEXT        IDC_ITYPE, 85, 76, 30, 14, ES_NUMBER
+    LTEXT           "FVC2000=1, FVC2002=2, FVC2004=2 (FPAlgo는 크기 구분을 위해 FVC2004에 임시로 3)", IDC_STATIC, 122, 79, 318, 10
+
+    LTEXT           "템플릿 저장 폴더", IDC_STATIC, 10, 101, 70, 10
+    EDITTEXT        IDC_TPL, 85, 98, 300, 14, ES_AUTOHSCROLL
+    PUSHBUTTON      "찾아보기", IDC_TPL_BROWSE, 390, 98, 50, 14
+    LTEXT           "비워 두면 결과 폴더\\templates 에 저장", IDC_STATIC, 85, 115, 355, 10
+
+    LTEXT           "결과 폴더", IDC_STATIC, 10, 135, 70, 10
+    EDITTEXT        IDC_OUT, 85, 132, 300, 14, ES_AUTOHSCROLL
+    PUSHBUTTON      "찾아보기", IDC_OUT_BROWSE, 390, 132, 50, 14
+END
+
+/////////////////////////////////////////////////////////////////////////////
+// 탭 2: 시험 규칙
+
+IDD_PAGE_RULES DIALOGEX 0, 0, 450, 165
+STYLE DS_SETFONT | DS_CONTROL | WS_CHILD
+FONT 9, "맑은 고딕", 400, 0, 0x81
+BEGIN
+    LTEXT           "등록 규칙", IDC_STATIC, 10, 11, 70, 10
+    COMBOBOX        IDC_ENROLL, 85, 8, 140, 80, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "순번", IDC_STATIC, 235, 11, 25, 10
+    EDITTEXT        IDC_ENROLL_IDX, 262, 8, 35, 14, ES_NUMBER
+
+    LTEXT           "본인비교 조합", IDC_STATIC, 10, 29, 70, 10
+    COMBOBOX        IDC_GEN, 85, 26, 140, 80, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "N", IDC_STATIC, 235, 29, 25, 10
+    EDITTEXT        IDC_GEN_N, 262, 26, 45, 14, ES_NUMBER
+
+    LTEXT           "타인비교 조합", IDC_STATIC, 10, 47, 70, 10
+    COMBOBOX        IDC_IMP, 85, 44, 140, 80, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "N", IDC_STATIC, 235, 47, 25, 10
+    EDITTEXT        IDC_IMP_N, 262, 44, 45, 14, ES_NUMBER
+    LTEXT           "순번 목록", IDC_STATIC, 318, 47, 40, 10
+    EDITTEXT        IDC_IMP_IDX, 360, 44, 80, 14, ES_AUTOHSCROLL
+
+    CONTROL         "타인비교 대칭 쌍 제거 ((a,b)와 (b,a) 중 하나만)", IDC_IMP_SYM, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 85, 63, 250, 10
+
+    LTEXT           "seed", IDC_STATIC, 10, 82, 70, 10
+    EDITTEXT        IDC_SEED, 85, 79, 90, 14, ES_NUMBER
+    PUSHBUTTON      "새 seed", IDC_SEED_NEW, 180, 79, 45, 14
+    LTEXT           "같은 seed면 조합과 실행 순서가 항상 같습니다", IDC_STATIC, 232, 82, 208, 10
+
+    LTEXT           "부분 평가 쌍 파일", IDC_STATIC, 10, 101, 70, 10
+    EDITTEXT        IDC_PAIRS, 85, 98, 300, 14, ES_AUTOHSCROLL
+    PUSHBUTTON      "찾아보기", IDC_PAIRS_BROWSE, 390, 98, 50, 14
+    LTEXT           "지정하면 위 규칙 대신 파일(enroll,attempt,type)의 쌍만 평가", IDC_STATIC, 85, 115, 355, 10
+
+    LTEXT           "", IDC_ESTIMATE, 10, 133, 430, 24
+END
+
+/////////////////////////////////////////////////////////////////////////////
+// 탭 3: 실행 옵션
+
+IDD_PAGE_RUN DIALOGEX 0, 0, 450, 165
+STYLE DS_SETFONT | DS_CONTROL | WS_CHILD
+FONT 9, "맑은 고딕", 400, 0, 0x81
+BEGIN
+    LTEXT           "동시 수행 수", IDC_STATIC, 10, 11, 70, 10
+    EDITTEXT        IDC_WORKERS, 85, 8, 30, 14, ES_NUMBER
+    LTEXT           "", IDC_CPU_INFO, 122, 11, 318, 10
+
+    LTEXT           "timeout (초)", IDC_STATIC, 10, 31, 70, 10
+    EDITTEXT        IDC_TIMEOUT, 85, 28, 30, 14, ES_NUMBER
+    LTEXT           "한 번의 함수 호출이 이 시간을 넘으면 TIMEOUT 처리하고 Worker를 강제 종료", IDC_STATIC, 122, 31, 318, 10
+
+    CONTROL         "Worker에 넘기는 파일명을 일련번호로 바꾸기 (알고리즘이 파일명으로 규칙을 유추하지 못하게)", IDC_ANON, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 85, 50, 355, 10
+
+    LTEXT           "평가 대상 DLL은 별도 Worker 프로세스에서 실행됩니다. DLL이 죽거나 멈춰도 평가 프로그램은 계속 동작하며, 해당 작업은 CRASH/TIMEOUT으로 기록됩니다. 32bit DLL은 FPWorker32, 64bit DLL은 FPWorker64가 자동 선택됩니다.", IDC_STATIC, 10, 75, 430, 30
+END
+
+/////////////////////////////////////////////////////////////////////////////
+// 탭 4: 리포트
+
+IDD_PAGE_REPORT DIALOGEX 0, 0, 450, 165
+STYLE DS_SETFONT | DS_CONTROL | WS_CHILD
+FONT 9, "맑은 고딕", 400, 0, 0x81
+BEGIN
+    LTEXT           "리포트 항목", IDC_STATIC, 10, 9, 70, 10
+    CONTROL         "FTE (등록 실패율)", IDC_ITEM0 + 0, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 85, 8, 170, 10
+    CONTROL         "REJ genuine/impostor", IDC_ITEM0 + 1, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 265, 8, 170, 10
+    CONTROL         "EER", IDC_ITEM0 + 2, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 85, 21, 170, 10
+    CONTROL         "EER*", IDC_ITEM0 + 3, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 265, 21, 170, 10
+    CONTROL         "ZeroFMR", IDC_ITEM0 + 4, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 85, 34, 170, 10
+    CONTROL         "ZeroFNMR", IDC_ITEM0 + 5, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 265, 34, 170, 10
+    CONTROL         "FMR100", IDC_ITEM0 + 6, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 85, 47, 170, 10
+    CONTROL         "FMR1000", IDC_ITEM0 + 7, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 265, 47, 170, 10
+    CONTROL         "Enrollment/Matching time", IDC_ITEM0 + 8, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 85, 60, 170, 10
+    CONTROL         "Template size", IDC_ITEM0 + 9, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 265, 60, 170, 10
+    CONTROL         "그래프: DET Curve", IDC_ITEM0 + 10, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 85, 73, 170, 10
+    CONTROL         "그래프: Score Distribution", IDC_ITEM0 + 11, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 265, 73, 170, 10
+    CONTROL         "그래프: FMR(t)·FNMR(t)", IDC_ITEM0 + 12, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 85, 86, 170, 10
+    CONTROL         "오류 목록", IDC_ITEM0 + 13, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 265, 86, 170, 10
+
+    LTEXT           "형식", IDC_STATIC, 10, 108, 70, 10
+    CONTROL         "HTML", IDC_HTML, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 85, 107, 60, 10
+    CONTROL         "MS-Word (.docx)", IDC_DOCX, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 150, 107, 90, 10
+
+    LTEXT           "EER 방식", IDC_STATIC, 10, 128, 70, 10
+    COMBOBOX        IDC_EER_METHOD, 85, 125, 100, 60, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "FMR/FNMR 분모", IDC_STATIC, 205, 128, 60, 10
+    COMBOBOX        IDC_DENOM, 268, 125, 100, 60, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+END
+
+/////////////////////////////////////////////////////////////////////////////
+// 버전 정보
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 0,1,0,0
+ PRODUCTVERSION 0,1,0,0
+ FILEFLAGSMASK 0x3fL
+ FILEOS 0x40004L
+ FILETYPE 0x1L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "041204b0"
+        BEGIN
+            VALUE "CompanyName", "SME3007 Team"
+            VALUE "FileDescription", "FPEval 지문인식 알고리즘 평가 프로그램"
+            VALUE "FileVersion", "0.1.0"
+            VALUE "ProductName", "FPEval"
+            VALUE "ProductVersion", "0.1.0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x412, 1200
+    END
+END
