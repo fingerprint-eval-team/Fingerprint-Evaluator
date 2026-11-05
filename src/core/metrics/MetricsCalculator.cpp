@@ -61,8 +61,14 @@ EerResult computeEer(const Rates& r, const std::vector<double>& cand, bool fvc) 
   for (double t : cand) {
     double a = r.fmr(t), b = r.fnmr(t);
     if (a == b) return {a, a, a, t, true};
-    if (b <= a) { t1 = t; has1 = true; }
-    if (b >= a && !has2) { t2 = t; has2 = true; }
+    if (b <= a) {
+      t1 = t;
+      has1 = true;
+    }
+    if (b >= a && !has2) {
+      t2 = t;
+      has2 = true;
+    }
   }
   if (!has1 && !has2) return e;
   if (!has1) return {(r.fmr(t2) + r.fnmr(t2)) / 2, r.fmr(t2), r.fnmr(t2), t2, false};
@@ -121,8 +127,11 @@ MetricsResult MetricsCalculator::compute(const std::vector<ExtractRecord>& ex, c
       }
     } else {
       ++m.nAttemptExtract;
-      if (!ok) ++m.nAF;
-      else addTime(m.attemptTime, r.elapsedUs);
+      if (!ok) {
+        ++m.nAF;
+      } else {
+        addTime(m.attemptTime, r.elapsedUs);
+      }
     }
   }
   m.fte = m.nEnroll ? (double)m.nEF / m.nEnroll : 0;

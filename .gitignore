@@ -14,6 +14,10 @@ testdb/FVC*/
 # 실행 시 생성되는 사용자 설정
 last_config.json
 
+# Python 개발 도구 캐시 (tools/check_skills.py 등)
+__pycache__/
+*.pyc
+
 # IDE
 .vs/
 .vscode/

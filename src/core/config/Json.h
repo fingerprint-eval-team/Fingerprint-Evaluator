@@ -1,8 +1,7 @@
 #pragma once
 // 설정 파일용 경량 JSON (객체·배열·문자열·숫자·불리언·null)
-#include <map>
-#include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace fpe {
@@ -15,18 +14,26 @@ class Json {
   Json(bool b) : type_(Type::Bool), b_(b) {}
   Json(double n) : type_(Type::Number), n_(n) {}
   Json(int n) : type_(Type::Number), n_(n) {}
-  Json(long long n) : type_(Type::Number), n_((double)n) {}
+  Json(long long n) : type_(Type::Number), n_(static_cast<double>(n)) {}
   Json(const char* s) : type_(Type::String), s_(s) {}
   Json(std::string s) : type_(Type::String), s_(std::move(s)) {}
-  static Json array() { Json j; j.type_ = Type::Array; return j; }
-  static Json object() { Json j; j.type_ = Type::Object; return j; }
+  static Json array() {
+    Json j;
+    j.type_ = Type::Array;
+    return j;
+  }
+  static Json object() {
+    Json j;
+    j.type_ = Type::Object;
+    return j;
+  }
 
   Type type() const { return type_; }
   bool isNull() const { return type_ == Type::Null; }
 
   bool asBool(bool def = false) const { return type_ == Type::Bool ? b_ : def; }
   double asNumber(double def = 0) const { return type_ == Type::Number ? n_ : def; }
-  int asInt(int def = 0) const { return type_ == Type::Number ? (int)n_ : def; }
+  int asInt(int def = 0) const { return type_ == Type::Number ? static_cast<int>(n_) : def; }
   std::string asString(const std::string& def = "") const { return type_ == Type::String ? s_ : def; }
 
   // 객체

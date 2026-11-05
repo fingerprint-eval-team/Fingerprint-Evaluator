@@ -20,10 +20,15 @@ std::string num(double v) {
 std::string esc(const std::string& s) {
   std::string o;
   for (char c : s) {
-    if (c == '<') o += "&lt;";
-    else if (c == '>') o += "&gt;";
-    else if (c == '&') o += "&amp;";
-    else o += c;
+    if (c == '<') {
+      o += "&lt;";
+    } else if (c == '>') {
+      o += "&gt;";
+    } else if (c == '&') {
+      o += "&amp;";
+    } else {
+      o += c;
+    }
   }
   return o;
 }

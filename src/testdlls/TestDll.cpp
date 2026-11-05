@@ -88,10 +88,23 @@ KISADLL int KISA_Compare(unsigned char* pEnroll, unsigned char* pAttempt, double
   *piErrorCode = 0;
   setMsg(arErrorMessage, "");
 #if defined(TESTDLL_BAD_SCORE)
-  if (h % 7 == 0) { *pdScore = 1.5; return 1; }
-  if (h % 7 == 1) { *pdScore = -0.1; return 1; }
-  if (h % 7 == 2) { *pdScore = std::numeric_limits<double>::quiet_NaN(); return 1; }
-  if (h % 7 == 3) { *piErrorCode = 42; setMsg(arErrorMessage, "compare refused"); return 0; }
+  if (h % 7 == 0) {
+    *pdScore = 1.5;
+    return 1;
+  }
+  if (h % 7 == 1) {
+    *pdScore = -0.1;
+    return 1;
+  }
+  if (h % 7 == 2) {
+    *pdScore = std::numeric_limits<double>::quiet_NaN();
+    return 1;
+  }
+  if (h % 7 == 3) {
+    *piErrorCode = 42;
+    setMsg(arErrorMessage, "compare refused");
+    return 0;
+  }
 #endif
 #if defined(TESTDLL_BAD_RANDOM) || defined(TESTDLL_BAD_SCORE)
   *pdScore = std::floor(((h * 2654435761u) % 1001u)) / 1000.0;

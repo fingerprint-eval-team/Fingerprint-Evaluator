@@ -1,5 +1,8 @@
 #include "db/TiffReader.h"
 
+#include <algorithm>
+#include <cstring>
+
 #include "PathUtil.h"
 
 namespace fpe {
@@ -42,13 +45,24 @@ bool readTiff(const std::wstring& path, GrayImage& out, std::string& err) {
     return false;
   }
   Reader r{buf};
-  if (buf[0] == 'I' && buf[1] == 'I') r.le = true;
-  else if (buf[0] == 'M' && buf[1] == 'M') r.le = false;
-  else { err = "not a TIFF"; return false; }
-  if (r.u16(2) != 42) { err = "not a TIFF"; return false; }
+  if (buf[0] == 'I' && buf[1] == 'I') {
+    r.le = true;
+  } else if (buf[0] == 'M' && buf[1] == 'M') {
+    r.le = false;
+  } else {
+    err = "not a TIFF";
+    return false;
+  }
+  if (r.u16(2) != 42) {
+    err = "not a TIFF";
+    return false;
+  }
 
   size_t ifd = r.u32(4);
-  if (!r.ok(ifd, 2)) { err = "bad IFD"; return false; }
+  if (!r.ok(ifd, 2)) {
+    err = "bad IFD";
+    return false;
+  }
   uint16_t n = r.u16(ifd);
   uint32_t width = 0, height = 0, bps = 8, compression = 1, photometric = 1, spp = 1;
   std::vector<uint32_t> stripOff, stripCnt, colormap;
@@ -71,22 +85,37 @@ bool readTiff(const std::wstring& path, GrayImage& out, std::string& err) {
       default: break;
     }
   }
-  if (compression != 1) { err = "compressed TIFF not supported"; return false; }
-  if (bps != 8 || spp != 1) { err = "only 8-bit grayscale supported"; return false; }
-  if (!width || !height || stripOff.empty()) { err = "missing image tags"; return false; }
+  if (compression != 1) {
+    err = "compressed TIFF not supported";
+    return false;
+  }
+  if (bps != 8 || spp != 1) {
+    err = "only 8-bit grayscale supported";
+    return false;
+  }
+  if (!width || !height || stripOff.empty()) {
+    err = "missing image tags";
+    return false;
+  }
 
-  out.width = (int)width;
-  out.height = (int)height;
-  out.pixels.assign((size_t)width * height, 0);
+  out.width = static_cast<int>(width);
+  out.height = static_cast<int>(height);
+  out.pixels.assign(static_cast<size_t>(width) * height, 0);
   size_t pos = 0;
   for (size_t s = 0; s < stripOff.size() && pos < out.pixels.size(); ++s) {
     size_t cnt = s < stripCnt.size() ? stripCnt[s] : out.pixels.size() - pos;
     cnt = std::min(cnt, out.pixels.size() - pos);
-    if (!r.ok(stripOff[s], cnt)) { err = "strip out of range"; return false; }
-    memcpy(out.pixels.data() + pos, buf.data() + stripOff[s], cnt);
+    if (!r.ok(stripOff[s], cnt)) {
+      err = "strip out of range";
+      return false;
+    }
+    std::memcpy(out.pixels.data() + pos, buf.data() + stripOff[s], cnt);
     pos += cnt;
   }
-  if (pos != out.pixels.size()) { err = "truncated pixel data"; return false; }
+  if (pos != out.pixels.size()) {
+    err = "truncated pixel data";
+    return false;
+  }
 
   if (photometric == 0) {  // WhiteIsZero
     for (auto& p : out.pixels) p = (uint8_t)(255 - p);

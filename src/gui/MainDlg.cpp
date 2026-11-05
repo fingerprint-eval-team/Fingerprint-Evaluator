@@ -265,9 +265,13 @@ void CMainDlg::OnClose() {
     // 작업 스레드가 남긴 WM_APP_* 메시지의 객체 정리
     MSG msg;
     while (PeekMessage(&msg, m_hWnd, WM_APP_PHASE, WM_APP_DONE, PM_REMOVE)) {
-      if (msg.message == WM_APP_PROGRESS) delete reinterpret_cast<CProgressBridge::Progress*>(msg.lParam);
-      else if (msg.message == WM_APP_DONE) delete reinterpret_cast<fpe::RunOutcome*>(msg.lParam);
-      else delete reinterpret_cast<std::string*>(msg.lParam);
+      if (msg.message == WM_APP_PROGRESS) {
+        delete reinterpret_cast<CProgressBridge::Progress*>(msg.lParam);
+      } else if (msg.message == WM_APP_DONE) {
+        delete reinterpret_cast<fpe::RunOutcome*>(msg.lParam);
+      } else {
+        delete reinterpret_cast<std::string*>(msg.lParam);
+      }
     }
   }
   fpe::EvalConfig c;

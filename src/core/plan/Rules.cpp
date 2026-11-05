@@ -136,10 +136,15 @@ std::unique_ptr<IPairRule> RuleFactory::genuine(const EvalConfig& c) {
 
 std::unique_ptr<IPairRule> RuleFactory::impostor(const EvalConfig& c) {
   std::unique_ptr<IPairRule> r;
-  if (c.impostorRule == "All") r = std::make_unique<ImpostorAll>();
-  else if (c.impostorRule == "SelectedIndex") r = std::make_unique<ImpostorSelectedIndex>(c.impostorIndices);
-  else if (c.impostorRule == "RandomN") r = std::make_unique<RandomSample>(std::make_unique<ImpostorAll>(), c.impostorN);
-  else r = std::make_unique<ImpostorFirstOne>();
+  if (c.impostorRule == "All") {
+    r = std::make_unique<ImpostorAll>();
+  } else if (c.impostorRule == "SelectedIndex") {
+    r = std::make_unique<ImpostorSelectedIndex>(c.impostorIndices);
+  } else if (c.impostorRule == "RandomN") {
+    r = std::make_unique<RandomSample>(std::make_unique<ImpostorAll>(), c.impostorN);
+  } else {
+    r = std::make_unique<ImpostorFirstOne>();
+  }
   if (c.impostorSymmetric) r = std::make_unique<SymmetricFilter>(std::move(r));
   return r;
 }
