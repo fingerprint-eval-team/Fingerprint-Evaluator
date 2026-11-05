@@ -65,5 +65,5 @@ class CMainDlg : public CDialogEx {
   std::unique_ptr<fpe::Evaluator> m_eval;
   std::thread m_worker;
   bool m_running = false;
-  CString m_phase, m_lastRunDir, m_lastHtml;
+  CString m_phase, m_lastRunDir, m_lastReport;  // m_lastReport: 생성된 리포트(HTML 우선, 없으면 Word)
 };

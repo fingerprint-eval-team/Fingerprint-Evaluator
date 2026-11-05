@@ -21,6 +21,10 @@
 #define IDC_TPL_BROWSE    1009
 #define IDC_OUT           1010
 #define IDC_OUT_BROWSE    1011
+#define IDC_REPDIR        1012
+#define IDC_REPDIR_BROWSE 1013
+#define IDC_LOGDIR        1014
+#define IDC_LOGDIR_BROWSE 1015
 
 // 탭 2: 시험 규칙
 #define IDC_ENROLL        1101
@@ -43,7 +47,7 @@
 #define IDC_ANON          1203
 #define IDC_CPU_INFO      1204
 
-// 탭 4: 리포트 (IDC_ITEM0 ~ IDC_ITEM0+13)
+// 탭 4: 리포트 (IDC_ITEM0 ~ IDC_ITEM0+14)
 #define IDC_ITEM0         1301
 #define IDC_HTML          1350
 #define IDC_DOCX          1351
