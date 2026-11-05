@@ -176,8 +176,11 @@ MetricsResult MetricsCalculator::compute(const std::vector<ExtractRecord>& ex, c
   std::sort(i.begin(), i.end());
   m.gOk = g.size();
   m.iOk = i.size();
-  m.nG = plannedG ? plannedG : m.nGEF + m.nGMF + m.gOk;
-  m.nI = plannedI ? plannedI : m.nIEF + m.nIMF + m.iOk;
+  m.nGDone = m.nGEF + m.nGMF + m.gOk;
+  m.nIDone = m.nIEF + m.nIMF + m.iOk;
+  m.nG = plannedG ? plannedG : m.nGDone;
+  m.nI = plannedI ? plannedI : m.nIDone;
+  m.complete = opt.complete;
   m.rejG = m.nGCalled ? (double)m.nGCallFail / m.nGCalled : kNA;
   m.rejI = m.nICalled ? (double)m.nICallFail / m.nICalled : kNA;
 
@@ -190,7 +193,8 @@ MetricsResult MetricsCalculator::compute(const std::vector<ExtractRecord>& ex, c
   Rates r{g, i, gFail, nG, nI};
   auto cand = candidates(g, i);
   // FMR은 N_I, FNMR은 N_G가 분모이므로 한쪽이라도 0이면 두 곡선을 비교하는 지표는 정의되지 않는다
-  m.ratesDefined = nG > 0 && nI > 0;
+  // 미완료 평가에서는 결과가 없는 계획 건이 FNMR 분자에 들어가지 않아 0%처럼 보이므로 계산하지 않는다
+  m.ratesDefined = opt.complete && nG > 0 && nI > 0;
   if (m.ratesDefined) {
     EerResult e = computeEer(r, cand, opt.fvcEer);
     m.eer = e.eer;
@@ -215,7 +219,7 @@ MetricsResult MetricsCalculator::compute(const std::vector<ExtractRecord>& ex, c
   }
 
   // EER*: 알고리즘이 OK로 돌려준 점수만 사용 (분모·분자 모두 성공 건 기준)
-  m.starDefined = !g.empty() && !i.empty();
+  m.starDefined = opt.complete && !g.empty() && !i.empty();
   if (m.starDefined) {
     Rates rs{g, i, 0.0, (double)g.size(), (double)i.size()};
     EerResult es = computeEer(rs, cand, opt.fvcEer);

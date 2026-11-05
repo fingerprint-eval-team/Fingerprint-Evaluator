@@ -193,6 +193,25 @@ static void testMetricsUndefined() {
   r = MetricsCalculator::compute(ex, {}, 0, 0, o);
   CHECK(r.nInternal == 1 && r.nEnroll == 2);
   NEAR(r.fte, 0.5);
+
+  // 중단된 평가: 비교 결과가 하나도 없으면 계획 분모로는 FMR=FNMR=0이 되어 EER 0%처럼 보인다 → N/A
+  r = MetricsCalculator::compute({}, {}, 4, 1, o);
+  CHECK(r.ratesDefined && !isNA(r.eer));  // 완료로 취급하면 정의되는 값 (이 상황을 막아야 함)
+  MetricOptions partial;
+  partial.complete = false;
+  r = MetricsCalculator::compute({}, {}, 4, 1, partial);
+  CHECK(!r.complete && !r.ratesDefined && !r.starDefined);
+  CHECK(isNA(r.eer) && isNA(r.eerStar) && isNA(r.fmr100) && isNA(r.fmr1000) && isNA(r.fmr10000));
+  CHECK(isNA(r.zeroFMR) && isNA(r.zeroFNMR) && r.det.empty() && r.rates.empty());
+  CHECK(r.nG == 4 && r.nI == 1 && r.nGDone == 0 && r.nIDone == 0);
+  // 일부만 끝난 경우에도 최종 지표는 N/A, 완료 건수는 집계
+  m.clear();
+  m.push_back(mr('G', 0.8));
+  m.push_back(mr('G', 0, Status::SkipEF));
+  m.push_back(mr('I', 0.1));
+  r = MetricsCalculator::compute({}, m, 4, 1, partial);
+  CHECK(isNA(r.eer) && isNA(r.eerStar) && r.nGDone == 2 && r.nIDone == 1);
+  NEAR(r.rejG, 0.0);
 }
 
 static std::wstring tempFile(const wchar_t* name) {
