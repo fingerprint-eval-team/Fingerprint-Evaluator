@@ -1,11 +1,13 @@
 // FPEvalCore 단위 테스트 (외부 프레임워크 없이 동작하는 최소 테스트 러너)
 #include <cmath>
 #include <cstdio>
+#include <filesystem>
 #include <functional>
 #include <set>
 #include <string>
 #include <vector>
 
+#include "PathUtil.h"
 #include "config/EvalConfig.h"
 #include "config/Json.h"
 #include "metrics/MetricsCalculator.h"
@@ -153,6 +155,119 @@ static void testMetrics() {
   NEAR(r.fte, 0.25);
 }
 
+// 부분 평가·전건 실패: 분모가 0인 지표는 0%가 아니라 N/A여야 한다
+static void testMetricsUndefined() {
+  MetricOptions o;
+  std::vector<MatchRecord> m;
+  for (double s : {0.6, 0.7, 0.8}) m.push_back(mr('G', s));
+  auto r = MetricsCalculator::compute({}, m, 3, 0, o);  // genuine 쌍만 있는 쌍 파일
+  CHECK(!r.ratesDefined);
+  CHECK(isNA(r.eer) && isNA(r.fmr100) && isNA(r.fmr1000) && isNA(r.zeroFMR) && isNA(r.zeroFNMR));
+  CHECK(!r.starDefined && isNA(r.eerStar));
+  CHECK(r.det.empty() && r.rates.empty());
+  CHECK(isNA(r.rejI));
+  NEAR(r.rejG, 0.0);
+
+  m.clear();
+  for (double s : {0.1, 0.2}) m.push_back(mr('I', s));
+  r = MetricsCalculator::compute({}, m, 0, 2, o);  // impostor 쌍만
+  CHECK(!r.ratesDefined && isNA(r.eer));
+
+  // 모든 genuine 비교 실패: EER은 계산되지만 EER*는 성공 점수가 없어 N/A
+  m.clear();
+  m.push_back(mr('G', 0, Status::Fail));
+  m.push_back(mr('G', 0, Status::Crash));
+  for (double s : {0.1, 0.2}) m.push_back(mr('I', s));
+  r = MetricsCalculator::compute({}, m, 2, 2, o);
+  CHECK(r.ratesDefined && !isNA(r.eer));
+  CHECK(!r.starDefined && isNA(r.eerStar));
+  NEAR(r.rejG, 1.0);
+
+  // 등록 시도 없음 → FTE N/A, 평가 프로그램 오류(INTERNAL)는 FTE에서 제외
+  r = MetricsCalculator::compute({}, {}, 0, 0, o);
+  CHECK(isNA(r.fte));
+  std::vector<ExtractRecord> ex(3);
+  for (auto& e : ex) e.kind = 'E';
+  ex[0].status = Status::InternalError;
+  ex[1].status = Status::Fail;
+  r = MetricsCalculator::compute(ex, {}, 0, 0, o);
+  CHECK(r.nInternal == 1 && r.nEnroll == 2);
+  NEAR(r.fte, 0.5);
+}
+
+static std::wstring tempFile(const wchar_t* name) {
+  return (std::filesystem::temp_directory_path() / name).wstring();
+}
+
+// 깨진 plan.csv는 예외 없이 false, 픽셀이 같은 이미지끼리의 비교는 계획·불러오기 모두에서 제외
+static void testPlanLoadAndDuplicates() {
+  FingerprintDB db = fakeDb();
+  std::string err;
+  EvalPlan p;
+  std::wstring path = tempFile(L"fpeval_test_plan.csv");
+  const char* bad[] = {"# seed=abc\njobId,kind,a,b,type\n1,E,101_1,,\n",
+                       "# seed=1\njobId,kind,a,b,type\nx,E,101_1,,\n2,C,101_1,101_2,G\n",
+                       "# seed=1\njobId,kind,a,b,type\n1,Z,101_1,,\n2,C,101_1,101_2,G\n",
+                       "# seed=1\njobId,kind,a,b,type\n2,C,101_1,101_2,G\n2,C,101_1,101_3,G\n",
+                       "# seed=1\njobId,kind,a,b,type\n2,C,101_1,101_2,Q\n"};
+  for (const char* text : bad) {
+    CHECK(writeText(path, text));
+    bool ok = true;
+    try {
+      ok = EvalPlan::load(path, db, p, err);
+    } catch (...) {
+      ok = true;
+      CHECK(!"exception escaped EvalPlan::load");
+    }
+    CHECK(!ok && !err.empty());
+  }
+
+  // 101_2는 101_1의 복사본(같은 해시)
+  std::vector<uint64_t> hash(db.images().size());
+  for (size_t i = 0; i < hash.size(); ++i) hash[i] = 1000 + i;
+  int a = db.find("101_1"), b = db.find("101_2");
+  hash[(size_t)b] = hash[(size_t)a];
+  EvalConfig c;
+  c.genuineRule = "All";
+  c.impostorRule = "All";
+  c.impostorSymmetric = false;
+  std::vector<std::string> w;
+  CHECK(EvalPlan::build(c, db, p, w, err, &hash));
+  CHECK(p.nSameImageRemoved == 2);  // (101_1,101_2), (101_2,101_1)
+  CHECK(p.nGenuine == 558);
+  for (auto& j : p.compareJobs) CHECK(!((j.a == a && j.b == b) || (j.a == b && j.b == a)));
+  CHECK(!w.empty());
+
+  // 해시 없이 만든 계획을 해시와 함께 불러오면 그 쌍이 빠진다
+  EvalPlan raw, loaded;
+  CHECK(EvalPlan::build(c, db, raw, w, err));
+  CHECK(raw.save(path, db));
+  CHECK(EvalPlan::load(path, db, loaded, err, &hash));
+  CHECK(loaded.nGenuine == 558 && loaded.nSameImageRemoved == 2);
+  CHECK(loaded.seed == raw.seed);
+  std::error_code ec;
+  std::filesystem::remove(path, ec);
+}
+
+// 리포트 항목: 키가 없으면 기본(전체), 사용자가 전부 해제한 빈 목록은 그대로 유지
+static void testReportItemsConfig() {
+  EvalConfig c;
+  CHECK(c.items.size() == allReportItems().size());
+  CHECK(c.hasItem(item::FMR10000));
+  c.items.clear();
+  EvalConfig d = EvalConfig::fromJson(c.toJson());
+  CHECK(d.items.empty());
+  Json j = c.toJson();
+  Json noItems = Json::object();
+  noItems["dllPath"] = j.get("dllPath").asString();
+  EvalConfig e = EvalConfig::fromJson(noItems);
+  CHECK(e.items.size() == allReportItems().size());
+  c.reportDir = L"C:\\리포트";
+  c.logDir = L"D:\\log";
+  EvalConfig f = EvalConfig::fromJson(c.toJson());
+  CHECK(f.reportDir == c.reportDir && f.logDir == c.logDir);
+}
+
 static void testJsonCsvZip() {
   EvalConfig c;
   c.dllPath = L"C:\\테스트\\a.dll";
@@ -179,6 +294,9 @@ int main() {
                {"Rules", testRules},
                {"PlanReproducible", testPlanReproducible},
                {"Metrics", testMetrics},
+               {"MetricsUndefined", testMetricsUndefined},
+               {"PlanLoadAndDuplicates", testPlanLoadAndDuplicates},
+               {"ReportItemsConfig", testReportItemsConfig},
                {"JsonCsvZip", testJsonCsvZip}};
   for (auto& t : tests) {
     int before = g_fail;
