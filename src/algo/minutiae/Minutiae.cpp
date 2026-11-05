@@ -105,8 +105,8 @@ std::vector<Minutia> extractMinutiae(const ImageU8& s, const OrientationField& o
       m.quality = of.cohAt(x, y);
       if (cn == 1 && br.size() == 1) {
         m.type = MinutiaType::Ending;
-        // 융선 끝에서 바깥을 향하는 방향
-        m.angle = std::atan2((float)(y - br[0].ey), (float)(x - br[0].ex));
+        // 융선 끝에서 융선 안쪽을 향하는 방향: 끝점↔분기점 뒤바뀜(압력 차) 시 방향이 일치
+        m.angle = std::atan2((float)(br[0].ey - y), (float)(br[0].ex - x));
         branchLen.push_back(br[0].len);  // 짧으면 잔가지(spur) 또는 짧은 조각
       } else if (cn == 3 && br.size() == 3) {
         m.type = MinutiaType::Bifurcation;
@@ -135,14 +135,14 @@ std::vector<Minutia> extractMinutiae(const ImageU8& s, const OrientationField& o
   // 거짓 미뉴셔 제거
   std::vector<uint8_t> drop(cand.size(), 0);
   for (size_t i = 0; i < cand.size(); ++i)
-    if (branchLen[i] < (cand[i].type == MinutiaType::Ending ? 8 : 5)) drop[i] = 1;  // 짧은 가지(spur)
+    if (branchLen[i] < (cand[i].type == MinutiaType::Ending ? 6 : 3)) drop[i] = 1;  // 짧은 가지(spur)
   for (size_t i = 0; i < cand.size(); ++i)
     for (size_t j = i + 1; j < cand.size(); ++j) {
       float dx = cand[i].x - cand[j].x, dy = cand[i].y - cand[j].y;
       float d2 = dx * dx + dy * dy;
-      if (d2 < 6 * 6) {
+      if (d2 < 4 * 4) {
         drop[i] = drop[j] = 1;  // 너무 가까운 쌍
-      } else if (d2 < 14 * 14 && cand[i].type == MinutiaType::Ending && cand[j].type == MinutiaType::Ending &&
+      } else if (d2 < 10 * 10 && cand[i].type == MinutiaType::Ending && cand[j].type == MinutiaType::Ending &&
                  angDiff(cand[i].angle, cand[j].angle) > kPi * 0.75f) {
         drop[i] = drop[j] = 1;  // 끊어진 융선의 양 끝
       }

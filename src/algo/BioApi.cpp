@@ -1,21 +1,18 @@
 // FPAlgo.dll — K-NBTC 지문인식 성능시험 DLL 규격 구현
-// 처리: 정규화 → 방향장·전경 분할 → 융선 간격 추정 → Gabor 강조·이진화 → 세선화 → 미뉴셔 추출 → 템플릿
+// 처리 단계는 Pipeline.cpp 참고
 #include "BioApi.h"
 
 #include <cstring>
 #include <exception>
+#include <vector>
 
+#include "Pipeline.h"
 #include "SensorTable.h"
-#include "enhance/Enhance.h"
-#include "image/Image.h"
-#include "match/Matcher.h"
-#include "minutiae/Minutiae.h"
 #include "templ/Template.h"
 
 namespace {
 
 constexpr int kCapacity = 999999;
-constexpr size_t kMinMinutiae = 8;
 
 void setError(int* piErr, char* msg, int code, const char* text) {
   if (piErr) *piErr = code;
@@ -34,22 +31,11 @@ int extractTemplate(int iType, const unsigned char* pImage, unsigned char* pOut,
     return 0;
   }
   try {
-    fpa::ImageF img = fpa::toFloat(pImage, w, h);
-    fpa::normalize(img);
-    fpa::OrientationField of = fpa::computeOrientation(img);
-    size_t fg = 0;
-    for (auto v : of.mask) fg += v;
-    if (fg < of.mask.size() / 20) {
-      setError(piErr, msg, FPA_ERR_NO_FOREGROUND, "no fingerprint area");
-      return 0;
-    }
-    float period = fpa::estimateRidgePeriod(img, of);
-    fpa::localNormalize(img);
-    fpa::ImageU8 bin = fpa::enhanceAndBinarize(img, of, period);
-    fpa::thin(bin);
-    std::vector<fpa::Minutia> m = fpa::extractMinutiae(bin, of);
-    if (m.size() < kMinMinutiae) {
-      setError(piErr, msg, FPA_ERR_FEW_MINUTIAE, "too few minutiae");
+    std::vector<fpa::Minutia> m;
+    const char* text = "";
+    int code = fpa::extractFeatures(pImage, w, h, m, &text);
+    if (code != FPA_OK) {
+      setError(piErr, msg, code, text);
       return 0;
     }
     int size = fpa::writeTemplate(m, w, h, pOut, kCapacity);
@@ -93,7 +79,7 @@ KISADLL int KISA_Compare(unsigned char* pEnroll, unsigned char* pAttempt, double
       setError(piErrorCode, arErrorMessage, FPA_ERR_TEMPLATE, "invalid template");
       return 0;
     }
-    *pdScore = fpa::matchMinutiae(e, a);
+    *pdScore = fpa::compareFeatures(e, a);
     setError(piErrorCode, arErrorMessage, FPA_OK, "");
     return 1;
   } catch (...) {

@@ -33,9 +33,10 @@ int wmain(int argc, wchar_t** argv) {
   ImageF img = toFloat(g.pixels.data(), g.width, g.height);
   normalize(img);
   OrientationField of = computeOrientation(img);
-  float period = estimateRidgePeriod(img, of);
+  std::vector<float> periodMap = estimateRidgePeriodMap(img, of);
+  float period = medianPeriod(periodMap, of);
   localNormalize(img);
-  ImageU8 bin = enhanceAndBinarize(img, of, period);
+  ImageU8 bin = enhanceAndBinarize(img, of, periodMap);
   std::vector<uint8_t> px(bin.d.size());
   for (size_t i = 0; i < px.size(); ++i) px[i] = bin.d[i] ? 0 : 255;
   savePgm(out + "_bin.pgm", bin.w, bin.h, px);

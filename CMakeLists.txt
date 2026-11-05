@@ -44,12 +44,14 @@ fp_output(FPWorker ${FP_BIN})
 add_library(FPAlgo SHARED
   src/algo/BioApi.cpp
   src/algo/DllMain.cpp
+  src/algo/Pipeline.cpp
   src/algo/FPAlgo.def
   src/algo/image/Image.cpp
   src/algo/enhance/Enhance.cpp
   src/algo/minutiae/Minutiae.cpp
   src/algo/templ/Template.cpp
-  src/algo/match/Matcher.cpp)
+  src/algo/match/Matcher.cpp
+  src/algo/match/Mcc.cpp)
 target_include_directories(FPAlgo PRIVATE src/algo)
 fp_output(FPAlgo ${FP_BIN}/plugins/${FP_ARCH})
 
@@ -97,6 +99,14 @@ if(FP_BITS EQUAL 64)
   target_include_directories(AlgoDebug PRIVATE src/algo)
   target_link_libraries(AlgoDebug PRIVATE FPEvalCore)
   fp_output(AlgoDebug ${CMAKE_BINARY_DIR}/tools)
+
+  # 알고리즘 정확도 벤치 (전체 쌍 EER·점수 덤프, 제출물 아님)
+  add_executable(AlgoBench tools/AlgoBench.cpp src/algo/Pipeline.cpp
+    src/algo/image/Image.cpp src/algo/enhance/Enhance.cpp src/algo/minutiae/Minutiae.cpp
+    src/algo/templ/Template.cpp src/algo/match/Matcher.cpp src/algo/match/Mcc.cpp)
+  target_include_directories(AlgoBench PRIVATE src/algo)
+  target_link_libraries(AlgoBench PRIVATE FPEvalCore)
+  fp_output(AlgoBench ${CMAKE_BINARY_DIR}/tools)
 
   add_executable(CoreTests tests/CoreTests.cpp)
   target_link_libraries(CoreTests PRIVATE FPEvalCore)
