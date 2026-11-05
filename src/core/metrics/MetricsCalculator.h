@@ -10,6 +10,9 @@ namespace fpe {
 struct MetricOptions {
   bool fvcEer = true;                 // true: FVC(t1,t2) 추정, false: |FMR-FNMR| 최소 지점
   bool predefinedDenominator = true;  // true: N_G/N_I = 계획된 전체 시도 수, false: 등록 실패 제외
+  // false: 계획 중 결과가 없는 작업이 있음(중단된 평가). 계획 수를 분모로 쓰는 오류율은
+  // 아직 비교하지 않은 건을 성공처럼 취급하게 되므로 EER·FMRxxx 등 최종 지표를 계산하지 않는다.
+  bool complete = true;
 };
 
 // 계산할 수 없는 지표 값 (분모가 0이거나 조건을 만족하는 임계값이 없음)
@@ -35,14 +38,16 @@ struct MetricsResult {
   double fte = 0;                        // nEnroll == 0이면 kNA
   // 비교
   size_t nG = 0, nI = 0;                 // 계획된 시도 수
+  size_t nGDone = 0, nIDone = 0;         // 결과가 기록된 시도 수 (EF + MF + OK)
   size_t nGEF = 0, nGMF = 0, nIEF = 0, nIMF = 0;
   size_t nGCalled = 0, nICalled = 0;     // 실제로 DLL을 호출한 수
   size_t nGCallFail = 0, nICallFail = 0;
   size_t gOk = 0, iOk = 0;
   double rejG = 0, rejI = 0;             // 호출 건수가 0이면 kNA
   // 오류율. 계산할 수 없으면 kNA (예: 부분 평가에서 genuine 또는 impostor 쌍이 없음)
-  bool ratesDefined = false;             // N_G > 0 && N_I > 0
-  bool starDefined = false;              // 성공 점수가 genuine·impostor 모두 있음
+  bool complete = true;                  // MetricOptions::complete. false면 아래 최종 지표는 모두 kNA
+  bool ratesDefined = false;             // complete && N_G > 0 && N_I > 0
+  bool starDefined = false;              // complete && 성공 점수가 genuine·impostor 모두 있음
   double eer = kNA, eerLow = kNA, eerHigh = kNA, eerT = 0;
   bool eerExact = false;
   double eerStar = kNA, eerStarT = 0;

@@ -195,6 +195,7 @@ RunOutcome buildReport(const std::wstring& runDir, const EvalConfig& cfg, IProgr
   MetricOptions mo;
   mo.fvcEer = cfg.eerMethod != "Nearest";
   mo.predefinedDenominator = cfg.denominator != "attempted";
+  mo.complete = out.incompleteJobs == 0;
   MetricsResult m = MetricsCalculator::compute(ex, mt, plan.nG, plan.nI, mo);
   out.metrics = m;
 
@@ -223,15 +224,21 @@ RunOutcome buildReport(const std::wstring& runDir, const EvalConfig& cfg, IProgr
       {"동시 수행 수 / timeout", std::to_string(cfg.workers) + " / " + std::to_string(cfg.timeoutSec) + "초"},
       {"EER 방식 / 분모", cfg.eerMethod + " / " + cfg.denominator},
       {"평가 시작", info.get("startedAt").asString()},
-      {"진행 상태", out.incompleteJobs ? "미완료 " + std::to_string(out.incompleteJobs) + "건 / 계획 " +
-                                             std::to_string(plan.jobIds.size()) + "건 — 중단된 평가의 부분 결과"
+      {"진행 상태", out.incompleteJobs ? "완료 " + std::to_string(plan.jobIds.size() - out.incompleteJobs) + "건 / 계획 " +
+                                             std::to_string(plan.jobIds.size()) + "건 (미완료 " +
+                                             std::to_string(out.incompleteJobs) + "건) — 중단된 평가의 부분 결과"
                                        : "완료 (계획 " + std::to_string(plan.jobIds.size()) + "건)"},
+      {"비교 진행", "genuine " + std::to_string(m.nGDone) + " / " + std::to_string(plan.nG) + "건, impostor " +
+                        std::to_string(m.nIDone) + " / " + std::to_string(plan.nI) + "건"},
       {"결과 폴더", toUtf8(runDir)},
       {"로그 파일", toUtf8(logPath)},
   };
   if (out.incompleteJobs)
-    rm.notes.push_back("평가가 끝나지 않은 상태의 리포트입니다. 결과가 없는 " + std::to_string(out.incompleteJobs) +
-                       "건은 지표 계산에서 빠져 있으며, 결과 폴더에서 이어하기로 마칠 수 있습니다.");
+    rm.notes.push_back("평가가 끝나지 않은 상태의 리포트입니다 (완료 " +
+                       std::to_string(plan.jobIds.size() - out.incompleteJobs) + "건 / 계획 " +
+                       std::to_string(plan.jobIds.size()) + "건). EER·EER*·ZeroFMR·ZeroFNMR·FMRxxx와 DET·FMR/FNMR "
+                       "그래프는 계획된 시도 수를 분모로 쓰므로 평가가 끝날 때까지 N/A로 둡니다. FTE·REJ·시간·크기와 "
+                       "점수 분포는 결과가 있는 작업만으로 계산한 중간 값입니다. 결과 폴더에서 이어하기로 마칠 수 있습니다.");
 
   auto failBreakdown = [&]() {
     std::string s;
@@ -242,7 +249,10 @@ RunOutcome buildReport(const std::wstring& runDir, const EvalConfig& cfg, IProgr
     if (!t.n) return std::string("N/A (성공 건 없음)");
     return fmtF(t.meanMs, 2) + " ms (최대 " + fmtF(t.maxMs, 1) + " ms, n=" + std::to_string(t.n) + ")";
   };
-  const std::string ratesWhy = "N/A — FMR·FNMR 분모가 0 (N_G=" + std::to_string(m.nG) + ", N_I=" + std::to_string(m.nI) + ")";
+  const std::string ratesWhy =
+      !m.complete ? "N/A — 평가 미완료 (완료 " + std::to_string(plan.jobIds.size() - out.incompleteJobs) + " / 계획 " +
+                        std::to_string(plan.jobIds.size()) + "건)"
+                  : "N/A — FMR·FNMR 분모가 0 (N_G=" + std::to_string(m.nG) + ", N_I=" + std::to_string(m.nI) + ")";
   auto rateItem = [&](double v) { return m.ratesDefined ? pctOrNA(v) : ratesWhy; };
   auto ratio = [](size_t a, size_t b) { return " (" + std::to_string(a) + "/" + std::to_string(b) + ")"; };
 
@@ -265,6 +275,7 @@ RunOutcome buildReport(const std::wstring& runDir, const EvalConfig& cfg, IProgr
   }
   if (cfg.hasItem(item::EERstar)) {
     rm.summary.push_back({"EER*", m.starDefined ? fmtPct(m.eerStar) + " (t=" + fmtF(m.eerStarT) + ")"
+                                  : !m.complete ? ratesWhy
                                                 : "N/A — 성공 점수 genuine " + std::to_string(m.gOk) + "건 / impostor " +
                                                       std::to_string(m.iOk) + "건"});
   }
@@ -289,10 +300,10 @@ RunOutcome buildReport(const std::wstring& runDir, const EvalConfig& cfg, IProgr
   }
 
   if (cfg.hasItem(item::REJ) || cfg.hasItem(item::FTE)) {
-    rm.counts = {{"구분", "계획(N)", "등록 실패(EF)", "비교 실패(MF)", "DLL 호출", "호출 실패", "성공(OK)"},
-                 {"Genuine", std::to_string(m.nG), std::to_string(m.nGEF), std::to_string(m.nGMF),
+    rm.counts = {{"구분", "계획(N)", "완료", "등록 실패(EF)", "비교 실패(MF)", "DLL 호출", "호출 실패", "성공(OK)"},
+                 {"Genuine", std::to_string(m.nG), std::to_string(m.nGDone), std::to_string(m.nGEF), std::to_string(m.nGMF),
                   std::to_string(m.nGCalled), std::to_string(m.nGCallFail), std::to_string(m.gOk)},
-                 {"Impostor", std::to_string(m.nI), std::to_string(m.nIEF), std::to_string(m.nIMF),
+                 {"Impostor", std::to_string(m.nI), std::to_string(m.nIDone), std::to_string(m.nIEF), std::to_string(m.nIMF),
                   std::to_string(m.nICalled), std::to_string(m.nICallFail), std::to_string(m.iOk)}};
   }
 
@@ -319,7 +330,8 @@ RunOutcome buildReport(const std::wstring& runDir, const EvalConfig& cfg, IProgr
   for (const auto& d : defs) {
     if (!cfg.hasItem(d.item)) continue;
     if (d.needsRates && !m.ratesDefined) {
-      rm.notes.push_back(std::string(d.caption) + " 그래프는 genuine 또는 impostor 계획 시도가 없어 그릴 수 없으므로 생략했습니다.");
+      if (m.complete)  // 미완료는 위 안내 문장에서 함께 설명한다
+        rm.notes.push_back(std::string(d.caption) + " 그래프는 genuine 또는 impostor 계획 시도가 없어 그릴 수 없으므로 생략했습니다.");
       continue;
     }
     ReportFigure f;
