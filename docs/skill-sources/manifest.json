@@ -1,0 +1,625 @@
+{
+  "reviewed_on": "2026-11-04",
+  "skills": [
+    {
+      "name": "fpeval-cpp17",
+      "title": "C++17 구현과 소유권",
+      "description": "Implement or refactor Fingerprint-Evaluator C++17 code involving RAII, ownership, resource lifetime, templates, or exception boundaries. Excludes build-only changes and numerical metric validation.",
+      "sources": [
+        "Jeffallan/claude-skills/cpp-pro"
+      ],
+      "license": "MIT"
+    },
+    {
+      "name": "fpeval-msvc-cmake",
+      "title": "MSVC·CMake 빌드",
+      "description": "Configure, build, or diagnose Fingerprint-Evaluator MSVC/CMake, MFC, x86/x64, CRT, linker and PDB issues. Use for build.ps1 or CMake changes; not for source-level runtime failures.",
+      "sources": [
+        "mohitmishra786/low-level-dev-skills/msvc-cl",
+        "mohitmishra786/low-level-dev-skills/cmake"
+      ],
+      "license": "MIT"
+    },
+    {
+      "name": "fpeval-static-analysis",
+      "title": "정적 분석과 컴파일 데이터베이스",
+      "description": "Run or configure MSVC analysis or clang-tidy for Fingerprint-Evaluator, diagnose compile_commands.json and IntelliSense errors, and triage C++ diagnostics. Do not switch the production generator merely to enable tooling.",
+      "sources": [
+        "mohitmishra786/low-level-dev-skills/static-analysis",
+        "microsoft/cpp-language-server/generate-compile-commands"
+      ],
+      "license": "MIT"
+    },
+    {
+      "name": "fpeval-dll-abi",
+      "title": "Windows DLL·파이프 계약",
+      "description": "Review or change KISA DLL exports, x86/x64 loading, calling conventions, template binary layout or named-pipe message ABI in Fingerprint-Evaluator. Use for compatibility changes, not general scheduler debugging.",
+      "sources": [
+        "mohitmishra786/low-level-dev-skills/msvc-cl"
+      ],
+      "license": "MIT"
+    },
+    {
+      "name": "fpeval-systematic-debugging",
+      "title": "증거 기반 원인 추적",
+      "description": "Investigate reproducible or intermittent Fingerprint-Evaluator failures before fixing them. Use for unexpected statuses, crashes, timeouts and failed tests; route known build or ABI problems to their specialized skills.",
+      "sources": [
+        "obra/superpowers/systematic-debugging"
+      ],
+      "license": "MIT"
+    },
+    {
+      "name": "fpeval-concurrency",
+      "title": "동시성·취소·자원 수명",
+      "description": "Diagnose or modify Fingerprint-Evaluator worker-pool races, deadlocks, overlapped I/O cancellation, stop/abort and GUI thread lifetime. Use for synchronization changes; persisted resume correctness has its own skill.",
+      "sources": [
+        "mohitmishra786/low-level-dev-skills/concurrency-debugging",
+        "mohitmishra786/low-level-dev-skills/memory-model"
+      ],
+      "license": "MIT"
+    },
+    {
+      "name": "fpeval-resume-validation",
+      "title": "저장·재개·설정 호환성",
+      "description": "Validate Fingerprint-Evaluator saved JSON/CSV compatibility, interrupted-run resume, retry deduplication and template persistence. Use for ResultStore, EvalConfig, EvalPlan serialization or resume behavior.",
+      "sources": [
+        "obra/superpowers/systematic-debugging",
+        "obra/superpowers/verification-before-completion"
+      ],
+      "license": "MIT"
+    },
+    {
+      "name": "fpeval-property-testing",
+      "title": "속성·회귀 테스트",
+      "description": "Design deterministic property and regression tests for Fingerprint-Evaluator RNG, pair rules, JSON/CSV and template serialization. Use for algebraic invariants and minimized counterexamples, not UI integration or coverage-guided fuzzing.",
+      "sources": [
+        "trailofbits/skills/property-based-testing",
+        "obra/superpowers/test-driven-development"
+      ],
+      "license": "CC-BY-SA-4.0"
+    },
+    {
+      "name": "fpeval-parser-fuzzing",
+      "title": "입력 파서·메모리 오류 검사",
+      "description": "Build bounded malformed-input and fuzz tests for Fingerprint-Evaluator TIFF, JSON, CSV, template and pipe parsing; diagnose ASan memory failures. Use for parser hardening or reproduced memory defects, not every ordinary code change.",
+      "sources": [
+        "mohitmishra786/low-level-dev-skills/fuzzing",
+        "mohitmishra786/low-level-dev-skills/sanitizers"
+      ],
+      "license": "MIT"
+    },
+    {
+      "name": "fpeval-metrics-validation",
+      "title": "지문 평가 수식 검증",
+      "description": "Validate Fingerprint-Evaluator FTE, REJ, FMR/FNMR, EER/EERstar, threshold selection, denominators and time/size aggregation using independent small examples. Excludes algorithm tuning and cosmetic chart edits.",
+      "sources": [
+        "trailofbits/skills/property-based-testing"
+      ],
+      "license": "CC-BY-SA-4.0"
+    },
+    {
+      "name": "fpeval-algorithm-experiments",
+      "title": "인식 알고리즘 실험",
+      "description": "Plan and compare Fingerprint-Evaluator FPAlgo preprocessing, minutiae, matching or parameter changes on FVC data with controlled baselines. Use for accuracy experiments and tuning, not formula correctness or CPU profiling alone.",
+      "sources": [
+        "K-Dense-AI/scientific-agent-skills/experimental-design",
+        "K-Dense-AI/scientific-agent-skills/statistical-analysis"
+      ],
+      "license": "MIT"
+    },
+    {
+      "name": "fpeval-performance-profiling",
+      "title": "CPU·메모리·처리량 측정",
+      "description": "Profile Fingerprint-Evaluator CPU, memory, allocation, IPC or worker-scaling bottlenecks and verify performance changes. Use for speed or memory work; accuracy tuning uses algorithm-experiments.",
+      "sources": [
+        "aniruddhaadak80/skills/code-quality-performance-profiling-cpp",
+        "mohitmishra786/low-level-dev-skills/intel-vtune-amd-uprof"
+      ],
+      "license": "MIT"
+    },
+    {
+      "name": "fpeval-mfc-ui",
+      "title": "MFC 화면·키보드·상태 검증",
+      "description": "Implement and validate Fingerprint-Evaluator native MFC dialogs, resource/DDX bindings, Korean text, DPI, keyboard navigation and run-state UI. Not a web frontend, WPF or Electron migration skill.",
+      "sources": [
+        "vercel-labs/agent-desktop/agent-desktop-windows"
+      ],
+      "license": "Apache-2.0"
+    },
+    {
+      "name": "fpeval-report-generation",
+      "title": "HTML·OOXML 리포트 생성",
+      "description": "Implement or validate Fingerprint-Evaluator ReportModel, HTML/DOCX writers, OOXML ZIP relationships, selected report items and report-only regeneration. Not a generic standalone Word authoring skill.",
+      "sources": [
+        "aniruddhaadak80/skills/document-generation-docx-report-generation"
+      ],
+      "license": "MIT"
+    },
+    {
+      "name": "fpeval-chart-validation",
+      "title": "과학적 그래프·SVG·EMF 검증",
+      "description": "Validate Fingerprint-Evaluator DET, score distributions and FMR/FNMR charts for truthful axes, normalization, vector output and SVG/EMF consistency. Use for ChartRenderer or canvas changes, not EER formula changes alone.",
+      "sources": [
+        "K-Dense-AI/scientific-agent-skills/scientific-visualization"
+      ],
+      "license": "MIT"
+    },
+    {
+      "name": "fpeval-release-validation",
+      "title": "설치·배포 검증",
+      "description": "Prepare and validate Fingerprint-Evaluator Release artifacts and Inno Setup packaging, architecture completeness and clean-Windows install/run/uninstall behavior. Does not authorize publishing or modifying a user installation.",
+      "sources": [
+        "obra/superpowers/verification-before-completion",
+        "mohitmishra786/low-level-dev-skills/msvc-cl"
+      ],
+      "license": "MIT"
+    },
+    {
+      "name": "fpeval-code-review",
+      "title": "변경 영향 중심 코드 리뷰",
+      "description": "Review Fingerprint-Evaluator local diffs or requested PR changes for concrete correctness, lifetime, compatibility and regression issues. Review-only by default; implement fixes when the user also asks for them.",
+      "sources": [
+        "getsentry/skills/code-review",
+        "getsentry/skills/find-bugs"
+      ],
+      "license": "Apache-2.0"
+    },
+    {
+      "name": "fpeval-verification",
+      "title": "작업 완료 검증",
+      "description": "Verify evidence before reporting Fingerprint-Evaluator work complete. Select fresh build, CoreTests, document/skill checks and domain checks proportional to the actual change; do not rerun unchanged successful checks without a reason.",
+      "sources": [
+        "obra/superpowers/verification-before-completion"
+      ],
+      "license": "MIT"
+    }
+  ],
+  "sources": {
+    "aniruddhaadak80/skills/code-quality-code-review-checklist-cpp": {
+      "repo": "aniruddhaadak80/skills",
+      "path": "skills/code-quality-code-review-checklist-cpp/SKILL.md",
+      "commit": "17f441875305220e7669ba1676bc61193d5a1a03",
+      "sha256": "f1b097d15d361109a7c7006617c1d65e051f6988db0497bbd06842c8f82cac99",
+      "url": "https://github.com/aniruddhaadak80/skills/blob/17f441875305220e7669ba1676bc61193d5a1a03/skills/code-quality-code-review-checklist-cpp/SKILL.md",
+      "used_by": [],
+      "decision": "not-installed",
+      "review": "procedure",
+      "notes": "간단한 일반 체크리스트보다 Sentry의 diff 수집·실제 결함 검증 절차를 선택.",
+      "license_file": "docs/skill-sources/licenses/aniruddhaadak80--skills.txt"
+    },
+    "aniruddhaadak80/skills/code-quality-performance-profiling-cpp": {
+      "repo": "aniruddhaadak80/skills",
+      "path": "skills/code-quality-performance-profiling-cpp/SKILL.md",
+      "commit": "17f441875305220e7669ba1676bc61193d5a1a03",
+      "sha256": "8de77194fd924bf355987f2fe0716755874a6b8901751458cb358bc624b9e341",
+      "url": "https://github.com/aniruddhaadak80/skills/blob/17f441875305220e7669ba1676bc61193d5a1a03/skills/code-quality-performance-profiling-cpp/SKILL.md",
+      "used_by": [
+        "fpeval-performance-profiling"
+      ],
+      "decision": "adapted",
+      "review": "procedure",
+      "notes": "원문 절차의 적용 범위를 좁히고 C++17/MSVC·로컬 검증·현재 코드 계약으로 조정.",
+      "license_file": "docs/skill-sources/licenses/aniruddhaadak80--skills.txt"
+    },
+    "aniruddhaadak80/skills/document-generation-docx-report-generation": {
+      "repo": "aniruddhaadak80/skills",
+      "path": "skills/document-generation-docx-report-generation/SKILL.md",
+      "commit": "17f441875305220e7669ba1676bc61193d5a1a03",
+      "sha256": "3c12be82ad1493a2a2a262f74ae9a3f6622d8c55fd788b29d9f69f206d1afe75",
+      "url": "https://github.com/aniruddhaadak80/skills/blob/17f441875305220e7669ba1676bc61193d5a1a03/skills/document-generation-docx-report-generation/SKILL.md",
+      "used_by": [
+        "fpeval-report-generation"
+      ],
+      "decision": "adapted",
+      "review": "procedure",
+      "notes": "원문 절차의 적용 범위를 좁히고 C++17/MSVC·로컬 검증·현재 코드 계약으로 조정.",
+      "license_file": "docs/skill-sources/licenses/aniruddhaadak80--skills.txt"
+    },
+    "anthropics/skills/docx": {
+      "repo": "anthropics/skills",
+      "path": "skills/docx/SKILL.md",
+      "commit": "ca45fc496a3436251f191354091d557da31c15b5",
+      "sha256": "8017469ea95fb7d28225c62daf8e2f3492a7b516fc64c18c28977cbf8980b7fe",
+      "url": "https://github.com/anthropics/skills/blob/ca45fc496a3436251f191354091d557da31c15b5/skills/docx/SKILL.md",
+      "used_by": [],
+      "decision": "not-installed",
+      "review": "procedure",
+      "notes": "현재 원문 LICENSE.txt가 복제·파생물 제한을 명시. 채택·배포하지 않고 MIT 리포트 스킬과 프로젝트 OOXML 코드 사용.",
+      "license_file": null
+    },
+    "anthropics/skills/frontend-design": {
+      "repo": "anthropics/skills",
+      "path": "skills/frontend-design/SKILL.md",
+      "commit": "ca45fc496a3436251f191354091d557da31c15b5",
+      "sha256": "d91970639e9f5c37682ac7ab60094d35f1c7c1f38d731bd56396563aee10c1d3",
+      "url": "https://github.com/anthropics/skills/blob/ca45fc496a3436251f191354091d557da31c15b5/skills/frontend-design/SKILL.md",
+      "used_by": [],
+      "decision": "not-installed",
+      "review": "procedure",
+      "notes": "웹 디자인·CSS·브랜드 시각 언어 중심. 네이티브 MFC를 대체할 스킬로는 부적합.",
+      "license_file": null
+    },
+    "anthropics/skills/webapp-testing": {
+      "repo": "anthropics/skills",
+      "path": "skills/webapp-testing/SKILL.md",
+      "commit": "ca45fc496a3436251f191354091d557da31c15b5",
+      "sha256": "51b7349e77ec63b7744a6f63647e7566a0b4d2e301121cc10e8c2113af6556a2",
+      "url": "https://github.com/anthropics/skills/blob/ca45fc496a3436251f191354091d557da31c15b5/skills/webapp-testing/SKILL.md",
+      "used_by": [],
+      "decision": "not-installed",
+      "review": "procedure",
+      "notes": "Playwright 웹 UI 테스트는 MFC 창 조작을 대체하지 못하므로 설치하지 않음.",
+      "license_file": null
+    },
+    "getsentry/skills/code-review": {
+      "repo": "getsentry/skills",
+      "path": "skills/code-review/SKILL.md",
+      "commit": "0c464f411bdfb8d4c12314b36264d06cb2f60270",
+      "sha256": "ec5fc8855cb4648b4f2c79b608f8c8824a2da6a683330524c4d6283e4a3954c4",
+      "url": "https://github.com/getsentry/skills/blob/0c464f411bdfb8d4c12314b36264d06cb2f60270/skills/code-review/SKILL.md",
+      "used_by": [
+        "fpeval-code-review"
+      ],
+      "decision": "adapted",
+      "review": "procedure",
+      "notes": "원문 절차의 적용 범위를 좁히고 C++17/MSVC·로컬 검증·현재 코드 계약으로 조정.",
+      "license_file": "docs/skill-sources/licenses/getsentry--skills.txt"
+    },
+    "getsentry/skills/find-bugs": {
+      "repo": "getsentry/skills",
+      "path": "skills/find-bugs/SKILL.md",
+      "commit": "0c464f411bdfb8d4c12314b36264d06cb2f60270",
+      "sha256": "08664c3698f89116a4b04d12f699f95cff1aadb725da353b7f24f8ad73b02003",
+      "url": "https://github.com/getsentry/skills/blob/0c464f411bdfb8d4c12314b36264d06cb2f60270/skills/find-bugs/SKILL.md",
+      "used_by": [
+        "fpeval-code-review"
+      ],
+      "decision": "adapted",
+      "review": "procedure",
+      "notes": "원문 절차의 적용 범위를 좁히고 C++17/MSVC·로컬 검증·현재 코드 계약으로 조정.",
+      "license_file": "docs/skill-sources/licenses/getsentry--skills.txt"
+    },
+    "Jeffallan/claude-skills/cpp-pro": {
+      "repo": "Jeffallan/claude-skills",
+      "path": "skills/cpp-pro/SKILL.md",
+      "commit": "078a25cc5bfd8011459be7b91d004e900c1d02d3",
+      "sha256": "53017f862c526df6080210a1a00e6678c2cd5382b5d1a51026bf3b0bde7f7ed2",
+      "url": "https://github.com/Jeffallan/claude-skills/blob/078a25cc5bfd8011459be7b91d004e900c1d02d3/skills/cpp-pro/SKILL.md",
+      "used_by": [
+        "fpeval-cpp17"
+      ],
+      "decision": "adapted",
+      "review": "procedure",
+      "notes": "원문 절차의 적용 범위를 좁히고 C++17/MSVC·로컬 검증·현재 코드 계약으로 조정.",
+      "license_file": "docs/skill-sources/licenses/Jeffallan--claude-skills.txt"
+    },
+    "K-Dense-AI/scientific-agent-skills/experimental-design": {
+      "repo": "K-Dense-AI/scientific-agent-skills",
+      "path": "skills/experimental-design/SKILL.md",
+      "commit": "a25cf9ec00e2745d03f8704acf6f6919694ccd9a",
+      "sha256": "db2de0f3d29b7729776a91e923c9c83801298f5ad8e88fe44570045fbefcc248",
+      "url": "https://github.com/K-Dense-AI/scientific-agent-skills/blob/a25cf9ec00e2745d03f8704acf6f6919694ccd9a/skills/experimental-design/SKILL.md",
+      "used_by": [
+        "fpeval-algorithm-experiments"
+      ],
+      "decision": "adapted",
+      "review": "procedure",
+      "notes": "원문 절차의 적용 범위를 좁히고 C++17/MSVC·로컬 검증·현재 코드 계약으로 조정.",
+      "license_file": "docs/skill-sources/licenses/K-Dense-AI--scientific-agent-skills.txt"
+    },
+    "K-Dense-AI/scientific-agent-skills/scientific-visualization": {
+      "repo": "K-Dense-AI/scientific-agent-skills",
+      "path": "skills/scientific-visualization/SKILL.md",
+      "commit": "a25cf9ec00e2745d03f8704acf6f6919694ccd9a",
+      "sha256": "8cbde7cdc10d959cf72cfd08335cc8ce996247eee6ebdb900eb64a4cb0ff34a3",
+      "url": "https://github.com/K-Dense-AI/scientific-agent-skills/blob/a25cf9ec00e2745d03f8704acf6f6919694ccd9a/skills/scientific-visualization/SKILL.md",
+      "used_by": [
+        "fpeval-chart-validation"
+      ],
+      "decision": "adapted",
+      "review": "procedure",
+      "notes": "원문 절차의 적용 범위를 좁히고 C++17/MSVC·로컬 검증·현재 코드 계약으로 조정.",
+      "license_file": "docs/skill-sources/licenses/K-Dense-AI--scientific-agent-skills.txt"
+    },
+    "K-Dense-AI/scientific-agent-skills/statistical-analysis": {
+      "repo": "K-Dense-AI/scientific-agent-skills",
+      "path": "skills/statistical-analysis/SKILL.md",
+      "commit": "a25cf9ec00e2745d03f8704acf6f6919694ccd9a",
+      "sha256": "e112848726b3713267cac65e4e2c15491a0a26ee1ed628db01195f7e43f97997",
+      "url": "https://github.com/K-Dense-AI/scientific-agent-skills/blob/a25cf9ec00e2745d03f8704acf6f6919694ccd9a/skills/statistical-analysis/SKILL.md",
+      "used_by": [
+        "fpeval-algorithm-experiments"
+      ],
+      "decision": "adapted",
+      "review": "procedure",
+      "notes": "원문 절차의 적용 범위를 좁히고 C++17/MSVC·로컬 검증·현재 코드 계약으로 조정.",
+      "license_file": "docs/skill-sources/licenses/K-Dense-AI--scientific-agent-skills.txt"
+    },
+    "microsoft/cpp-language-server/generate-compile-commands": {
+      "repo": "microsoft/cpp-language-server",
+      "path": "plugins/cpp-language-server/skills/generate-compile-commands/SKILL.md",
+      "commit": "db8100bc696a42914a95e56c0ae3f84ed7548e79",
+      "sha256": "b83e463d1b8f776d67ca58ce8affa0f2e9710e79b63460399fe3a4ef5cfc2fbc",
+      "url": "https://github.com/microsoft/cpp-language-server/blob/db8100bc696a42914a95e56c0ae3f84ed7548e79/plugins/cpp-language-server/skills/generate-compile-commands/SKILL.md",
+      "used_by": [
+        "fpeval-static-analysis"
+      ],
+      "decision": "adapted",
+      "review": "procedure",
+      "notes": "원문 절차의 적용 범위를 좁히고 C++17/MSVC·로컬 검증·현재 코드 계약으로 조정.",
+      "license_file": "docs/skill-sources/licenses/microsoft--cpp-language-server.txt"
+    },
+    "mohitmishra786/low-level-dev-skills/fuzzing": {
+      "repo": "mohitmishra786/low-level-dev-skills",
+      "path": "skills/runtimes/fuzzing/SKILL.md",
+      "commit": "bdc58472fa9f309ed1b3f7d985a0d8e9bd8f4608",
+      "sha256": "9693fdd9c32d9b2e6c112f8420f59155d7ea3d5efa55bf3038a97d2eedc42c00",
+      "url": "https://github.com/mohitmishra786/low-level-dev-skills/blob/bdc58472fa9f309ed1b3f7d985a0d8e9bd8f4608/skills/runtimes/fuzzing/SKILL.md",
+      "used_by": [
+        "fpeval-parser-fuzzing"
+      ],
+      "decision": "adapted",
+      "review": "procedure",
+      "notes": "원문 절차의 적용 범위를 좁히고 C++17/MSVC·로컬 검증·현재 코드 계약으로 조정.",
+      "license_file": "docs/skill-sources/licenses/mohitmishra786--low-level-dev-skills.txt"
+    },
+    "mohitmishra786/low-level-dev-skills/sanitizers": {
+      "repo": "mohitmishra786/low-level-dev-skills",
+      "path": "skills/runtimes/sanitizers/SKILL.md",
+      "commit": "bdc58472fa9f309ed1b3f7d985a0d8e9bd8f4608",
+      "sha256": "159c29a55f5ffa24348533ddfe15e705307b3c314acd9c6ee60f375f52590d65",
+      "url": "https://github.com/mohitmishra786/low-level-dev-skills/blob/bdc58472fa9f309ed1b3f7d985a0d8e9bd8f4608/skills/runtimes/sanitizers/SKILL.md",
+      "used_by": [
+        "fpeval-parser-fuzzing"
+      ],
+      "decision": "adapted",
+      "review": "procedure",
+      "notes": "원문 절차의 적용 범위를 좁히고 C++17/MSVC·로컬 검증·현재 코드 계약으로 조정.",
+      "license_file": "docs/skill-sources/licenses/mohitmishra786--low-level-dev-skills.txt"
+    },
+    "mohitmishra786/low-level-dev-skills/intel-vtune-amd-uprof": {
+      "repo": "mohitmishra786/low-level-dev-skills",
+      "path": "skills/profilers/intel-vtune-amd-uprof/SKILL.md",
+      "commit": "bdc58472fa9f309ed1b3f7d985a0d8e9bd8f4608",
+      "sha256": "32df15b0dc3ccb7444bdd9449d752722666510ed1e77a20f0ceebfa887db2ad8",
+      "url": "https://github.com/mohitmishra786/low-level-dev-skills/blob/bdc58472fa9f309ed1b3f7d985a0d8e9bd8f4608/skills/profilers/intel-vtune-amd-uprof/SKILL.md",
+      "used_by": [
+        "fpeval-performance-profiling"
+      ],
+      "decision": "adapted",
+      "review": "procedure",
+      "notes": "원문 절차의 적용 범위를 좁히고 C++17/MSVC·로컬 검증·현재 코드 계약으로 조정.",
+      "license_file": "docs/skill-sources/licenses/mohitmishra786--low-level-dev-skills.txt"
+    },
+    "mohitmishra786/low-level-dev-skills/memory-model": {
+      "repo": "mohitmishra786/low-level-dev-skills",
+      "path": "skills/low-level-programming/memory-model/SKILL.md",
+      "commit": "bdc58472fa9f309ed1b3f7d985a0d8e9bd8f4608",
+      "sha256": "ba86a8a3f7db7a9fdcb59403b747a189ade6d3f32c6c180731470b7aeaf4dfb1",
+      "url": "https://github.com/mohitmishra786/low-level-dev-skills/blob/bdc58472fa9f309ed1b3f7d985a0d8e9bd8f4608/skills/low-level-programming/memory-model/SKILL.md",
+      "used_by": [
+        "fpeval-concurrency"
+      ],
+      "decision": "adapted",
+      "review": "procedure",
+      "notes": "원문 절차의 적용 범위를 좁히고 C++17/MSVC·로컬 검증·현재 코드 계약으로 조정.",
+      "license_file": "docs/skill-sources/licenses/mohitmishra786--low-level-dev-skills.txt"
+    },
+    "mohitmishra786/low-level-dev-skills/concurrency-debugging": {
+      "repo": "mohitmishra786/low-level-dev-skills",
+      "path": "skills/debuggers/concurrency-debugging/SKILL.md",
+      "commit": "bdc58472fa9f309ed1b3f7d985a0d8e9bd8f4608",
+      "sha256": "aced85c0f11d2e008fc4c5202556d1006341f683535bb7bd623fd0e2a1ec5acb",
+      "url": "https://github.com/mohitmishra786/low-level-dev-skills/blob/bdc58472fa9f309ed1b3f7d985a0d8e9bd8f4608/skills/debuggers/concurrency-debugging/SKILL.md",
+      "used_by": [
+        "fpeval-concurrency"
+      ],
+      "decision": "adapted",
+      "review": "procedure",
+      "notes": "원문 절차의 적용 범위를 좁히고 C++17/MSVC·로컬 검증·현재 코드 계약으로 조정.",
+      "license_file": "docs/skill-sources/licenses/mohitmishra786--low-level-dev-skills.txt"
+    },
+    "mohitmishra786/low-level-dev-skills/abi-and-calling-conventions": {
+      "repo": "mohitmishra786/low-level-dev-skills",
+      "path": "skills/computer-architecture/abi-and-calling-conventions/SKILL.md",
+      "commit": "bdc58472fa9f309ed1b3f7d985a0d8e9bd8f4608",
+      "sha256": "f96270ff08afc5d09c957892c6649d33a461e608854f44f7f4ffc0a4f2b08edd",
+      "url": "https://github.com/mohitmishra786/low-level-dev-skills/blob/bdc58472fa9f309ed1b3f7d985a0d8e9bd8f4608/skills/computer-architecture/abi-and-calling-conventions/SKILL.md",
+      "used_by": [],
+      "decision": "not-installed",
+      "review": "procedure",
+      "notes": "SysV·ARM·RISC-V 설명 중심. Windows ABI는 MSVC 스킬과 Microsoft 공식 문서로 대체.",
+      "license_file": "docs/skill-sources/licenses/mohitmishra786--low-level-dev-skills.txt"
+    },
+    "mohitmishra786/low-level-dev-skills/msvc-cl": {
+      "repo": "mohitmishra786/low-level-dev-skills",
+      "path": "skills/compilers/msvc-cl/SKILL.md",
+      "commit": "bdc58472fa9f309ed1b3f7d985a0d8e9bd8f4608",
+      "sha256": "0bd797888c9fdd03d54fae435a1a5f24aede89d7f8b3b911e40a52a7f909e478",
+      "url": "https://github.com/mohitmishra786/low-level-dev-skills/blob/bdc58472fa9f309ed1b3f7d985a0d8e9bd8f4608/skills/compilers/msvc-cl/SKILL.md",
+      "used_by": [
+        "fpeval-msvc-cmake",
+        "fpeval-dll-abi",
+        "fpeval-release-validation"
+      ],
+      "decision": "adapted",
+      "review": "procedure",
+      "notes": "원문 절차의 적용 범위를 좁히고 C++17/MSVC·로컬 검증·현재 코드 계약으로 조정.",
+      "license_file": "docs/skill-sources/licenses/mohitmishra786--low-level-dev-skills.txt"
+    },
+    "mohitmishra786/low-level-dev-skills/cmake": {
+      "repo": "mohitmishra786/low-level-dev-skills",
+      "path": "skills/build-systems/cmake/SKILL.md",
+      "commit": "bdc58472fa9f309ed1b3f7d985a0d8e9bd8f4608",
+      "sha256": "3dc7ad6d429baf208ae6615036b53957e4ed4490f310ee09060e6b197361aa5d",
+      "url": "https://github.com/mohitmishra786/low-level-dev-skills/blob/bdc58472fa9f309ed1b3f7d985a0d8e9bd8f4608/skills/build-systems/cmake/SKILL.md",
+      "used_by": [
+        "fpeval-msvc-cmake"
+      ],
+      "decision": "adapted",
+      "review": "procedure",
+      "notes": "원문 절차의 적용 범위를 좁히고 C++17/MSVC·로컬 검증·현재 코드 계약으로 조정.",
+      "license_file": "docs/skill-sources/licenses/mohitmishra786--low-level-dev-skills.txt"
+    },
+    "mohitmishra786/low-level-dev-skills/static-analysis": {
+      "repo": "mohitmishra786/low-level-dev-skills",
+      "path": "skills/build-systems/static-analysis/SKILL.md",
+      "commit": "bdc58472fa9f309ed1b3f7d985a0d8e9bd8f4608",
+      "sha256": "6e3deab819f563ff92e9ed3ec1f34df1a3faba1c2db350c2648c3f619a20b9c5",
+      "url": "https://github.com/mohitmishra786/low-level-dev-skills/blob/bdc58472fa9f309ed1b3f7d985a0d8e9bd8f4608/skills/build-systems/static-analysis/SKILL.md",
+      "used_by": [
+        "fpeval-static-analysis"
+      ],
+      "decision": "adapted",
+      "review": "procedure",
+      "notes": "원문 절차의 적용 범위를 좁히고 C++17/MSVC·로컬 검증·현재 코드 계약으로 조정.",
+      "license_file": "docs/skill-sources/licenses/mohitmishra786--low-level-dev-skills.txt"
+    },
+    "mohitmishra786/low-level-dev-skills/dynamic-linking": {
+      "repo": "mohitmishra786/low-level-dev-skills",
+      "path": "skills/binaries/dynamic-linking/SKILL.md",
+      "commit": "bdc58472fa9f309ed1b3f7d985a0d8e9bd8f4608",
+      "sha256": "eb57f022c7a88186f360e3f88931b509c68299367decf80a2d2069368448c0bf",
+      "url": "https://github.com/mohitmishra786/low-level-dev-skills/blob/bdc58472fa9f309ed1b3f7d985a0d8e9bd8f4608/skills/binaries/dynamic-linking/SKILL.md",
+      "used_by": [],
+      "decision": "not-installed",
+      "review": "procedure",
+      "notes": "Linux ELF·RPATH·dlopen 중심이므로 Windows DLL 절차로 채택하지 않음.",
+      "license_file": "docs/skill-sources/licenses/mohitmishra786--low-level-dev-skills.txt"
+    },
+    "obra/superpowers/receiving-code-review": {
+      "repo": "obra/superpowers",
+      "path": "skills/receiving-code-review/SKILL.md",
+      "commit": "22f0b463e7a5e579904dd6211a520321035526f7",
+      "sha256": "091df1629510af1b92fc4abd6f96732ebedb4cb2c0f3457e8f2740b0504a2438",
+      "url": "https://github.com/obra/superpowers/blob/22f0b463e7a5e579904dd6211a520321035526f7/skills/receiving-code-review/SKILL.md",
+      "used_by": [],
+      "decision": "not-installed",
+      "review": "procedure",
+      "notes": "이번 구조에서 별도 스킬로 만들 필요가 낮아 코드 리뷰 절차에 범위를 집중.",
+      "license_file": "docs/skill-sources/licenses/obra--superpowers.txt"
+    },
+    "obra/superpowers/requesting-code-review": {
+      "repo": "obra/superpowers",
+      "path": "skills/requesting-code-review/SKILL.md",
+      "commit": "22f0b463e7a5e579904dd6211a520321035526f7",
+      "sha256": "2180e14a448e9410bec88e6646a2d1f0ce7fdd58de27388c1e052e929679d2bc",
+      "url": "https://github.com/obra/superpowers/blob/22f0b463e7a5e579904dd6211a520321035526f7/skills/requesting-code-review/SKILL.md",
+      "used_by": [],
+      "decision": "not-installed",
+      "review": "procedure",
+      "notes": "자동 subagent 위임과 스킬 간 의존 대신 독립적인 Sentry 리뷰 절차 채택.",
+      "license_file": "docs/skill-sources/licenses/obra--superpowers.txt"
+    },
+    "obra/superpowers/systematic-debugging": {
+      "repo": "obra/superpowers",
+      "path": "skills/systematic-debugging/SKILL.md",
+      "commit": "22f0b463e7a5e579904dd6211a520321035526f7",
+      "sha256": "51c6435d98c83c42c96ba7c35725a0b2c376cd487fb1a4e6bd0ddbe7e33ef202",
+      "url": "https://github.com/obra/superpowers/blob/22f0b463e7a5e579904dd6211a520321035526f7/skills/systematic-debugging/SKILL.md",
+      "used_by": [
+        "fpeval-systematic-debugging",
+        "fpeval-resume-validation"
+      ],
+      "decision": "adapted",
+      "review": "procedure",
+      "notes": "원문 절차의 적용 범위를 좁히고 C++17/MSVC·로컬 검증·현재 코드 계약으로 조정.",
+      "license_file": "docs/skill-sources/licenses/obra--superpowers.txt"
+    },
+    "obra/superpowers/test-driven-development": {
+      "repo": "obra/superpowers",
+      "path": "skills/test-driven-development/SKILL.md",
+      "commit": "22f0b463e7a5e579904dd6211a520321035526f7",
+      "sha256": "64b03fce4aee5a97a93160cea8111f3ba13a17b7c001db4bd5836d67fd10705d",
+      "url": "https://github.com/obra/superpowers/blob/22f0b463e7a5e579904dd6211a520321035526f7/skills/test-driven-development/SKILL.md",
+      "used_by": [
+        "fpeval-property-testing"
+      ],
+      "decision": "adapted",
+      "review": "procedure",
+      "notes": "실패 사례 검증은 채택. 기존 코드 삭제·모든 작업의 의무 TDD·예외 승인 흐름은 제외.",
+      "license_file": "docs/skill-sources/licenses/obra--superpowers.txt"
+    },
+    "obra/superpowers/verification-before-completion": {
+      "repo": "obra/superpowers",
+      "path": "skills/verification-before-completion/SKILL.md",
+      "commit": "22f0b463e7a5e579904dd6211a520321035526f7",
+      "sha256": "2befe7fc55bcadaa3d97dd9e8efeb633d2561c0ebe74c5a8b17c4d9e7e4520b3",
+      "url": "https://github.com/obra/superpowers/blob/22f0b463e7a5e579904dd6211a520321035526f7/skills/verification-before-completion/SKILL.md",
+      "used_by": [
+        "fpeval-resume-validation",
+        "fpeval-release-validation",
+        "fpeval-verification"
+      ],
+      "decision": "adapted",
+      "review": "procedure",
+      "notes": "원문 절차의 적용 범위를 좁히고 C++17/MSVC·로컬 검증·현재 코드 계약으로 조정.",
+      "license_file": "docs/skill-sources/licenses/obra--superpowers.txt"
+    },
+    "trailofbits/skills/address-sanitizer": {
+      "repo": "trailofbits/skills",
+      "path": "plugins/testing-handbook-skills/skills/address-sanitizer/SKILL.md",
+      "commit": "711af095215ad4ecde5b90cd1d0124b3f1c4ca9e",
+      "sha256": "eb9ea8210fa55d50477fbe52993a704e320c88739c10d619864b6ce377ebce25",
+      "url": "https://github.com/trailofbits/skills/blob/711af095215ad4ecde5b90cd1d0124b3f1c4ca9e/plugins/testing-handbook-skills/skills/address-sanitizer/SKILL.md",
+      "used_by": [],
+      "decision": "not-installed",
+      "review": "scope-and-metadata",
+      "notes": "별도 보안 도구 스킬로 설치하지 않음. Windows MSVC 공식 지원 범위와 선택한 sanitizer 절차로 제한.",
+      "license_file": "docs/skill-sources/licenses/trailofbits--skills.txt"
+    },
+    "trailofbits/skills/libfuzzer": {
+      "repo": "trailofbits/skills",
+      "path": "plugins/testing-handbook-skills/skills/libfuzzer/SKILL.md",
+      "commit": "711af095215ad4ecde5b90cd1d0124b3f1c4ca9e",
+      "sha256": "56b2c68b193f7fed4ae00ade6c6395196d44612d140ad51de43d150404dde2eb",
+      "url": "https://github.com/trailofbits/skills/blob/711af095215ad4ecde5b90cd1d0124b3f1c4ca9e/plugins/testing-handbook-skills/skills/libfuzzer/SKILL.md",
+      "used_by": [],
+      "decision": "not-installed",
+      "review": "scope-and-metadata",
+      "notes": "대규모 핸드북·LLVM/Linux 예제 전체 도입 대신 bounded parser-fuzzing 적응본 선택.",
+      "license_file": "docs/skill-sources/licenses/trailofbits--skills.txt"
+    },
+    "trailofbits/skills/property-based-testing": {
+      "repo": "trailofbits/skills",
+      "path": "plugins/property-based-testing/skills/property-based-testing/SKILL.md",
+      "commit": "711af095215ad4ecde5b90cd1d0124b3f1c4ca9e",
+      "sha256": "9448cacb65c6237a7c22dc59602667177ecae405524079ae9ff92240590b995a",
+      "url": "https://github.com/trailofbits/skills/blob/711af095215ad4ecde5b90cd1d0124b3f1c4ca9e/plugins/property-based-testing/skills/property-based-testing/SKILL.md",
+      "used_by": [
+        "fpeval-property-testing",
+        "fpeval-metrics-validation"
+      ],
+      "decision": "adapted",
+      "review": "procedure",
+      "notes": "원문 절차의 적용 범위를 좁히고 C++17/MSVC·로컬 검증·현재 코드 계약으로 조정.",
+      "license_file": "docs/skill-sources/licenses/trailofbits--skills.txt"
+    },
+    "trailofbits/skills/differential-review": {
+      "repo": "trailofbits/skills",
+      "path": "plugins/differential-review/skills/differential-review/SKILL.md",
+      "commit": "711af095215ad4ecde5b90cd1d0124b3f1c4ca9e",
+      "sha256": "f9af6a8193fc1a9f8ca3c54bb8d19095a5f20c9472ca6d014488bbde50b67da0",
+      "url": "https://github.com/trailofbits/skills/blob/711af095215ad4ecde5b90cd1d0124b3f1c4ca9e/plugins/differential-review/skills/differential-review/SKILL.md",
+      "used_by": [],
+      "decision": "not-installed",
+      "review": "procedure",
+      "notes": "보안 감사·강제 보고서·외부 agent 의존이 일반 과제 리뷰에 과함. Sentry 리뷰를 선택.",
+      "license_file": "docs/skill-sources/licenses/trailofbits--skills.txt"
+    },
+    "vercel-labs/agent-desktop/agent-desktop-windows": {
+      "repo": "vercel-labs/agent-desktop",
+      "path": "skills/agent-desktop-windows/SKILL.md",
+      "commit": "6660fbac768dc7e7332837b90ed465684859afa3",
+      "sha256": "6d1ce79a23caf84a5ef75695a4896a1b8bdde7d2b4ff55a655c20118b38e189c",
+      "url": "https://github.com/vercel-labs/agent-desktop/blob/6660fbac768dc7e7332837b90ed465684859afa3/skills/agent-desktop-windows/SKILL.md",
+      "used_by": [
+        "fpeval-mfc-ui"
+      ],
+      "decision": "adapted",
+      "review": "procedure",
+      "notes": "원문 절차의 적용 범위를 좁히고 C++17/MSVC·로컬 검증·현재 코드 계약으로 조정.",
+      "license_file": "docs/skill-sources/licenses/vercel-labs--agent-desktop.txt"
+    }
+  }
+}
