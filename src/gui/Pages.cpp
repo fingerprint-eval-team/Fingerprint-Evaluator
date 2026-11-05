@@ -93,8 +93,11 @@ void CTargetPage::UpdateDllInfo() {
       info = L"파일이 없습니다";
     } else {
       int bits = fpe::peBitness(toW(p));
-      if (bits) info.Format(L"%dbit DLL → FPWorker%d.exe에서 실행", bits, bits);
-      else info = L"Windows DLL이 아닙니다";
+      if (bits) {
+        info.Format(L"%dbit DLL → FPWorker%d.exe에서 실행", bits, bits);
+      } else {
+        info = L"Windows DLL이 아닙니다";
+      }
     }
   }
   SetDlgItemText(IDC_DLL_INFO, info);

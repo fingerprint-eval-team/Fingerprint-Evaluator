@@ -449,8 +449,11 @@ RunOutcome Evaluator::run(const std::wstring& resumeDir) {
   for (auto& j : plan.compareJobs) {
     if (doneIds.count(j.id)) continue;
     Status skip = Status::OK;
-    if (!enrollOk[j.a]) skip = Status::SkipEF;
-    else if (!attemptOk[j.b]) skip = Status::SkipAF;
+    if (!enrollOk[j.a]) {
+      skip = Status::SkipEF;
+    } else if (!attemptOk[j.b]) {
+      skip = Status::SkipAF;
+    }
     if (skip != Status::OK) {  // 템플릿이 없으면 DLL을 호출하지 않고 기록
       MatchRecord rec;
       rec.jobId = j.id;

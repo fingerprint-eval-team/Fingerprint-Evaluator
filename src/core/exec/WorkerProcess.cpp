@@ -27,8 +27,9 @@ bool WorkerProcess::start(std::string& err, DWORD connectTimeoutMs) {
   ResetEvent(ov.hEvent);
   BOOL connected = ConnectNamedPipe(pipe_.get(), &ov);
   DWORD ce = GetLastError();
-  if (connected || ce == ERROR_PIPE_CONNECTED) SetEvent(ov.hEvent);
-  else if (ce != ERROR_IO_PENDING) {
+  if (connected || ce == ERROR_PIPE_CONNECTED) {
+    SetEvent(ov.hEvent);
+  } else if (ce != ERROR_IO_PENDING) {
     err = "ConnectNamedPipe failed";
     return false;
   }

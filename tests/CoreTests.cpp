@@ -18,13 +18,14 @@
 using namespace fpe;
 
 static int g_fail = 0, g_pass = 0;
-#define CHECK(cond)                                                    \
-  do {                                                                 \
-    if (cond) ++g_pass;                                                \
-    else {                                                             \
-      ++g_fail;                                                        \
-      printf("  FAIL %s:%d  %s\n", __FILE__, __LINE__, #cond);         \
-    }                                                                  \
+#define CHECK(cond)                                              \
+  do {                                                           \
+    if (cond) {                                                  \
+      ++g_pass;                                                  \
+    } else {                                                     \
+      ++g_fail;                                                  \
+      printf("  FAIL %s:%d  %s\n", __FILE__, __LINE__, #cond);   \
+    }                                                            \
   } while (0)
 #define NEAR(a, b) CHECK(std::fabs((a) - (b)) < 1e-9)
 

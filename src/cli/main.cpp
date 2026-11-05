@@ -70,17 +70,27 @@ int wmain(int argc, wchar_t** argv) {
         return 2;
       }
       haveCfg = true;
-    } else if (a == L"--dll") cfg.dllPath = next();
-    else if (a == L"--db") cfg.dbPath = next();
-    else if (a == L"--itype") cfg.iType = _wtoi(next().c_str());
-    else if (a == L"--out") cfg.outputDir = next();
-    else if (a == L"--workers") cfg.workers = _wtoi(next().c_str());
-    else if (a == L"--timeout") cfg.timeoutSec = _wtoi(next().c_str());
-    else if (a == L"--seed") cfg.seed = _wcstoui64(next().c_str(), nullptr, 10);
-    else if (a == L"--pairs") cfg.pairsFile = next();
-    else if (a == L"--resume") resumeDir = next();
-    else if (a == L"--report-only") reportDir = next();
-    else {
+    } else if (a == L"--dll") {
+      cfg.dllPath = next();
+    } else if (a == L"--db") {
+      cfg.dbPath = next();
+    } else if (a == L"--itype") {
+      cfg.iType = _wtoi(next().c_str());
+    } else if (a == L"--out") {
+      cfg.outputDir = next();
+    } else if (a == L"--workers") {
+      cfg.workers = _wtoi(next().c_str());
+    } else if (a == L"--timeout") {
+      cfg.timeoutSec = _wtoi(next().c_str());
+    } else if (a == L"--seed") {
+      cfg.seed = _wcstoui64(next().c_str(), nullptr, 10);
+    } else if (a == L"--pairs") {
+      cfg.pairsFile = next();
+    } else if (a == L"--resume") {
+      resumeDir = next();
+    } else if (a == L"--report-only") {
+      reportDir = next();
+    } else {
       usage();
       return 2;
     }

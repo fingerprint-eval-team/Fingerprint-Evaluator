@@ -71,10 +71,11 @@ void Json::dumpTo(std::string& out, int indent, int level) const {
     case Type::Bool: out += b_ ? "true" : "false"; break;
     case Type::Number: {
       char b[64];
-      if (std::floor(n_) == n_ && std::fabs(n_) < 1e15)
-        snprintf(b, sizeof b, "%lld", (long long)n_);
-      else
+      if (std::floor(n_) == n_ && std::fabs(n_) < 1e15) {
+        snprintf(b, sizeof b, "%lld", static_cast<long long>(n_));
+      } else {
         snprintf(b, sizeof b, "%.10g", n_);
+      }
       out += b;
       break;
     }
@@ -140,9 +141,16 @@ struct Parser {
             if (i + 4 > t.size()) return fail("bad \\u");
             unsigned cp = (unsigned)strtoul(t.substr(i, 4).c_str(), nullptr, 16);
             i += 4;
-            if (cp < 0x80) out += (char)cp;
-            else if (cp < 0x800) { out += (char)(0xC0 | (cp >> 6)); out += (char)(0x80 | (cp & 0x3F)); }
-            else { out += (char)(0xE0 | (cp >> 12)); out += (char)(0x80 | ((cp >> 6) & 0x3F)); out += (char)(0x80 | (cp & 0x3F)); }
+            if (cp < 0x80) {
+              out += static_cast<char>(cp);
+            } else if (cp < 0x800) {
+              out += static_cast<char>(0xC0 | (cp >> 6));
+              out += static_cast<char>(0x80 | (cp & 0x3F));
+            } else {
+              out += static_cast<char>(0xE0 | (cp >> 12));
+              out += static_cast<char>(0x80 | ((cp >> 6) & 0x3F));
+              out += static_cast<char>(0x80 | (cp & 0x3F));
+            }
             break;
           }
           default: out += e;
@@ -163,7 +171,10 @@ struct Parser {
       ++i;
       out = Json::object();
       ws();
-      if (i < t.size() && t[i] == '}') { ++i; return true; }
+      if (i < t.size() && t[i] == '}') {
+        ++i;
+        return true;
+      }
       for (;;) {
         ws();
         std::string k;
@@ -175,8 +186,14 @@ struct Parser {
         if (!value(v)) return false;
         out[k] = std::move(v);
         ws();
-        if (i < t.size() && t[i] == ',') { ++i; continue; }
-        if (i < t.size() && t[i] == '}') { ++i; return true; }
+        if (i < t.size() && t[i] == ',') {
+          ++i;
+          continue;
+        }
+        if (i < t.size() && t[i] == '}') {
+          ++i;
+          return true;
+        }
         return fail("expected ',' or '}'");
       }
     }
@@ -184,14 +201,23 @@ struct Parser {
       ++i;
       out = Json::array();
       ws();
-      if (i < t.size() && t[i] == ']') { ++i; return true; }
+      if (i < t.size() && t[i] == ']') {
+        ++i;
+        return true;
+      }
       for (;;) {
         Json v;
         if (!value(v)) return false;
         out.push(std::move(v));
         ws();
-        if (i < t.size() && t[i] == ',') { ++i; continue; }
-        if (i < t.size() && t[i] == ']') { ++i; return true; }
+        if (i < t.size() && t[i] == ',') {
+          ++i;
+          continue;
+        }
+        if (i < t.size() && t[i] == ']') {
+          ++i;
+          return true;
+        }
         return fail("expected ',' or ']'");
       }
     }
@@ -201,9 +227,21 @@ struct Parser {
       out = Json(std::move(s));
       return true;
     }
-    if (t.compare(i, 4, "true") == 0) { i += 4; out = Json(true); return true; }
-    if (t.compare(i, 5, "false") == 0) { i += 5; out = Json(false); return true; }
-    if (t.compare(i, 4, "null") == 0) { i += 4; out = Json(); return true; }
+    if (t.compare(i, 4, "true") == 0) {
+      i += 4;
+      out = Json(true);
+      return true;
+    }
+    if (t.compare(i, 5, "false") == 0) {
+      i += 5;
+      out = Json(false);
+      return true;
+    }
+    if (t.compare(i, 4, "null") == 0) {
+      i += 4;
+      out = Json();
+      return true;
+    }
     char* end = nullptr;
     double d = strtod(t.c_str() + i, &end);
     if (end == t.c_str() + i) return fail("bad value");
