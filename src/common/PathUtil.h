@@ -24,6 +24,12 @@ bool readFile(const std::wstring& p, std::vector<uint8_t>& out);
 bool writeFile(const std::wstring& p, const void* data, size_t size);
 bool writeText(const std::wstring& p, const std::string& utf8);
 
+// FNV-1a 64bit 해시: 동일 이미지 판별, 이어하기 시 DLL·DB 변경 감지에 사용 (보안 목적 아님)
+constexpr uint64_t kFnvOffset = 14695981039346656037ULL;
+uint64_t hashBytes(const void* data, size_t size, uint64_t h = kFnvOffset);
+bool hashFile(const std::wstring& p, uint64_t& out);
+std::string hashHex(uint64_t h);
+
 // PE 헤더 Machine 필드로 DLL bitness 판별: 32, 64, 0(알 수 없음)
 int peBitness(const std::wstring& dllPath);
 

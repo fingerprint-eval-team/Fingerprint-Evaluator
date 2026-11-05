@@ -1,6 +1,7 @@
 #include "plan/Rules.h"
 
 #include <algorithm>
+#include <map>
 #include <set>
 
 #include "PathUtil.h"

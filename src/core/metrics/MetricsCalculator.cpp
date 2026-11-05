@@ -113,6 +113,10 @@ MetricsResult MetricsCalculator::compute(const std::vector<ExtractRecord>& ex, c
   size_t tplN = 0;
   for (const auto& r : ex) {
     if (r.status == Status::Aborted) continue;
+    if (r.status == Status::InternalError) {  // 알고리즘 실패가 아니므로 FTE에 넣지 않음
+      ++m.nInternal;
+      continue;
+    }
     bool ok = r.status == Status::OK;
     if (r.kind == 'E') {
       ++m.nEnroll;
@@ -134,12 +138,16 @@ MetricsResult MetricsCalculator::compute(const std::vector<ExtractRecord>& ex, c
       }
     }
   }
-  m.fte = m.nEnroll ? (double)m.nEF / m.nEnroll : 0;
+  m.fte = m.nEnroll ? (double)m.nEF / m.nEnroll : kNA;
   m.tplMean = tplN ? tplSum / tplN : 0;
 
   std::vector<double> g, i;
   for (const auto& r : mt) {
     if (r.status == Status::Aborted) continue;
+    if (r.status == Status::InternalError) {
+      ++m.nInternal;
+      continue;
+    }
     bool gen = r.type == 'G';
     if (r.status == Status::SkipEF) {
       ++(gen ? m.nGEF : m.nIEF);
@@ -170,8 +178,8 @@ MetricsResult MetricsCalculator::compute(const std::vector<ExtractRecord>& ex, c
   m.iOk = i.size();
   m.nG = plannedG ? plannedG : m.nGEF + m.nGMF + m.gOk;
   m.nI = plannedI ? plannedI : m.nIEF + m.nIMF + m.iOk;
-  m.rejG = m.nGCalled ? (double)m.nGCallFail / m.nGCalled : 0;
-  m.rejI = m.nICalled ? (double)m.nICallFail / m.nICalled : 0;
+  m.rejG = m.nGCalled ? (double)m.nGCallFail / m.nGCalled : kNA;
+  m.rejI = m.nICalled ? (double)m.nICallFail / m.nICalled : kNA;
 
   double nG = (double)m.nG, nI = (double)m.nI, gFail = (double)(m.nGEF + m.nGMF);
   if (!opt.predefinedDenominator) {  // 등록 실패분을 분모·분자에서 제외
@@ -181,31 +189,38 @@ MetricsResult MetricsCalculator::compute(const std::vector<ExtractRecord>& ex, c
   }
   Rates r{g, i, gFail, nG, nI};
   auto cand = candidates(g, i);
-  EerResult e = computeEer(r, cand, opt.fvcEer);
-  m.eer = e.eer;
-  m.eerLow = e.low;
-  m.eerHigh = e.high;
-  m.eerT = e.t;
-  m.eerExact = e.exact;
+  // FMR은 N_I, FNMR은 N_G가 분모이므로 한쪽이라도 0이면 두 곡선을 비교하는 지표는 정의되지 않는다
+  m.ratesDefined = nG > 0 && nI > 0;
+  if (m.ratesDefined) {
+    EerResult e = computeEer(r, cand, opt.fvcEer);
+    m.eer = e.eer;
+    m.eerLow = e.low;
+    m.eerHigh = e.high;
+    m.eerT = e.t;
+    m.eerExact = e.exact;
+
+    m.zeroFMR = lowestFnmrAt(r, cand, 0.0);
+    m.fmr100 = lowestFnmrAt(r, cand, 0.01);
+    m.fmr1000 = lowestFnmrAt(r, cand, 0.001);
+    m.fmr10000 = lowestFnmrAt(r, cand, 0.0001);
+    for (double t : cand) {
+      if (r.fnmr(t) == 0) m.zeroFNMR = isNA(m.zeroFNMR) ? r.fmr(t) : std::min(m.zeroFNMR, r.fmr(t));
+    }
+
+    for (double t : cand) m.det.push_back({t, r.fmr(t), r.fnmr(t)});
+    for (int k = 0; k <= 1000; ++k) {
+      double t = k / 1000.0;
+      m.rates.push_back({t, r.fmr(t), r.fnmr(t)});
+    }
+  }
 
   // EER*: 알고리즘이 OK로 돌려준 점수만 사용 (분모·분자 모두 성공 건 기준)
-  Rates rs{g, i, 0.0, (double)g.size(), (double)i.size()};
-  EerResult es = computeEer(rs, cand, opt.fvcEer);
-  m.eerStar = es.eer;
-  m.eerStarT = es.t;
-
-  m.zeroFMR = lowestFnmrAt(r, cand, 0.0);
-  m.fmr100 = lowestFnmrAt(r, cand, 0.01);
-  m.fmr1000 = lowestFnmrAt(r, cand, 0.001);
-  m.fmr10000 = lowestFnmrAt(r, cand, 0.0001);
-  m.zeroFNMR = -1;
-  for (double t : cand)
-    if (r.fnmr(t) == 0) m.zeroFNMR = m.zeroFNMR < 0 ? r.fmr(t) : std::min(m.zeroFNMR, r.fmr(t));
-
-  for (double t : cand) m.det.push_back({t, r.fmr(t), r.fnmr(t)});
-  for (int k = 0; k <= 1000; ++k) {
-    double t = k / 1000.0;
-    m.rates.push_back({t, r.fmr(t), r.fnmr(t)});
+  m.starDefined = !g.empty() && !i.empty();
+  if (m.starDefined) {
+    Rates rs{g, i, 0.0, (double)g.size(), (double)i.size()};
+    EerResult es = computeEer(rs, cand, opt.fvcEer);
+    m.eerStar = es.eer;
+    m.eerStarT = es.t;
   }
   m.histG = histogram(g);
   m.histI = histogram(i);

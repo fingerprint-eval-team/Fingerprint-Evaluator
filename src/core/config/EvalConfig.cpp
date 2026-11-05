@@ -5,8 +5,14 @@
 namespace fpe {
 
 std::vector<std::string> allReportItems() {
-  return {item::FTE,    item::REJ,  item::EER,  item::EERstar, item::ZeroFMR, item::ZeroFNMR, item::FMR100,
-          item::FMR1000, item::Time, item::Size, item::DET,     item::Dist,    item::Rates,    item::Errors};
+  return {item::FTE,     item::REJ,  item::EER,  item::EERstar, item::ZeroFMR, item::ZeroFNMR, item::FMR100,
+          item::FMR1000, item::Time, item::Size, item::DET,     item::Dist,    item::Rates,    item::Errors,
+          item::FMR10000};
+}
+
+std::set<std::string> defaultReportItems() {
+  auto all = allReportItems();
+  return std::set<std::string>(all.begin(), all.end());
 }
 
 Json EvalConfig::toJson() const {
@@ -17,6 +23,8 @@ Json EvalConfig::toJson() const {
   db["iType"] = iType;
   j["templateDir"] = toUtf8(templateDir);
   j["outputDir"] = toUtf8(outputDir);
+  j["reportDir"] = toUtf8(reportDir);
+  j["logDir"] = toUtf8(logDir);
 
   Json& r = j["rules"];
   r["enroll"] = enrollRule;
@@ -57,6 +65,8 @@ EvalConfig EvalConfig::fromJson(const Json& j) {
   c.iType = j.get("db").get("iType").asInt(1);
   c.templateDir = fromUtf8(j.get("templateDir").asString());
   c.outputDir = fromUtf8(j.get("outputDir").asString());
+  c.reportDir = fromUtf8(j.get("reportDir").asString());
+  c.logDir = fromUtf8(j.get("logDir").asString());
 
   const Json& r = j.get("rules");
   c.enrollRule = r.get("enroll").asString(c.enrollRule);
@@ -88,12 +98,11 @@ EvalConfig EvalConfig::fromJson(const Json& j) {
       if (f.at(i).asString() == "docx") c.docx = true;
     }
   }
-  if (rep.has("items")) {
+  if (rep.has("items")) {  // 키가 있으면 빈 목록도 사용자의 선택으로 존중
+    c.items.clear();
     const Json& it = rep.get("items");
     for (size_t i = 0; i < it.size(); ++i) c.items.insert(it.at(i).asString());
   }
-  if (c.items.empty())
-    for (auto& s : allReportItems()) c.items.insert(s);
   c.eerMethod = rep.get("eerMethod").asString(c.eerMethod);
   c.denominator = rep.get("denominator").asString(c.denominator);
   return c;

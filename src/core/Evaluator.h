@@ -24,7 +24,9 @@ struct RunOutcome {
   bool stopped = false;
   std::string message;
   std::wstring runDir;
-  std::wstring htmlPath, docxPath;
+  std::wstring htmlPath, docxPath;  // 실제로 생성된 리포트만 채운다
+  std::wstring logPath;
+  size_t incompleteJobs = 0;        // 계획 중 아직 결과가 없는 작업 수 (중단된 평가)
   MetricsResult metrics;
 };
 

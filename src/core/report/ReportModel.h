@@ -25,6 +25,7 @@ struct ReportModel {
   std::string title;
   std::vector<std::pair<std::string, std::string>> info;     // 평가 환경
   std::vector<std::pair<std::string, std::string>> summary;  // 요약 지표
+  std::vector<std::string> notes;                            // 요약 아래 참고 문장 (N/A 사유, 미완료 등)
   std::vector<std::vector<std::string>> counts;              // 시도 수 표 (첫 행 = 머리글)
   std::vector<ReportFigure> figures;
   std::vector<ReportError> errors;
