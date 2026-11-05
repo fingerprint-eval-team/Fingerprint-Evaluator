@@ -50,6 +50,12 @@ void copyMsg(Reply& r, const char* src) {
   r.errMsg[255] = '\0';
 }
 
+// 안내서 p29: 점수는 0~1이며 최대 소수점 3째 자리까지 표현한다. 부동소수 오차는 허용한다.
+bool scoreHasValidPrecision(double s) {
+  double scaled = s * 1000.0;
+  return std::fabs(scaled - std::round(scaled)) <= 1e-6;
+}
+
 bool loadToGuarded(const std::wstring& path, std::vector<uint8_t>& tmp, size_t expect, std::string& err) {
   if (!readFile(path, tmp)) {
     err = "cannot read " + toUtf8(path);
@@ -135,8 +141,14 @@ Reply CommandExecutor::extract(bool isEnroll, const ExtractReq& req) {
       return r;
     }
   }
-  if (ret <= 0) {
+  // 안내서 p26·p28: 성공 1, 실패 0만 규격. 그 밖의 값은 출력과 동작이 맞지 않는 것으로 본다.
+  if (ret == 0) {
     r.status = (int)Status::Fail;
+    return r;
+  }
+  if (ret != 1) {
+    r.status = (int)Status::Mismatch;
+    snprintf(r.errMsg, sizeof(r.errMsg), "return value %d (spec: 1 or 0)", ret);
     return r;
   }
   if (size <= 0 || size >= kMaxTemplateSize) {
@@ -182,11 +194,17 @@ Reply CommandExecutor::compare(const CompareReq& req) {
   if (ret == kSehCaught) {
     r.status = (int)Status::Crash;
     r.sehCode = seh;
-  } else if (ret <= 0) {
+  } else if (ret == 0) {
     r.status = (int)Status::Fail;
+  } else if (ret != 1) {
+    r.status = (int)Status::Mismatch;
+    snprintf(r.errMsg, sizeof(r.errMsg), "return value %d (spec: 1 or 0)", ret);
   } else if (std::isnan(score) || score < 0.0 || score > 1.0) {
     r.status = (int)Status::Mismatch;
     snprintf(r.errMsg, sizeof(r.errMsg), "returned 1 but score=%g", score);
+  } else if (!scoreHasValidPrecision(score)) {
+    r.status = (int)Status::Mismatch;
+    snprintf(r.errMsg, sizeof(r.errMsg), "score %.17g has more than 3 decimal places", score);
   }
   return r;
 }

@@ -3,7 +3,7 @@
 //   DUMMY_OK    : K-NBTC 예제 BioApi.cpp와 같은 동작(고정 템플릿, 점수 0.8)
 //   BAD_CRASH   : 일부 입력에서 NULL 접근
 //   BAD_TIMEOUT : 일부 입력에서 무한 루프
-//   BAD_SCORE   : 일부 비교에서 1.5 / -0.1 / NaN 반환
+//   BAD_SCORE   : 일부 비교에서 1.5 / -0.1 / NaN / 소수 넷째 자리 점수 / 반환값 2
 //   BAD_SIZE    : 일부 추출에서 템플릿 크기 0 / 2,000,000 보고, 또는 출력 버퍼 오버런
 //   BAD_RANDOM  : 무작위 점수(EER ≈ 50% 확인용)
 #include <windows.h>
@@ -104,6 +104,14 @@ KISADLL int KISA_Compare(unsigned char* pEnroll, unsigned char* pAttempt, double
     *piErrorCode = 42;
     setMsg(arErrorMessage, "compare refused");
     return 0;
+  }
+  if (h % 11 == 4) {
+    *pdScore = 0.1234;  // 소수 넷째 자리 → 규격 위반
+    return 1;
+  }
+  if (h % 13 == 5) {
+    *pdScore = 0.5;
+    return 2;  // 1·0이 아닌 반환값
   }
 #endif
 #if defined(TESTDLL_BAD_RANDOM) || defined(TESTDLL_BAD_SCORE)
