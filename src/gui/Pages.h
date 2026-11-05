@@ -34,13 +34,15 @@ class CTargetPage : public CPageBase {
   afx_msg void OnBrowseDb();
   afx_msg void OnBrowseTpl();
   afx_msg void OnBrowseOut();
+  afx_msg void OnBrowseReportDir();
+  afx_msg void OnBrowseLogDir();
   afx_msg void OnDllChange();
   afx_msg void OnDbKillFocus();
   DECLARE_MESSAGE_MAP()
 
  private:
   void UpdateDllInfo();
-  CString m_dll, m_db, m_tpl, m_out;
+  CString m_dll, m_db, m_tpl, m_out, m_repDir, m_logDir;
   int m_iType = 1;
 };
 
@@ -86,7 +88,7 @@ class CRunPage : public CPageBase {
 // ---- 탭 4: 리포트 ----
 class CReportPage : public CPageBase {
  public:
-  static constexpr int kItems = 14;
+  static constexpr int kItems = 15;  // allReportItems()와 같은 순서·개수
   CReportPage() : CPageBase(IDD_PAGE_REPORT) {}
   void LoadFrom(const fpe::EvalConfig& c) override;
   bool SaveTo(fpe::EvalConfig& c) override;

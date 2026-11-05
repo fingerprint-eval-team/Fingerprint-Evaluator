@@ -1,8 +1,8 @@
 // FPEvalCli.exe — GUI 없이 같은 평가 엔진(FPEvalCore)을 실행하는 콘솔 도구 (자동 테스트·일괄 평가용)
 //
 // 사용법:
-//   FPEvalCli --config cfg.json [--dll path] [--db dir] [--itype n] [--out dir] [--workers n]
-//             [--timeout sec] [--seed n] [--pairs file]
+//   FPEvalCli --config cfg.json [--dll path] [--db dir] [--itype n] [--out dir] [--report-dir dir]
+//             [--log-dir dir] [--workers n] [--timeout sec] [--seed n] [--pairs file]
 //   FPEvalCli --resume <결과폴더> [--workers n]
 //   FPEvalCli --report-only <결과폴더>
 #include <windows.h>
@@ -47,8 +47,8 @@ BOOL WINAPI onCtrl(DWORD) {
 
 void usage() {
   printf(
-      "FPEvalCli --config cfg.json [--dll p] [--db d] [--itype n] [--out d] [--workers n] [--timeout s] [--seed n] "
-      "[--pairs f]\n"
+      "FPEvalCli --config cfg.json [--dll p] [--db d] [--itype n] [--out d] [--report-dir d] [--log-dir d] "
+      "[--workers n] [--timeout s] [--seed n] [--pairs f]\n"
       "FPEvalCli --resume <run dir> [--workers n]\n"
       "FPEvalCli --report-only <run dir>\n");
 }
@@ -78,6 +78,10 @@ int wmain(int argc, wchar_t** argv) {
       cfg.iType = _wtoi(next().c_str());
     } else if (a == L"--out") {
       cfg.outputDir = next();
+    } else if (a == L"--report-dir") {
+      cfg.reportDir = next();
+    } else if (a == L"--log-dir") {
+      cfg.logDir = next();
     } else if (a == L"--workers") {
       cfg.workers = _wtoi(next().c_str());
     } else if (a == L"--timeout") {
@@ -99,8 +103,6 @@ int wmain(int argc, wchar_t** argv) {
     usage();
     return 2;
   }
-  if (cfg.items.empty())
-    for (auto& s : allReportItems()) cfg.items.insert(s);
 
   ConsoleListener l;
   RunOutcome out;
@@ -117,5 +119,6 @@ int wmain(int argc, wchar_t** argv) {
   if (!out.runDir.empty()) printf("폴더: %s\n", toUtf8(out.runDir).c_str());
   if (!out.htmlPath.empty()) printf("HTML: %s\n", toUtf8(out.htmlPath).c_str());
   if (!out.docxPath.empty()) printf("DOCX: %s\n", toUtf8(out.docxPath).c_str());
+  if (!out.logPath.empty()) printf("LOG:  %s\n", toUtf8(out.logPath).c_str());
   return out.ok ? 0 : (out.stopped ? 3 : 1);
 }

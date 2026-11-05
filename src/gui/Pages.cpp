@@ -44,6 +44,8 @@ BEGIN_MESSAGE_MAP(CTargetPage, CPageBase)
   ON_BN_CLICKED(IDC_DB_BROWSE, &CTargetPage::OnBrowseDb)
   ON_BN_CLICKED(IDC_TPL_BROWSE, &CTargetPage::OnBrowseTpl)
   ON_BN_CLICKED(IDC_OUT_BROWSE, &CTargetPage::OnBrowseOut)
+  ON_BN_CLICKED(IDC_REPDIR_BROWSE, &CTargetPage::OnBrowseReportDir)
+  ON_BN_CLICKED(IDC_LOGDIR_BROWSE, &CTargetPage::OnBrowseLogDir)
   ON_EN_CHANGE(IDC_DLL, &CTargetPage::OnDllChange)
   ON_EN_KILLFOCUS(IDC_DB, &CTargetPage::OnDbKillFocus)
 END_MESSAGE_MAP()
@@ -56,6 +58,8 @@ void CTargetPage::DoDataExchange(CDataExchange* pDX) {
   DDV_MinMaxInt(pDX, m_iType, 0, 1000);
   DDX_Text(pDX, IDC_TPL, m_tpl);
   DDX_Text(pDX, IDC_OUT, m_out);
+  DDX_Text(pDX, IDC_REPDIR, m_repDir);
+  DDX_Text(pDX, IDC_LOGDIR, m_logDir);
 }
 
 void CTargetPage::LoadFrom(const fpe::EvalConfig& c) {
@@ -64,6 +68,8 @@ void CTargetPage::LoadFrom(const fpe::EvalConfig& c) {
   m_iType = c.iType;
   m_tpl = toCS(c.templateDir);
   m_out = toCS(c.outputDir);
+  m_repDir = toCS(c.reportDir);
+  m_logDir = toCS(c.logDir);
   UpdateData(FALSE);
   UpdateDllInfo();
 }
@@ -75,6 +81,8 @@ bool CTargetPage::SaveTo(fpe::EvalConfig& c) {
   c.iType = m_iType;
   c.templateDir = toW(m_tpl);
   c.outputDir = toW(m_out);
+  c.reportDir = toW(m_repDir);
+  c.logDir = toW(m_logDir);
   return true;
 }
 
@@ -127,6 +135,16 @@ void CTargetPage::OnBrowseTpl() {
 void CTargetPage::OnBrowseOut() {
   CString p = BrowseFolder(this);
   if (!p.IsEmpty()) SetDlgItemText(IDC_OUT, p);
+}
+
+void CTargetPage::OnBrowseReportDir() {
+  CString p = BrowseFolder(this);
+  if (!p.IsEmpty()) SetDlgItemText(IDC_REPDIR, p);
+}
+
+void CTargetPage::OnBrowseLogDir() {
+  CString p = BrowseFolder(this);
+  if (!p.IsEmpty()) SetDlgItemText(IDC_LOGDIR, p);
 }
 
 // ============================================================ 탭 2: 시험 규칙
@@ -288,6 +306,11 @@ void CReportPage::LoadFrom(const fpe::EvalConfig& c) {
 
 bool CReportPage::SaveTo(fpe::EvalConfig& c) {
   if (!UpdateData(TRUE)) return false;
+  if (!m_html && !m_docx) {
+    AfxMessageBox(L"리포트 형식(HTML 또는 MS-Word)을 하나 이상 선택하세요.", MB_ICONWARNING);
+    GetDlgItem(IDC_HTML)->SetFocus();
+    return false;
+  }
   auto all = fpe::allReportItems();
   c.items.clear();
   for (int i = 0; i < kItems; ++i)

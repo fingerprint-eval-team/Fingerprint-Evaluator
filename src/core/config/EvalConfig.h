@@ -18,6 +18,7 @@ constexpr const char* ZeroFMR = "ZeroFMR";
 constexpr const char* ZeroFNMR = "ZeroFNMR";
 constexpr const char* FMR100 = "FMR100";
 constexpr const char* FMR1000 = "FMR1000";
+constexpr const char* FMR10000 = "FMR10000";
 constexpr const char* Time = "Time";
 constexpr const char* Size = "Size";
 constexpr const char* DET = "DET";
@@ -26,7 +27,9 @@ constexpr const char* Rates = "FMRFNMR";
 constexpr const char* Errors = "Errors";
 }  // namespace item
 
+// 순서 = GUI 체크박스 순서(IDC_ITEM0 + i). 새 항목은 뒤에 추가한다.
 std::vector<std::string> allReportItems();
+std::set<std::string> defaultReportItems();
 
 struct EvalConfig {
   // 대상
@@ -34,7 +37,9 @@ struct EvalConfig {
   std::wstring dbPath;
   int iType = 1;
   std::wstring templateDir;   // 비우면 결과 폴더/templates
-  std::wstring outputDir;
+  std::wstring outputDir;     // 결과(설정·계획·로그 CSV·캐시) 폴더
+  std::wstring reportDir;     // 비우면 결과 폴더. 지정하면 <reportDir>/<실행 이름>/report.*
+  std::wstring logDir;        // 비우면 결과 폴더. 지정하면 <logDir>/<실행 이름>/eval.log
 
   // 시험 규칙
   std::string enrollRule = "All";        // All | First | Index | RandomPerFinger
@@ -56,7 +61,8 @@ struct EvalConfig {
   // 리포트
   bool html = true;
   bool docx = true;
-  std::set<std::string> items;           // 비어 있으면 allReportItems()로 채움
+  // 기본값은 전체 항목. 설정 파일에 items가 있으면 비어 있어도 그대로 따른다(사용자가 전부 해제한 경우).
+  std::set<std::string> items = defaultReportItems();
   std::string eerMethod = "FVC";         // FVC | Nearest
   std::string denominator = "predefined"; // predefined | attempted
 

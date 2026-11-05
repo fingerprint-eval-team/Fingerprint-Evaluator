@@ -36,28 +36,36 @@ IDD_PAGE_TARGET DIALOGEX 0, 0, 450, 165
 STYLE DS_SETFONT | DS_CONTROL | WS_CHILD
 FONT 9, "맑은 고딕", 400, 0, 0x81
 BEGIN
-    LTEXT           "알고리즘 DLL", IDC_STATIC, 10, 11, 70, 10
-    EDITTEXT        IDC_DLL, 85, 8, 300, 14, ES_AUTOHSCROLL
-    PUSHBUTTON      "찾아보기", IDC_DLL_BROWSE, 390, 8, 50, 14
-    LTEXT           "", IDC_DLL_INFO, 85, 25, 355, 10
+    LTEXT           "알고리즘 DLL", IDC_STATIC, 10, 7, 70, 10
+    EDITTEXT        IDC_DLL, 85, 4, 300, 14, ES_AUTOHSCROLL
+    PUSHBUTTON      "찾아보기", IDC_DLL_BROWSE, 390, 4, 50, 14
+    LTEXT           "", IDC_DLL_INFO, 85, 19, 355, 9
 
-    LTEXT           "테스트 DB 폴더", IDC_STATIC, 10, 45, 70, 10
-    EDITTEXT        IDC_DB, 85, 42, 300, 14, ES_AUTOHSCROLL
-    PUSHBUTTON      "찾아보기", IDC_DB_BROWSE, 390, 42, 50, 14
-    LTEXT           "", IDC_DB_INFO, 85, 59, 355, 10
+    LTEXT           "테스트 DB 폴더", IDC_STATIC, 10, 33, 70, 10
+    EDITTEXT        IDC_DB, 85, 30, 300, 14, ES_AUTOHSCROLL
+    PUSHBUTTON      "찾아보기", IDC_DB_BROWSE, 390, 30, 50, 14
+    LTEXT           "", IDC_DB_INFO, 85, 45, 355, 9
 
-    LTEXT           "iType", IDC_STATIC, 10, 79, 70, 10
-    EDITTEXT        IDC_ITYPE, 85, 76, 30, 14, ES_NUMBER
-    LTEXT           "FVC2000=1, FVC2002=2, FVC2004=2 (FPAlgo는 크기 구분을 위해 FVC2004에 임시로 3)", IDC_STATIC, 122, 79, 318, 10
+    LTEXT           "iType", IDC_STATIC, 10, 59, 70, 10
+    EDITTEXT        IDC_ITYPE, 85, 56, 30, 14, ES_NUMBER
+    LTEXT           "FVC2000=1, FVC2002=2, FVC2004=2 (FPAlgo는 크기 구분을 위해 FVC2004에 임시로 3)", IDC_STATIC, 122, 59, 318, 10
 
-    LTEXT           "템플릿 저장 폴더", IDC_STATIC, 10, 101, 70, 10
-    EDITTEXT        IDC_TPL, 85, 98, 300, 14, ES_AUTOHSCROLL
-    PUSHBUTTON      "찾아보기", IDC_TPL_BROWSE, 390, 98, 50, 14
-    LTEXT           "비워 두면 결과 폴더\\templates 에 저장", IDC_STATIC, 85, 115, 355, 10
+    LTEXT           "템플릿 저장 폴더", IDC_STATIC, 10, 77, 70, 10
+    EDITTEXT        IDC_TPL, 85, 74, 300, 14, ES_AUTOHSCROLL
+    PUSHBUTTON      "찾아보기", IDC_TPL_BROWSE, 390, 74, 50, 14
 
-    LTEXT           "결과 폴더", IDC_STATIC, 10, 135, 70, 10
-    EDITTEXT        IDC_OUT, 85, 132, 300, 14, ES_AUTOHSCROLL
-    PUSHBUTTON      "찾아보기", IDC_OUT_BROWSE, 390, 132, 50, 14
+    LTEXT           "결과 폴더", IDC_STATIC, 10, 95, 70, 10
+    EDITTEXT        IDC_OUT, 85, 92, 300, 14, ES_AUTOHSCROLL
+    PUSHBUTTON      "찾아보기", IDC_OUT_BROWSE, 390, 92, 50, 14
+
+    LTEXT           "리포트 저장 폴더", IDC_STATIC, 10, 113, 70, 10
+    EDITTEXT        IDC_REPDIR, 85, 110, 300, 14, ES_AUTOHSCROLL
+    PUSHBUTTON      "찾아보기", IDC_REPDIR_BROWSE, 390, 110, 50, 14
+
+    LTEXT           "로그 저장 폴더", IDC_STATIC, 10, 131, 70, 10
+    EDITTEXT        IDC_LOGDIR, 85, 128, 300, 14, ES_AUTOHSCROLL
+    PUSHBUTTON      "찾아보기", IDC_LOGDIR_BROWSE, 390, 128, 50, 14
+    LTEXT           "템플릿·리포트·로그 폴더를 비워 두면 결과 폴더 안에 저장합니다 (지정하면 그 폴더\\실행 이름 아래)", IDC_STATIC, 85, 146, 355, 10
 END
 
 /////////////////////////////////////////////////////////////////////////////
@@ -141,15 +149,16 @@ BEGIN
     CONTROL         "그래프: Score Distribution", IDC_ITEM0 + 11, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 265, 73, 170, 10
     CONTROL         "그래프: FMR(t)·FNMR(t)", IDC_ITEM0 + 12, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 85, 86, 170, 10
     CONTROL         "오류 목록", IDC_ITEM0 + 13, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 265, 86, 170, 10
+    CONTROL         "FMR10000", IDC_ITEM0 + 14, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 85, 99, 170, 10
 
-    LTEXT           "형식", IDC_STATIC, 10, 108, 70, 10
-    CONTROL         "HTML", IDC_HTML, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 85, 107, 60, 10
-    CONTROL         "MS-Word (.docx)", IDC_DOCX, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 150, 107, 90, 10
+    LTEXT           "형식", IDC_STATIC, 10, 118, 70, 10
+    CONTROL         "HTML", IDC_HTML, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 85, 117, 60, 10
+    CONTROL         "MS-Word (.docx)", IDC_DOCX, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 150, 117, 90, 10
 
-    LTEXT           "EER 방식", IDC_STATIC, 10, 128, 70, 10
-    COMBOBOX        IDC_EER_METHOD, 85, 125, 100, 60, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "FMR/FNMR 분모", IDC_STATIC, 205, 128, 60, 10
-    COMBOBOX        IDC_DENOM, 268, 125, 100, 60, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "EER 방식", IDC_STATIC, 10, 138, 70, 10
+    COMBOBOX        IDC_EER_METHOD, 85, 135, 100, 60, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "FMR/FNMR 분모", IDC_STATIC, 205, 138, 60, 10
+    COMBOBOX        IDC_DENOM, 268, 135, 100, 60, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
 END
 
 /////////////////////////////////////////////////////////////////////////////

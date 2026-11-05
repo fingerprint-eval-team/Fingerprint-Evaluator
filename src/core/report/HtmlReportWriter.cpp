@@ -34,6 +34,7 @@ bool IReportWriter::write(const ReportModel& m, const std::wstring& path, std::s
     for (auto& kv : m.summary) s.push_back({kv.first, kv.second});
     table(s, true);
   }
+  for (auto& n : m.notes) paragraph("※ " + n);
   if (m.counts.size() > 1) {
     heading(2, "3. 시도 수");
     table(m.counts, true);

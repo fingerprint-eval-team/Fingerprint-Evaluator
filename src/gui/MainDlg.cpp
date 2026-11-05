@@ -71,8 +71,6 @@ BOOL CMainDlg::OnInitDialog() {
     GetSystemInfo(&si);
     c.workers = std::max(1, std::min<int>(4, (int)si.dwNumberOfProcessors));
   }
-  if (c.items.empty())
-    for (auto& s : fpe::allReportItems()) c.items.insert(s);
   ApplyConfig(c);
 
   ShowPage(0);
@@ -160,7 +158,7 @@ void CMainDlg::SetRunning(bool running) {
   for (int id : idle) GetDlgItem(id)->EnableWindow(!running);
   GetDlgItem(IDC_STOP)->EnableWindow(running);
   GetDlgItem(IDC_ABORT)->EnableWindow(running);
-  GetDlgItem(IDC_OPEN_REPORT)->EnableWindow(!running && !m_lastHtml.IsEmpty());
+  GetDlgItem(IDC_OPEN_REPORT)->EnableWindow(!running && !m_lastReport.IsEmpty());
   GetDlgItem(IDC_OPEN_FOLDER)->EnableWindow(!running && !m_lastRunDir.IsEmpty());
   for (auto* p : m_pages) p->EnableWindow(!running);  // 실행 중에는 설정 잠금
 }
@@ -180,7 +178,7 @@ void CMainDlg::StartRun(const std::wstring& resumeDir) {
   if (!GatherConfig(cfg)) return;
   cfg.save(LastConfigPath());
   m_log.ResetContent();
-  m_lastHtml.Empty();
+  m_lastReport.Empty();
   SetRunning(true);
   JoinWorker();
   m_bridge = std::make_unique<CProgressBridge>(m_hWnd);
@@ -241,8 +239,6 @@ void CMainDlg::OnLoadConfig() {
   fpe::EvalConfig c;
   std::string err;
   if (fpe::EvalConfig::load(toW(p), c, err)) {
-    if (c.items.empty())
-      for (auto& s : fpe::allReportItems()) c.items.insert(s);
     ApplyConfig(c);
   } else {
     AfxMessageBox(L"설정 불러오기 실패: " + toCS(err), MB_ICONERROR);
@@ -250,7 +246,7 @@ void CMainDlg::OnLoadConfig() {
 }
 
 void CMainDlg::OnOpenReport() {
-  if (!m_lastHtml.IsEmpty()) ShellExecute(m_hWnd, L"open", m_lastHtml, nullptr, nullptr, SW_SHOWNORMAL);
+  if (!m_lastReport.IsEmpty()) ShellExecute(m_hWnd, L"open", m_lastReport, nullptr, nullptr, SW_SHOWNORMAL);
 }
 
 void CMainDlg::OnOpenFolder() {
@@ -310,15 +306,27 @@ LRESULT CMainDlg::OnDone(WPARAM, LPARAM l) {
   JoinWorker();
   m_eval.reset();
   m_lastRunDir = toCS(o->runDir);
-  m_lastHtml = toCS(o->htmlPath);
+  m_lastReport = toCS(!o->htmlPath.empty() ? o->htmlPath : o->docxPath);
   CString msg = toCS(o->message);
   if (o->ok) {
-    msg.Format(L"완료 — EER %.2f%%, FTE %.2f%%", o->metrics.eer * 100, o->metrics.fte * 100);
+    auto pct = [](double v) {
+      CString s;
+      if (fpe::isNA(v)) {
+        s = L"N/A";
+      } else {
+        s.Format(L"%.2f%%", v * 100);
+      }
+      return s;
+    };
+    msg = toCS(o->message) + L" — EER " + pct(o->metrics.eer) + L", FTE " + pct(o->metrics.fte);
     m_progress.SetPos(1000);
   }
   SetDlgItemText(IDC_STATUS, msg);
   AppendLog(L"■ " + msg);
   if (!o->runDir.empty()) AppendLog(L"결과 폴더: " + m_lastRunDir);
+  if (!o->htmlPath.empty()) AppendLog(L"HTML 리포트: " + toCS(o->htmlPath));
+  if (!o->docxPath.empty()) AppendLog(L"Word 리포트: " + toCS(o->docxPath));
+  if (!o->logPath.empty()) AppendLog(L"로그 파일: " + toCS(o->logPath));
   SetRunning(false);
   return 0;
 }

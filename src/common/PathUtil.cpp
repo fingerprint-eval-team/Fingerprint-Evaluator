@@ -122,6 +122,25 @@ int peBitness(const std::wstring& dllPath) {
   return 0;
 }
 
+uint64_t hashBytes(const void* data, size_t size, uint64_t h) {
+  const auto* p = static_cast<const uint8_t*>(data);
+  for (size_t i = 0; i < size; ++i) h = (h ^ p[i]) * 1099511628211ULL;
+  return h;
+}
+
+bool hashFile(const std::wstring& p, uint64_t& out) {
+  std::vector<uint8_t> buf;
+  if (!readFile(p, buf)) return false;
+  out = hashBytes(buf.data(), buf.size());
+  return true;
+}
+
+std::string hashHex(uint64_t h) {
+  char b[24];
+  snprintf(b, sizeof b, "%016llx", static_cast<unsigned long long>(h));
+  return b;
+}
+
 std::wstring nowStamp() {
   SYSTEMTIME t;
   GetLocalTime(&t);

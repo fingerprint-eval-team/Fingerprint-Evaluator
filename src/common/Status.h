@@ -10,7 +10,7 @@ enum class Status : int32_t {
   Fail = 1,          // DLL이 0 이하 반환
   Timeout = 2,       // 제한 시간 초과 → Worker 강제 종료
   Crash = 3,         // 예외/비정상 종료
-  Mismatch = 4,      // 반환 1인데 크기·점수가 규격 밖
+  Mismatch = 4,      // 반환값이 1·0이 아니거나, 반환 1인데 크기·점수가 규격 밖
   Overflow = 5,      // 출력 버퍼 canary 훼손
   SkipEF = 6,        // 등록 템플릿이 없어 비교하지 않음
   SkipAF = 7,        // 비교용(Attempt) 템플릿이 없어 비교하지 않음
