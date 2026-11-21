@@ -1,0 +1,29 @@
+{
+  "release": "minutiae-v2",
+  "independent_holdout_available": false,
+  "existing_datasets_role": "DEVELOPMENT_EXPOSED",
+  "submitted": false,
+  "certification_status": "NOT_ASSESSED",
+  "parameters": {
+    "max_points": 128,
+    "spatial_side": 8,
+    "orientation_bins": 6,
+    "radius_px_at_500dpi": 80,
+    "cell_step_px_at_500dpi": 20,
+    "position_tolerance_px_at_500dpi": 14,
+    "angle_tolerance_radians": 0.55
+  },
+  "sha256": {
+    "src/minutiae.h": "f58f51b157dbfdc865f51e5406e9aa526b2f91a1dfbc77b9ad7c1d08037a8979",
+    "src/minutiae_algorithm.cpp": "1841680d70b081ce69231ef9436c1b6ae195571155a6c685816cd12d16f95050",
+    "CMakeLists.txt": "fd900c11348af16140add2e075e1594d52502472fc8dfb204c9ae65638cc544e",
+    "build/Release/fingerprint_minutiae.dll": "e832b9458d1c6f15b20c63146e603695cc6fd5c0ef3335419768674fda5775f3",
+    "build/Release/FRFXLL.dll": "f4dea57135358ba876d838243e8fc9e0a948b578b7024352196d16dbcefde2ea",
+    "build-win32/Release/fingerprint_minutiae.dll": "e754f789406e85ffecd8f54514297789b32154bc1a49b1a29534d6319a61d499",
+    "build-win32/Release/FRFXLL.dll": "eb5a0eb676680b2229872c9d904ce37e42c7d264822710cfb61e1448e5422eb7",
+    "third_party/FingerJetFXOSE-source.zip": "e910e872962b29ba14441f005ef367b973929b7ec6d3d01ff3cf26ad3210bfd0"
+  },
+  "build_revision": "formatted-source-and-hardened-engine",
+  "measurement_binary_sha256": "14822c2f51a9f59f066a25b5891d60236ad32cbd8e26b2769e0d7893abe6038f",
+  "numerical_parameters_changed_since_measurement": false
+}
