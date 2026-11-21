@@ -83,8 +83,16 @@ CommandExecutor::~CommandExecutor() {
 }
 
 bool CommandExecutor::load(const std::wstring& dllPath, std::string& err) {
-  // DLL 폴더의 부속 DLL을 찾을 수 있도록 altered search path 사용 (안내서 p31)
-  dll_ = LoadLibraryExW(dllPath.c_str(), nullptr, LOAD_WITH_ALTERED_SEARCH_PATH);
+  // DLL 폴더의 부속 DLL을 찾을 수 있도록 altered search path 사용 (안내서 p31).
+  // 이 플래그는 '/' 구분자나 상대 경로에서는 DLL 폴더를 검색하지 않으므로 '\' 절대 경로로 바꿔 넘긴다.
+  std::wstring fullPath = dllPath;
+  DWORD need = GetFullPathNameW(dllPath.c_str(), 0, nullptr, nullptr);
+  if (need > 0) {
+    std::wstring buf(need, L'\0');
+    DWORD len = GetFullPathNameW(dllPath.c_str(), need, buf.data(), nullptr);
+    if (len > 0 && len < need) fullPath.assign(buf.data(), len);
+  }
+  dll_ = LoadLibraryExW(fullPath.c_str(), nullptr, LOAD_WITH_ALTERED_SEARCH_PATH);
   if (!dll_) {
     err = "LoadLibrary failed (error " + std::to_string(GetLastError()) + ")";
     return false;
