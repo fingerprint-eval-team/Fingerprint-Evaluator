@@ -68,7 +68,7 @@ testdb/
 3. **2. 시험 규칙** 탭: 등록·본인·타인 규칙, seed, (선택) 부분 평가 쌍 파일
 4. **평가 시작** → 완료 후 **리포트 열기**
 
-iType: FVC2000 = 1, FVC2002 = 2, FVC2004 = 3 (FPAlgo의 임시 값, 아래 "알려진 제한" 참고)
+과제 PDF ver1 6쪽의 iType은 FVC2000 = 1, FVC2002 = 2, FVC2004 = 3이다.
 
 콘솔 버전:
 
@@ -83,6 +83,14 @@ bin/FPEvalCli.exe --resume results/<결과 폴더>
 ```bash
 bin/FPEvalCli.exe --report-only results/<결과 폴더>
 ```
+
+라운드별 출력 폴더를 지정해 평가한 후 각 실행의 `summary.csv`를 한 표로 모을 수 있다.
+
+```powershell
+.\tools\Collect-RoundResults.ps1 -RoundFolders @('results\round1', 'results\round2') -OutputPath 'results\rounds.csv'
+```
+
+요약은 EER, 등록·추출·비교의 실패 건수와 분모, 단계별 시간 초과 건수 및 결과 폴더를 기록한다. 시간 초과 건수는 해당 단계의 실패 건수에 포함된다.
 
 GUI 설정(`last_config.json`)과 GUI의 기본 결과 폴더는 **문서\FPEval**에 저장된다.
 
@@ -147,7 +155,7 @@ Inno Setup 6이 필요하다. 사용자 설치 기준:
 |---|---|---|---|
 | FVC2000_DB3_B | 1 | 0% | 12.66% |
 | FVC2002_DB3_B | 2 | 0% | 34.17% |
-| FVC2004_DB1_B | 3 (임시) | 0% | 28.73% |
+| FVC2004_DB1_B | 3 | 0% | 28.73% |
 
 - x86/x64 FPAlgo 결과 동일, Worker 1개와 8개 결과 동일, 강제 종료 후 이어하기 결과 = 한 번에 수행한 결과
 - 시험용 DLL: CRASH, TIMEOUT, MISMATCH, FAIL, OVERFLOW 모두 감지, Bad_Random EER ≈ 49%
@@ -155,7 +163,6 @@ Inno Setup 6이 필요하다. 사용자 설치 기준:
 
 ## 알려진 제한·남은 일
 
-- **iType 2 모호성:** FVC2002(300x300)와 FVC2004(640x480)가 같은 iType 2라 DLL이 크기를 구분할 수 없다. FPAlgo는 임시로 FVC2004에 iType 3을 쓴다 (`src/algo/SensorTable.h`). 확인 후 수정.
 - **알고리즘 성능:** 프로토타입 수준. 매칭 개선과 파라미터 튜닝은 13~14주 작업.
 - **설치 패키지:** 깨끗한 Windows(VM)에서의 설치·실행·제거 확인이 남아 있다.
 - 전체 남은 작업은 [docs/프로젝트_통합문서.html](docs/프로젝트_통합문서.html) 9장 참고.
