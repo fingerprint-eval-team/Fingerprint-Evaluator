@@ -1,10 +1,12 @@
 // FPEvalCore 단위 테스트 (외부 프레임워크 없이 동작하는 최소 테스트 러너)
+#include <algorithm>
 #include <cmath>
 #include <cstdio>
 #include <filesystem>
 #include <functional>
 #include <set>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "PathUtil.h"
@@ -73,6 +75,16 @@ static void testRules() {
   CHECK(iFirstSym.size() == 45);
   auto rnd = RandomSample(std::make_unique<ImpostorAll>(), 100).generate(db, all, r);
   CHECK(rnd.size() == 100);
+
+  EvalConfig c;
+  c.impostorRule = "RandomN";
+  c.impostorN = 1500;
+  c.impostorSymmetric = true;
+  auto sample = RuleFactory::impostor(c)->generate(db, all, r);
+  CHECK(sample.size() == 1500);
+  std::set<std::pair<int, int>> pairs;
+  for (const auto& p : sample) pairs.insert(std::minmax(p.enroll, p.attempt));
+  CHECK(pairs.size() == sample.size());
 
   for (auto* v : {&gAll, &iAll})
     for (auto& p : *v) CHECK(p.enroll != p.attempt);  // 동일 이미지 비교 없음

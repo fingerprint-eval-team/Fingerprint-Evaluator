@@ -111,7 +111,7 @@ td code{white-space:nowrap}
 <tr><th>제약</th><td>C/C++만 사용. 공개 라이브러리는 단위 기능에 한해 허용(출처 명시). 독자 동작 SW 연동 불허</td></tr>
 <tr><th>배점</th><td>평가 SW 70% · 알고리즘 인식 성능 20% · 발표/자료/시연 10% · 팀원 평가 ±</td></tr>
 <tr><th>일정</th><td>12주 진도 보고 · 13주 중간 시연 발표 · 14주 진도 보고 · 15주 최종 발표·시연</td></tr>
-<tr><th>시험 DB</th><td>FVC2000_DB3_B (iType 1, 448×478) · FVC2002_DB3_B (iType 2, 300×300) · FVC2004_DB1_B (iType 2, 640×480) — 각 10손가락 × 8장</td></tr>
+<tr><th>시험 DB</th><td>FVC2000_DB3_B (iType 1, 448×478) · FVC2002_DB3_B (iType 2, 300×300) · FVC2004_DB1_B (iType 3, 640×480) — 각 10손가락 × 8장</td></tr>
 </table></div>
 <h3>평가 프로그램 요구사항과 구현 대응</h3>
 <div class="tbl"><table>
@@ -151,7 +151,7 @@ td code{white-space:nowrap}
 <tr><td>리포트</td><td><span class="pill g">동작 확인</span></td><td>HTML, DOCX(Word에서 열림 확인), SVG/EMF 그래프 3종</td></tr>
 <tr><td>FPAlgo DLL</td><td><span class="pill m">성능 개선 필요</span></td><td>FTE 0%, EER 12.7% / 34.2% / 28.7%. 매칭 개선이 다음 과제</td></tr>
 <tr><td>설치 패키지</td><td><span class="pill g">동작 확인</span></td><td>설치 → 실행 → 평가 → 제거 확인. 설정·결과는 문서\FPEval에 저장. 깨끗한 VM 검증은 남음</td></tr>
-<tr><td>iType 2 문제</td><td><span class="pill r">교수님 답변 대기</span></td><td>FVC2002와 FVC2004가 같은 iType 2 → FPAlgo는 임시로 FVC2004에 3 사용</td></tr>
+<tr><td>과제 iType</td><td><span class="pill g">확인</span></td><td>과제 PDF ver1 6쪽에서 FVC2000·FVC2002·FVC2004에 각각 1·2·3 지정</td></tr>
 </table></div>
 </section>
 
@@ -217,7 +217,7 @@ int KISA_Compare(unsigned char* pEnroll, unsigned char* pAttempt,
 <tr><th>iType</th><th>크기</th><th>출처</th></tr>
 <tr><td class="num">1</td><td class="num">448 × 478</td><td>FVC2000_DB3_B</td></tr>
 <tr><td class="num">2</td><td class="num">300 × 300</td><td>FVC2002_DB3_B</td></tr>
-<tr><td class="num">3</td><td class="num">640 × 480</td><td>FVC2004_DB1_B <span class="pill r">임시</span> (과제 PDF는 2)</td></tr>
+<tr><td class="num">3</td><td class="num">640 × 480</td><td>FVC2004_DB1_B (과제 PDF ver1 6쪽)</td></tr>
 <tr><td class="num">5 / 7 / 8 / 9</td><td class="num">280×320 / 292×525 / 248×292 / 288×320</td><td>K-NBTC 센서 표 3-3</td></tr>
 </table></div>
 <h4>FPAlgo 오류 코드 (<code>piErrorCode</code>)</h4>
@@ -507,7 +507,6 @@ FPEvalCli --report-only &lt;결과 폴더&gt;</code></pre>
 <section id="s8"><h2><span class="n">8</span>제약·알려진 문제</h2>
 <div class="tbl"><table>
 <tr><th>항목</th><th>내용</th><th>영향</th></tr>
-<tr><td>iType 2 모호성</td><td>FVC2002(300×300)와 FVC2004(640×480)가 같은 iType. DLL은 크기를 알 수 없음</td><td>FVC2004를 iType 2로 평가하면 FPAlgo가 300×300으로 잘못 읽음</td></tr>
 <tr><td>입력 형식</td><td>평가 프로그램은 비압축 8-bit TIFF만 읽음</td><td>K-NBTC 실제 DB는 RAW 파일 → 지원 필요</td></tr>
 <tr><td>대규모 DB</td><td>STEP 1 캐시가 단일 스레드, 타인 All은 N² 규모</td><td>7,500장 DB에서 타인 All은 약 5,600만 건 → FirstOne/RandomN 필요</td></tr>
 <tr><td>ETA</td><td>진행률·건수는 표시, 남은 시간은 없음</td><td>F-19 일부</td></tr>
@@ -524,7 +523,7 @@ FPEvalCli --report-only &lt;결과 폴더&gt;</code></pre>
 <h3><span class="n">9.1</span>P0 — 12주 진도 보고 전</h3>
 <div class="tbl"><table>
 <tr><th>#</th><th>할 일</th><th>담당</th><th>완료 기준</th></tr>
-<tr><td class="num">1</td><td>iType 2 문제 교수님 질의, 답변을 <code>SensorTable.h</code>·GUI 안내문에 반영</td><td>전원</td><td>FVC2004를 과제 지정 iType으로 평가 가능</td></tr>
+<tr><td class="num">1</td><td>과제 PDF ver1의 iType 표를 <code>SensorTable.h</code>·GUI 안내문에 반영</td><td>전원</td><td>FVC2004를 iType 3으로 평가</td></tr>
 <tr><td class="num">2</td><td>GitHub 비공개 저장소 생성, 코드 업로드, <code>main/dev/feature</code> 규칙, PR 리뷰 1인 이상</td><td>B</td><td>3명 모두 clone·빌드 성공</td></tr>
 <tr><td class="num">3</td><td>각자 PC에서 <code>build.ps1</code> 빌드 확인 (VS 2022 포함), 빌드 문제 정리</td><td>전원</td><td>3대 모두 CoreTests 통과</td></tr>
 <tr><td class="num">4</td><td>12주 진도 보고 자료: 구조도, 오류 감지 시연(Bad_*), 현재 EER</td><td>C</td><td>발표 자료 초안</td></tr>
