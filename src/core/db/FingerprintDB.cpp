@@ -30,6 +30,11 @@ bool parseName(const std::wstring& file, int& finger, int& index) {
 bool FingerprintDB::scan(const std::wstring& dir, std::string& err) {
   images_.clear();
   warnings_.clear();
+  // 빈 경로는 joinPath 결과가 "*"가 되어 현재 작업 폴더를 스캔하게 되므로 먼저 거른다
+  if (dir.empty()) {
+    err = "테스트 DB 폴더를 지정하세요";
+    return false;
+  }
   WIN32_FIND_DATAW fd;
   HANDLE h = FindFirstFileW(joinPath(dir, L"*").c_str(), &fd);
   if (h == INVALID_HANDLE_VALUE) {
