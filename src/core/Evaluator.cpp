@@ -118,7 +118,10 @@ bool parseJobId(const std::string& s, uint32_t& id) {
 struct PlanSummary {
   bool found = false;
   size_t nG = 0, nI = 0, sameImageRemoved = 0;
-  std::set<uint32_t> jobIds;
+  struct PlannedRow {
+    std::string kind, a, b, type;
+  };
+  std::map<uint32_t, PlannedRow> jobs;
   std::string desc;
 };
 
@@ -133,11 +136,14 @@ PlanSummary readPlanSummary(const std::wstring& path) {
   size_t rp = text.find("# same_image_removed=");
   if (rp != std::string::npos) s.sameImageRemoved = strtoull(text.c_str() + rp + 21, nullptr, 10);
   for (const auto& line : splitLines(text)) {
-    if (line.empty() || line[0] == '#') continue;
+    if (line.empty() || line[0] == '#' || line == "jobId,kind,a,b,type") continue;
     auto f = parseCsvLine(line);
     uint32_t id = 0;
-    if (f.size() < 5 || !parseJobId(f[0], id)) continue;
-    s.jobIds.insert(id);
+    if (f.size() < 5 || !parseJobId(f[0], id) ||
+        !s.jobs.emplace(id, PlanSummary::PlannedRow{f[1], f[2], f[3], f[4]}).second) {
+      s.found = false;
+      return s;
+    }
     if (f[1] == "C") (f[4] == "G" ? s.nG : s.nI)++;
   }
   return s;
@@ -175,22 +181,31 @@ RunOutcome buildReport(const std::wstring& runDir, const EvalConfig& cfg, IProgr
   }
   PlanSummary plan = readPlanSummary(joinPath(runDir, L"plan.csv"));
   if (!plan.found) {
-    out.message = "plan.csv를 읽을 수 없음";
+    out.message = "plan.csv를 읽을 수 없거나 작업 행이 잘못됨";
     l.onLog("[오류] " + out.message);
     return out;
   }
 
   // 계획 대비 결과가 없는 작업: 중단된 평가에서 리포트만 만들면 부분 결과임을 표시한다
   std::set<uint32_t> doneIds;
+  auto mismatch = [&](uint32_t id) {
+    out.message = "계획과 로그의 작업이 일치하지 않음: jobId=" + std::to_string(id);
+    l.onLog("[오류] " + out.message);
+    return out;
+  };
   for (const auto& r : ex) {
+    auto j = plan.jobs.find(r.jobId);
+    if (j == plan.jobs.end() || j->second.kind != std::string(1, r.kind) || j->second.a != r.image ||
+        (r.kind != 'E' && r.kind != 'A')) return mismatch(r.jobId);
     if (isFinal(r.status)) doneIds.insert(r.jobId);
   }
   for (const auto& r : mt) {
+    auto j = plan.jobs.find(r.jobId);
+    if (j == plan.jobs.end() || j->second.kind != "C" || j->second.a != r.enroll ||
+        j->second.b != r.attempt || j->second.type != std::string(1, r.type)) return mismatch(r.jobId);
     if (isFinal(r.status)) doneIds.insert(r.jobId);
   }
-  for (uint32_t id : plan.jobIds) {
-    if (!doneIds.count(id)) ++out.incompleteJobs;
-  }
+  out.incompleteJobs = plan.jobs.size() - doneIds.size();
 
   MetricOptions mo;
   mo.fvcEer = cfg.eerMethod != "Nearest";
@@ -224,10 +239,10 @@ RunOutcome buildReport(const std::wstring& runDir, const EvalConfig& cfg, IProgr
       {"동시 수행 수 / timeout", std::to_string(cfg.workers) + " / " + std::to_string(cfg.timeoutSec) + "초"},
       {"EER 방식 / 분모", cfg.eerMethod + " / " + cfg.denominator},
       {"평가 시작", info.get("startedAt").asString()},
-      {"진행 상태", out.incompleteJobs ? "완료 " + std::to_string(plan.jobIds.size() - out.incompleteJobs) + "건 / 계획 " +
-                                             std::to_string(plan.jobIds.size()) + "건 (미완료 " +
+      {"진행 상태", out.incompleteJobs ? "완료 " + std::to_string(plan.jobs.size() - out.incompleteJobs) + "건 / 계획 " +
+                                             std::to_string(plan.jobs.size()) + "건 (미완료 " +
                                              std::to_string(out.incompleteJobs) + "건) — 중단된 평가의 부분 결과"
-                                       : "완료 (계획 " + std::to_string(plan.jobIds.size()) + "건)"},
+                                       : "완료 (계획 " + std::to_string(plan.jobs.size()) + "건)"},
       {"비교 진행", "genuine " + std::to_string(m.nGDone) + " / " + std::to_string(plan.nG) + "건, impostor " +
                         std::to_string(m.nIDone) + " / " + std::to_string(plan.nI) + "건"},
       {"결과 폴더", toUtf8(runDir)},
@@ -235,8 +250,8 @@ RunOutcome buildReport(const std::wstring& runDir, const EvalConfig& cfg, IProgr
   };
   if (out.incompleteJobs)
     rm.notes.push_back("평가가 끝나지 않은 상태의 리포트입니다 (완료 " +
-                       std::to_string(plan.jobIds.size() - out.incompleteJobs) + "건 / 계획 " +
-                       std::to_string(plan.jobIds.size()) + "건). EER·EER*·ZeroFMR·ZeroFNMR·FMRxxx와 DET·FMR/FNMR "
+                       std::to_string(plan.jobs.size() - out.incompleteJobs) + "건 / 계획 " +
+                       std::to_string(plan.jobs.size()) + "건). EER·EER*·ZeroFMR·ZeroFNMR·FMRxxx와 DET·FMR/FNMR "
                        "그래프는 계획된 시도 수를 분모로 쓰므로 평가가 끝날 때까지 N/A로 둡니다. FTE·REJ·시간·크기와 "
                        "점수 분포는 결과가 있는 작업만으로 계산한 중간 값입니다. 결과 폴더에서 이어하기로 마칠 수 있습니다.");
 
@@ -250,8 +265,8 @@ RunOutcome buildReport(const std::wstring& runDir, const EvalConfig& cfg, IProgr
     return fmtF(t.meanMs, 2) + " ms (최대 " + fmtF(t.maxMs, 1) + " ms, n=" + std::to_string(t.n) + ")";
   };
   const std::string ratesWhy =
-      !m.complete ? "N/A — 평가 미완료 (완료 " + std::to_string(plan.jobIds.size() - out.incompleteJobs) + " / 계획 " +
-                        std::to_string(plan.jobIds.size()) + "건)"
+      !m.complete ? "N/A — 평가 미완료 (완료 " + std::to_string(plan.jobs.size() - out.incompleteJobs) + " / 계획 " +
+                        std::to_string(plan.jobs.size()) + "건)"
                   : "N/A — FMR·FNMR 분모가 0 (N_G=" + std::to_string(m.nG) + ", N_I=" + std::to_string(m.nI) + ")";
   auto rateItem = [&](double v) { return m.ratesDefined ? pctOrNA(v) : ratesWhy; };
   auto ratio = [](size_t a, size_t b) { return " (" + std::to_string(a) + "/" + std::to_string(b) + ")"; };
@@ -267,6 +282,21 @@ RunOutcome buildReport(const std::wstring& runDir, const EvalConfig& cfg, IProgr
   if (cfg.hasItem(item::REJ)) {
     rm.summary.push_back({"REJ genuine", isNA(m.rejG) ? std::string("N/A (genuine 비교 호출 없음)") : fmtPct(m.rejG) + ratio(m.nGCallFail, m.nGCalled)});
     rm.summary.push_back({"REJ impostor", isNA(m.rejI) ? std::string("N/A (impostor 비교 호출 없음)") : fmtPct(m.rejI) + ratio(m.nICallFail, m.nICalled)});
+  }
+  const auto enrollTimeouts = std::count_if(ex.begin(), ex.end(), [](const ExtractRecord& r) {
+    return r.kind == 'E' && r.status == Status::Timeout;
+  });
+  const auto attemptTimeouts = std::count_if(ex.begin(), ex.end(), [](const ExtractRecord& r) {
+    return r.kind == 'A' && r.status == Status::Timeout;
+  });
+  const auto compareTimeouts = std::count_if(mt.begin(), mt.end(), [](const MatchRecord& r) {
+    return r.status == Status::Timeout;
+  });
+  if (cfg.hasItem(item::Errors)) {
+    rm.summary.push_back({"시간 초과 (TIMEOUT)", "등록 " + std::to_string(enrollTimeouts) + "건 · 비교용 추출 " +
+                                                   std::to_string(attemptTimeouts) + "건 · 비교 호출 " +
+                                                   std::to_string(compareTimeouts) + "건"});
+    rm.notes.push_back("시간 초과는 해당 단계의 실패 건수에 포함됩니다. 등록·비교용 추출 실패로 건너뛴 쌍은 비교 호출 수에 포함되지 않습니다.");
   }
   if (cfg.hasItem(item::EER)) {
     rm.summary.push_back({"EER", m.ratesDefined ? fmtPct(m.eer) + (m.eerExact ? " (정확, t=" : " (추정, t=") + fmtF(m.eerT) +
@@ -289,6 +319,7 @@ RunOutcome buildReport(const std::wstring& runDir, const EvalConfig& cfg, IProgr
   if (cfg.hasItem(item::FMR1000)) rm.summary.push_back({"FMR1000", rateItem(m.fmr1000)});
   if (cfg.hasItem(item::FMR10000)) rm.summary.push_back({"FMR10000", rateItem(m.fmr10000)});
   if (cfg.hasItem(item::Time)) {
+    rm.notes.push_back("처리 시간은 성공한 DLL 호출 구간의 평균과 최대입니다.");
     rm.summary.push_back({"Enrollment time", timeStr(m.enrollTime)});
     rm.summary.push_back({"Matching time (전체)", timeStr(m.matchAll)});
     rm.summary.push_back({"Matching time (genuine)", timeStr(m.matchG)});
@@ -387,6 +418,25 @@ RunOutcome buildReport(const std::wstring& runDir, const EvalConfig& cfg, IProgr
       out.docxPath = p;
     } else {
       writeErrors.push_back(err);
+    }
+  }
+  if (writeErrors.empty()) {
+    const std::string header = csvRow({
+        "run_dir", "db_name", "db_path", "db_hash", "dll_name", "dll_hash", "seed", "eer_method", "denominator",
+        "i_type", "report_timeout_sec", "incomplete_jobs", "eer_percent", "enroll_failed", "enroll_attempted",
+        "attempt_failed", "attempt_extracted", "compare_failed", "compare_called", "timeout_enroll",
+        "timeout_attempt", "timeout_compare", "genuine_planned", "impostor_planned", "genuine_done", "impostor_done"});
+    const std::string row = csvRow({
+        toUtf8(runDir), dbName, toUtf8(cfg.dbPath), info.get("dbHash").asString(),
+        info.get("dllName").asString(toUtf8(fileNameOf(cfg.dllPath))), info.get("dllHash").asString(),
+        std::to_string(cfg.seed), cfg.eerMethod, cfg.denominator, std::to_string(cfg.iType),
+        std::to_string(cfg.timeoutSec), std::to_string(out.incompleteJobs), isNA(m.eer) ? "" : fmtF(m.eer * 100, 6),
+        std::to_string(m.nEF), std::to_string(m.nEnroll), std::to_string(m.nAF), std::to_string(m.nAttemptExtract),
+        std::to_string(m.nGCallFail + m.nICallFail), std::to_string(m.nGCalled + m.nICalled),
+        std::to_string(enrollTimeouts), std::to_string(attemptTimeouts), std::to_string(compareTimeouts),
+        std::to_string(plan.nG), std::to_string(plan.nI), std::to_string(m.nGDone), std::to_string(m.nIDone)});
+    if (!writeText(joinPath(runDir, L"summary.csv"), "\xEF\xBB\xBF" + header + row)) {
+      writeErrors.push_back("summary.csv 저장 실패");
     }
   }
   l.onProgress(1, 1, 0);
