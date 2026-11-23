@@ -19,7 +19,7 @@
 | 지문인식 알고리즘 | Windows DLL. K-NBTC 지문인식 성능시험 규격(`KISA_Enroll`, `KISA_Attempt`, `KISA_Compare`) 호환 |
 | 설치 패키지 | 평가 프로그램 배포용 설치 파일 |
 
-- 언어: C/C++ (외부 라이브러리 없음, Windows SDK·MFC만 사용)
+- 언어: C/C++ (평가 프로그램과 FPAlgo는 외부 라이브러리 없음, Windows SDK·MFC만 사용. FPAlgoV1만 FingerJetFX OSE 특징점 추출기 사용, [NOTICE](NOTICE.md))
 - 시험 DB: FVC2000_DB3_B, FVC2002_DB3_B, FVC2004_DB1_B
 - 평가 지표: FTE, FMR/FNMR, EER, EER*, ZeroFMR, ZeroFNMR, FMR100, FMR1000, 처리 시간, 템플릿 크기
 
@@ -31,6 +31,7 @@
 | `bin/FPEvalCli.exe` | 같은 평가 엔진의 콘솔 버전 (자동 테스트·일괄 평가) |
 | `bin/FPWorker32.exe`, `FPWorker64.exe` | 평가 대상 DLL을 실행하는 격리 프로세스 |
 | `bin/plugins/{x86,x64}/FPAlgo.dll` | 우리 팀 지문인식 DLL |
+| `bin/plugins/{x86,x64}/FPAlgoV1.dll` + `FRFXLL.dll` | 지문인식 DLL v1 (구 c_project). 두 파일을 같은 폴더에 둔다. [설명](docs/algorithm-v1/README.md) |
 | `bin/plugins/{x86,x64}/Dummy_OK.dll`, `Bad_*.dll` | 오류 감지 검증·시연용 DLL |
 
 ## 빌드
@@ -118,9 +119,11 @@ src/gui/       MFC GUI: CFPEvalApp, CMainDlg(탭 + 실행 영역), CTargetPage/C
                CProgressBridge(작업 스레드 → PostMessage), FPEval.rc(대화상자 템플릿), 정적 MFC 링크
 src/cli/       콘솔 실행기
 src/algo/      FPAlgo.dll: 정규화 → 방향장·분할 → 국소 정규화 → Gabor → 세선화 → 미뉴셔 → Hough 매칭
+src/algo_v1/   FPAlgoV1.dll: 대비 정규화 → FingerJetFX 특징점 → 8×8×6 기술자 → 그래프 정합 → 겹침 보정 → 방향장 검증
 src/testdlls/  Dummy_OK / Bad_Crash / Bad_Timeout / Bad_Score / Bad_Size / Bad_Random
+third_party/   FingerJetFXOSE (libFRFXLL 원본, LGPL-3.0, FRFXLL.dll로 빌드)
 tests/         CoreTests (규칙 쌍 개수, 재현성, 지표 수식, JSON/CSV/CRC)
-tools/         AlgoDebug (알고리즘 중간 영상 덤프, 제출물 아님)
+tools/         AlgoDebug (알고리즘 중간 영상 덤프), AlgoV1Compare (v1 DLL 단독 호출) — 제출물 아님
 installer/     FPEval.iss (Inno Setup)
 docs/          과제 계획서, 동작 명세, 통합 문서
 ```

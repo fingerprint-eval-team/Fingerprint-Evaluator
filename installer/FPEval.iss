@@ -33,6 +33,11 @@ Source: "..\bin\FPWorker32.exe";  DestDir: "{app}"; Flags: ignoreversion
 Source: "..\bin\plugins\x64\*.dll"; DestDir: "{app}\plugins\x64"; Flags: ignoreversion
 Source: "..\bin\plugins\x86\*.dll"; DestDir: "{app}\plugins\x86"; Flags: ignoreversion
 Source: "..\README.md";           DestDir: "{app}"; Flags: ignoreversion isreadme
+; plugins의 FRFXLL.dll(FingerJetFX OSE, LGPL-3.0) 배포 조건: 고지문과 라이선스 원문 동봉
+Source: "..\NOTICE.md";           DestDir: "{app}"; Flags: ignoreversion
+Source: "..\third_party\FingerJetFXOSE\COPYRIGHT.txt";      DestDir: "{app}\licenses\FingerJetFXOSE"; Flags: ignoreversion
+Source: "..\third_party\FingerJetFXOSE\COPYING.txt";        DestDir: "{app}\licenses\FingerJetFXOSE"; Flags: ignoreversion
+Source: "..\third_party\FingerJetFXOSE\COPYING.LESSER.txt"; DestDir: "{app}\licenses\FingerJetFXOSE"; Flags: ignoreversion
 
 ; 결과 폴더·설정 파일은 프로그램이 처음 실행될 때 실행한 사용자의 문서\FPEval에 직접 만든다.
 ; (설치 프로그램이 만들면 관리자 계정으로 설치할 때 다른 사용자의 문서 폴더에 생길 수 있음)

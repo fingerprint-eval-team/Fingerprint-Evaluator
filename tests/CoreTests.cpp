@@ -305,6 +305,14 @@ static void testJsonCsvZip() {
   CHECK(ZipWriter::crc32((const uint8_t*)s, 9) == 0xCBF43926u);  // CRC-32 표준 검증값
 }
 
+static void testDbEmptyPath() {
+  FingerprintDB db;
+  std::string err;
+  CHECK(!db.scan(L"", err));  // 현재 작업 폴더를 스캔하지 않는다
+  CHECK(err == "테스트 DB 폴더를 지정하세요");
+  CHECK(db.images().empty());
+}
+
 int main() {
   struct T {
     const char* name;
@@ -316,7 +324,8 @@ int main() {
                {"MetricsUndefined", testMetricsUndefined},
                {"PlanLoadAndDuplicates", testPlanLoadAndDuplicates},
                {"ReportItemsConfig", testReportItemsConfig},
-               {"JsonCsvZip", testJsonCsvZip}};
+               {"JsonCsvZip", testJsonCsvZip},
+               {"DbEmptyPath", testDbEmptyPath}};
   for (auto& t : tests) {
     int before = g_fail;
     t.fn();

@@ -1,0 +1,14 @@
+{
+  "base_algorithm": "minutiae-v2",
+  "recognition_parameters_changed": false,
+  "template_version": 2,
+  "normal_scores_verified_against_saved_results": 2360,
+  "failed_records_retained": 10,
+  "source_sha256": {
+    "src/minutiae.h": "dfc445fba8321b48f860fb00a9f893001e647c53be475ba705fb95cf4eabf4b3",
+    "src/inspect.cpp": "6c34845b43ea4b61b6bcd8343b5224105d794ccd3ec843847c08c9417b1964ac",
+    "assets/inspect/index.html": "bf7a544215fcf5348157976778cf94b79e36cf30a7dc4e4e897abb0638afcc33",
+    "assets/inspect/viewer.js": "4ab77856b17a7abb82bf1bdde1495dcbb1d55b53945f629dd5698bbcdcc72427"
+  },
+  "native_gui_button": "connected and built; live click validation pending"
+}
