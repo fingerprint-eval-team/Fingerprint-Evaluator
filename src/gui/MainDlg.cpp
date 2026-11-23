@@ -3,6 +3,7 @@
 #include "MainDlg.h"
 
 #include <algorithm>
+#include <cmath>
 
 #include "plan/EvalPlan.h"
 
@@ -321,6 +322,7 @@ void CMainDlg::OnClose() {
 LRESULT CMainDlg::OnPhase(WPARAM, LPARAM l) {
   std::unique_ptr<std::string> s(reinterpret_cast<std::string*>(l));
   m_phase = toCS(*s);
+  m_phaseStarted = std::chrono::steady_clock::now();
   SetDlgItemText(IDC_STATUS, m_phase);
   AppendLog(L"── " + m_phase);
   m_progress.SetPos(0);
@@ -332,6 +334,14 @@ LRESULT CMainDlg::OnProgress(WPARAM, LPARAM l) {
   m_progress.SetPos(p->total ? (int)(p->done * 1000 / p->total) : 1000);
   CString s;
   s.Format(L"%s  |  %zu / %zu  (실패 %zu)", m_phase.GetString(), p->done, p->total, p->failures);
+  const std::chrono::duration<double> elapsed = std::chrono::steady_clock::now() - m_phaseStarted;
+  if (p->done > 0 && p->done < p->total && elapsed.count() >= 1.0) {
+    const double seconds = std::ceil(elapsed.count() * static_cast<double>(p->total - p->done) /
+                                     static_cast<double>(p->done));
+    CString eta;
+    eta.Format(L"  |  단계 남은 시간 약 %.0f초", seconds);
+    s += eta;
+  }
   SetDlgItemText(IDC_STATUS, s);
   return 0;
 }

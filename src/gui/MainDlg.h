@@ -1,6 +1,7 @@
 #pragma once
 #include "pch.h"
 
+#include <chrono>
 #include <memory>
 #include <thread>
 
@@ -65,5 +66,6 @@ class CMainDlg : public CDialogEx {
   std::unique_ptr<fpe::Evaluator> m_eval;
   std::thread m_worker;
   bool m_running = false;
+  std::chrono::steady_clock::time_point m_phaseStarted;
   CString m_phase, m_lastRunDir, m_lastReport;  // m_lastReport: 생성된 리포트(HTML 우선, 없으면 Word)
 };
