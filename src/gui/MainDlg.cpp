@@ -33,6 +33,36 @@ void CMainDlg::DoDataExchange(CDataExchange* pDX) {
   DDX_Control(pDX, IDC_LOG, m_log);
 }
 
+namespace {
+// 기본 테스트 DB: exe 옆 또는 상위(개발 빌드의 bin\..)의 testdb\FVC* 중 이름순 첫 폴더. 없으면 빈 문자열.
+std::wstring findDefaultDb() {
+  const std::wstring roots[] = {fpe::joinPath(fpe::exeDir(), L"testdb"),
+                                fpe::joinPath(fpe::dirOf(fpe::exeDir()), L"testdb")};
+  for (const auto& root : roots) {
+    std::vector<std::wstring> dirs;
+    WIN32_FIND_DATAW fd;
+    HANDLE h = FindFirstFileW(fpe::joinPath(root, L"FVC*").c_str(), &fd);
+    if (h == INVALID_HANDLE_VALUE) continue;
+    do {
+      if (fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) dirs.push_back(fpe::joinPath(root, fd.cFileName));
+    } while (FindNextFileW(h, &fd));
+    FindClose(h);
+    std::sort(dirs.begin(), dirs.end());
+    if (!dirs.empty()) return dirs.front();
+  }
+  return L"";
+}
+
+// DB 폴더 이름으로 iType 추정 (과제 자료 p6, 대상 탭 안내와 같음: FVC2000=1, FVC2002=2, FVC2004=3)
+int guessIType(const std::wstring& dbPath, int fallback) {
+  std::wstring name = fpe::fileNameOf(dbPath);
+  if (name.find(L"FVC2000") != std::wstring::npos) return 1;
+  if (name.find(L"FVC2002") != std::wstring::npos) return 2;
+  if (name.find(L"FVC2004") != std::wstring::npos) return 3;
+  return fallback;
+}
+}  // namespace
+
 // 설정 파일은 문서\FPEval에 둔다 (설치판의 Program Files는 쓰기 불가)
 std::wstring CMainDlg::LastConfigPath() const { return fpe::joinPath(fpe::userDataDir(), L"last_config.json"); }
 
@@ -66,10 +96,21 @@ BOOL CMainDlg::OnInitDialog() {
     // 첫 실행: 기본값. 결과 폴더는 쓰기 가능한 문서\FPEval\results
     std::wstring algo = fpe::joinPath(fpe::exeDir(), L"plugins\\x64\\FPAlgo.dll");
     if (fpe::fileExists(algo)) c.dllPath = algo;
-    c.outputDir = fpe::joinPath(fpe::userDataDir(), L"results");
+    // 저장 폴더는 모두 쓰기 가능한 문서\FPEval 아래에 둔다
+    const std::wstring data = fpe::userDataDir();
+    c.outputDir = fpe::joinPath(data, L"results");
+    c.templateDir = fpe::joinPath(data, L"templates");
+    c.reportDir = fpe::joinPath(data, L"reports");
+    c.logDir = fpe::joinPath(data, L"logs");
+    c.dbPath = findDefaultDb();
+    c.iType = guessIType(c.dbPath, c.iType);
     SYSTEM_INFO si;
     GetSystemInfo(&si);
     c.workers = std::max(1, std::min<int>(4, (int)si.dwNumberOfProcessors));
+  } else if (c.dbPath.empty()) {
+    // 저장된 설정에 DB 폴더가 없으면(빈 값은 평가할 수 없음) 기본 DB로 채운다
+    c.dbPath = findDefaultDb();
+    c.iType = guessIType(c.dbPath, c.iType);
   }
   ApplyConfig(c);
 

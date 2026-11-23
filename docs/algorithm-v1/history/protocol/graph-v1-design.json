@@ -1,0 +1,12 @@
+{
+  "algorithm": "graph-consensus-v1",
+  "role": "development candidate; baseline remains unchanged",
+  "parameters_frozen_before_first_real_db_run": true,
+  "distance_sigma_px_at_500dpi": 4.0,
+  "relative_distance_sigma": 0.05,
+  "relative_orientation_sigma_radians": 0.35,
+  "relative_bearing_sigma_radians": 0.35,
+  "rule": "weight each proposed correspondence by mean pairwise distance/direction/bearing consistency; rescore every rigid hypothesis",
+  "database_specific_thresholds": false,
+  "independent_validation_completed": false
+}

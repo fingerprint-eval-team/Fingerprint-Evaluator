@@ -1,0 +1,23 @@
+{
+  "version": "algorithm-v1-20261114",
+  "template_bytes": 551512,
+  "files": {
+    "bin/win32/fingerprint_algorithm.dll": "43d44080978ff7b06e06e33053a0da107683fd1a0ef128ff521f0d5357a642a5",
+    "bin/win32/FRFXLL.dll": "f94ba36c00efc1713b7756059a3d944ef248ddcb304c21c426d22462cd2cfd23",
+    "bin/x64/fingerprint_algorithm.dll": "08f0b792562dab0849cc8556506c9e6b0342422d0a9f281becaad330b6418bc0",
+    "bin/x64/FRFXLL.dll": "6b720c290d98123a79f41b2f65c204f569444cb56153c9ef7deb599dc313fa1b",
+    "src/api.h": "d67ccc16cd1a43b1c605f8c70af9bf3a2e94b78f90bd0a236cddcc3d787739f0",
+    "src/minutiae.h": "dfc445fba8321b48f860fb00a9f893001e647c53be475ba705fb95cf4eabf4b3",
+    "src/minutiae_algorithm.cpp": "3c704d47af3cfad4c21c8c2040a120aaa4359c062a00fa4dec2c9bf0146298a8",
+    "src/minutiae_graph.h": "22972391c5f96e887bef4532ced4e9795fd6c38e95bb60894dafc4f447a93e51",
+    "src/minutiae_orientation.h": "5317581620d82e792c4ac5ea0a952a179ffe4b227969c18406a354fdfb5277a4",
+    "src/minutiae_overlap.h": "8c0d04612b4ec648b66360740348cab6f89f0d155e156f2f23c4123c57061d30",
+    "src/photometric.h": "5d6cd97136a1020fbe5422aaac4c66e14a9dd33115858e4ae290810a852361ab",
+    "bin/x64/fingerprint_algorithm_eval.dll": "3de01f298ca4d6cf556d5ff1cc890cd6f8f70a90420921bff4cebbbc02c4a6c5",
+    "bin/win32/fingerprint_algorithm_eval.dll": "16816bf7585fb2ee412276a250cd642d000790691c2e7f7cc02edc54de4f0efa"
+  },
+  "evaluation_variant": {
+    "score_decimals": 3,
+    "source": "same selected core; FP_THREE_DECIMAL_SCORE enabled"
+  }
+}

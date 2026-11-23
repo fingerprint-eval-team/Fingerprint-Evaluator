@@ -48,7 +48,7 @@ BEGIN
 
     LTEXT           "iType", IDC_STATIC, 10, 59, 70, 10
     EDITTEXT        IDC_ITYPE, 85, 56, 30, 14, ES_NUMBER
-    LTEXT           "FVC2000=1, FVC2002=2, FVC2004=2 (FPAlgo는 크기 구분을 위해 FVC2004에 임시로 3)", IDC_STATIC, 122, 59, 318, 10
+    LTEXT           "FVC2000=1, FVC2002=2, FVC2004=3 (과제 자료 기준)", IDC_STATIC, 122, 59, 318, 10
 
     LTEXT           "템플릿 저장 폴더", IDC_STATIC, 10, 77, 70, 10
     EDITTEXT        IDC_TPL, 85, 74, 300, 14, ES_AUTOHSCROLL

@@ -53,6 +53,24 @@ add_library(FPAlgo SHARED
 target_include_directories(FPAlgo PRIVATE src/algo)
 fp_output(FPAlgo ${FP_BIN}/plugins/${FP_ARCH})
 
+# ---------- 지문인식 DLL v1 (구 c_project/algorithm-v1) ----------
+# 특징점 추출은 FingerJetFX OSE(LGPL-3.0)를 별도 교체 가능한 FRFXLL.dll로 빌드해 사용한다.
+# 정합(기술자·그래프·겹침 보정·방향장 검증)은 src/algo_v1 코드다. NOTICE.md 참고.
+set(FRFX_ROOT ${CMAKE_SOURCE_DIR}/third_party/FingerJetFXOSE/libFRFXLL)
+file(GLOB FRFX_SOURCES CONFIGURE_DEPENDS "${FRFX_ROOT}/src/lib/*.cpp")
+add_library(FRFXLL SHARED ${FRFX_SOURCES})
+target_include_directories(FRFXLL PUBLIC "${FRFX_ROOT}/include" PRIVATE "${FRFX_ROOT}/src/algorithm")
+# 외부 원본 코드: 경고 끄고 표준 엄격 모드(/permissive-) 해제
+target_compile_options(FRFXLL PRIVATE /W0 /permissive)
+target_compile_definitions(FRFXLL PRIVATE _SILENCE_NONFLOATING_COMPLEX_DEPRECATION_WARNING)
+fp_output(FRFXLL ${FP_BIN}/plugins/${FP_ARCH})
+
+# 평가 프로그램 규격(점수 소수점 3자리)에 맞춘 평가용 빌드만 플러그인으로 낸다.
+add_library(FPAlgoV1 SHARED src/algo_v1/minutiae_algorithm.cpp)
+target_compile_definitions(FPAlgoV1 PRIVATE FP_ORIENTATION_TEMPLATE FP_CONTRAST_NORMALIZATION FP_THREE_DECIMAL_SCORE)
+target_link_libraries(FPAlgoV1 PRIVATE FRFXLL)
+fp_output(FPAlgoV1 ${FP_BIN}/plugins/${FP_ARCH})
+
 # ---------- 시험용 DLL ----------
 foreach(kind Dummy_OK Bad_Crash Bad_Timeout Bad_Score Bad_Size Bad_Random)
   add_library(${kind} SHARED src/testdlls/TestDll.cpp src/testdlls/TestDll.def)
@@ -97,6 +115,10 @@ if(FP_BITS EQUAL 64)
   target_include_directories(AlgoDebug PRIVATE src/algo)
   target_link_libraries(AlgoDebug PRIVATE FPEvalCore)
   fp_output(AlgoDebug ${CMAKE_BINARY_DIR}/tools)
+
+  # v1 DLL 단독 호출 예제: AlgoV1Compare <dll> <iType> enroll.raw attempt.raw (제출물 아님)
+  add_executable(AlgoV1Compare tools/AlgoV1Compare.cpp)
+  fp_output(AlgoV1Compare ${CMAKE_BINARY_DIR}/tools)
 
   add_executable(CoreTests tests/CoreTests.cpp)
   target_link_libraries(CoreTests PRIVATE FPEvalCore)
