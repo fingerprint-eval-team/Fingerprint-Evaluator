@@ -50,12 +50,6 @@ void copyMsg(Reply& r, const char* src) {
   r.errMsg[255] = '\0';
 }
 
-// 안내서 p29: 점수는 0~1이며 최대 소수점 3째 자리까지 표현한다. 부동소수 오차는 허용한다.
-bool scoreHasValidPrecision(double s) {
-  double scaled = s * 1000.0;
-  return std::fabs(scaled - std::round(scaled)) <= 1e-6;
-}
-
 bool loadToGuarded(const std::wstring& path, std::vector<uint8_t>& tmp, size_t expect, std::string& err) {
   if (!readFile(path, tmp)) {
     err = "cannot read " + toUtf8(path);
@@ -210,9 +204,15 @@ Reply CommandExecutor::compare(const CompareReq& req) {
   } else if (std::isnan(score) || score < 0.0 || score > 1.0) {
     r.status = (int)Status::Mismatch;
     snprintf(r.errMsg, sizeof(r.errMsg), "returned 1 but score=%g", score);
-  } else if (!scoreHasValidPrecision(score)) {
-    r.status = (int)Status::Mismatch;
-    snprintf(r.errMsg, sizeof(r.errMsg), "score %.17g has more than 3 decimal places", score);
+  } else {
+    const double rounded = std::round(score * 1000.0) / 1000.0;
+    // 제공 예제 DLL은 float로 표현한 점수를 double로 전달한다.
+    if (std::fabs(score - rounded) <= 1e-9 || score == static_cast<double>(static_cast<float>(rounded))) {
+      r.score = rounded;
+    } else {
+      r.status = (int)Status::Mismatch;
+      snprintf(r.errMsg, sizeof(r.errMsg), "score %.17g has more than 3 decimal places", score);
+    }
   }
   return r;
 }
