@@ -22,11 +22,15 @@ struct OrientationField {
 
 OrientationField computeOrientation(const ImageF& norm);
 
-// 블록별 x-signature로 융선 간격(px)을 추정, 전체 중앙값 반환 (실패 시 9)
-float estimateRidgePeriod(const ImageF& norm, const OrientationField& of);
+// 블록별 융선 간격(px) 맵: 융선 수직 방향 신호의 스펙트럼 최대 주기.
+// 추정 실패 블록은 주변 값으로 채우고 평활화한다. 전체 실패 시 모든 블록 9.
+std::vector<float> estimateRidgePeriodMap(const ImageF& norm, const OrientationField& of);
 
-// Gabor 필터로 융선 강조 후 이진화 (1 = 융선)
-ImageU8 enhanceAndBinarize(const ImageF& norm, const OrientationField& of, float period);
+// 간격 맵의 전경 중앙값 (진단용)
+float medianPeriod(const std::vector<float>& periodMap, const OrientationField& of);
+
+// 블록별 방향·간격에 맞춘 Gabor 필터로 융선 강조 후 이진화 (1 = 융선)
+ImageU8 enhanceAndBinarize(const ImageF& norm, const OrientationField& of, const std::vector<float>& periodMap);
 
 // Zhang-Suen 세선화 (in-place, 1 = 골격)
 void thin(ImageU8& bin);
