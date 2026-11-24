@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- FPEval 고DPI 설정: 모니터별 DPI(Per-Monitor V2)를 직접 처리해 125%/150% 배율에서도 글자가 번지지 않게 한다.
+     공용 컨트롤 v6 의존성은 FPEvalApp.cpp의 #pragma로 넣고, 링커가 이 파일과 합친다. -->
+<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
+  <application xmlns="urn:schemas-microsoft-com:asm.v3">
+    <windowsSettings>
+      <dpiAware xmlns="http://schemas.microsoft.com/SMI/2005/WindowsSettings">true/pm</dpiAware>
+      <dpiAwareness xmlns="http://schemas.microsoft.com/SMI/2016/WindowsSettings">PerMonitorV2, PerMonitor</dpiAwareness>
+    </windowsSettings>
+  </application>
+</assembly>

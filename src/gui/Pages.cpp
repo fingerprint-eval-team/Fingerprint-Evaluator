@@ -5,6 +5,8 @@
 #include <algorithm>
 #include <vector>
 
+#include "Theme.h"
+
 namespace {
 
 // 콤보 상자 항목 ↔ 설정 값
@@ -27,13 +29,102 @@ void fillCombo(CWnd* page, int id, const std::vector<std::string>& v) {
   for (auto& s : v) cb->AddString(toCS(s));
 }
 
+std::wstring pathField(const CWnd* page, int id) {
+  CString text;
+  page->GetDlgItemText(id, text);
+  return toW(text);
+}
+
+std::wstring fileFieldFolder(const CWnd* page, int id) {
+  const auto path = pathField(page, id);
+  if (path.empty()) return {};
+  const auto folder = std::filesystem::path(path).parent_path();
+  return folder.empty() ? L"." : folder.native();
+}
+
+std::wstring testDbBrowseRoot() {
+  const auto exe = fpe::exeDir();
+  const auto installed = fpe::joinPath(exe, L"testdb");
+  if (fpe::dirExists(installed)) return installed;
+  const auto development = fpe::joinPath(fpe::dirOf(exe), L"testdb");
+  return fpe::dirExists(development) ? development : fpe::userDataDir();
+}
+
+bool selectFolder(CWnd* page, int id, const std::wstring& fallback) {
+  const CString selected = BrowseFolder(page, browseStartFolder(pathField(page, id), fallback));
+  if (selected.IsEmpty()) return false;
+  page->SetDlgItemText(id, selected);
+  return true;
+}
+
 }  // namespace
 
 // ============================================================ 공통
 
 BOOL CPageBase::OnInitDialog() {
   CDialogEx::OnInitDialog();
-  EnableThemeDialogTexture(m_hWnd, ETDT_ENABLETAB);  // 탭 컨트롤 배경과 같은 테마 배경
+  SetBackgroundColor(theme::kPanel);  // 흰 패널 (라벨·체크박스·그룹 상자도 같은 배경으로 그린다)
+  CAccentButton::SubclassPushButtons(this, theme::kPanel, m_buttons);
+  CFlatCombo::SubclassCombos(this, theme::kPanel, m_combos);
+  CFlatEdit::SubclassEdits(this, theme::kPanel, m_edits);
+  return TRUE;
+}
+
+BOOL CPageBase::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* result) {
+  const auto* notice = reinterpret_cast<const NMHDR*>(lParam);
+  if (!notice || notice->code != NM_CUSTOMDRAW) return CDialogEx::OnNotify(wParam, lParam, result);
+  const HWND hwnd = notice->hwndFrom;
+  wchar_t windowClass[16]{};
+  GetClassNameW(hwnd, windowClass, _countof(windowClass));
+  const auto style = GetWindowLongPtrW(hwnd, GWL_STYLE);
+  if (_wcsicmp(windowClass, L"Button") != 0 || (style & BS_TYPEMASK) != BS_AUTOCHECKBOX)
+    return CDialogEx::OnNotify(wParam, lParam, result);
+
+  const auto* draw = reinterpret_cast<const NMCUSTOMDRAW*>(notice);
+  HIGHCONTRASTW contrast{sizeof contrast};
+  if (draw->dwDrawStage != CDDS_PREPAINT ||
+      (SystemParametersInfoW(SPI_GETHIGHCONTRAST, sizeof contrast, &contrast, 0) && (contrast.dwFlags & HCF_HIGHCONTRASTON)))
+    return CDialogEx::OnNotify(wParam, lParam, result);
+
+  CDC* dc = CDC::FromHandle(draw->hdc);
+  const int saved = dc->SaveDC();
+  const auto px = [dpi = static_cast<int>(GetDpiForWindow(hwnd))](int size) { return MulDiv(size, dpi, 96); };
+  const CRect row(draw->rc);
+  const int size = std::min(px(14), row.Height() - 2);
+  const int top = row.top + (row.Height() - size) / 2;
+  const CRect box(row.left, top, row.left + size, top + size);
+  const bool checked = ::SendMessageW(hwnd, BM_GETCHECK, 0, 0) == BST_CHECKED;
+  const bool enabled = ::IsWindowEnabled(hwnd) != FALSE;
+  const COLORREF fill = checked ? (enabled ? theme::kAccent : theme::kTextDisabled) : theme::kPanel;
+  const COLORREF border = checked ? fill : (enabled ? theme::kTextSecondary : theme::kBorder);
+  dc->FillSolidRect(row, theme::kPanel);
+  theme::FillRoundRect(dc, box, px(5), fill, border);
+  if (checked) {
+    CPen pen(PS_SOLID, px(2), theme::kOnAccent);
+    CPen* previous = dc->SelectObject(&pen);
+    const CPoint check[] = {{box.left + px(3), box.top + px(7)}, {box.left + px(6), box.top + px(10)},
+                            {box.left + px(11), box.top + px(4)}};
+    dc->Polyline(check, _countof(check));
+    dc->SelectObject(previous);
+  }
+  CString label;
+  CWnd* button = CWnd::FromHandle(hwnd);
+  button->GetWindowText(label);
+  if (CFont* font = button->GetFont()) dc->SelectObject(font);
+  dc->SetBkMode(TRANSPARENT);
+  dc->SetTextColor(enabled ? theme::kText : theme::kTextDisabled);
+  const auto uiState = ::SendMessageW(hwnd, WM_QUERYUISTATE, 0, 0);
+  const UINT flags = DT_SINGLELINE | DT_VCENTER | ((uiState & UISF_HIDEACCEL) ? DT_HIDEPREFIX : 0);
+  CRect text(box.right + px(6), row.top, row.right, row.bottom);
+  dc->DrawText(label, text, flags | DT_END_ELLIPSIS);
+  if (::GetFocus() == hwnd && !(uiState & UISF_HIDEFOCUS)) {
+    CRect focus(text);
+    dc->DrawText(label, focus, flags | DT_CALCRECT);
+    text.right = std::min(text.right, focus.right + px(1));
+    dc->DrawFocusRect(text);
+  }
+  dc->RestoreDC(saved);
+  *result = CDRF_SKIPDEFAULT;
   return TRUE;
 }
 
@@ -92,19 +183,31 @@ CString CTargetPage::DbPath() const {
   return s;
 }
 
+std::wstring CTargetPage::DllPath() const { return pathField(this, IDC_DLL); }
+
+CString CTargetPage::OutDir() const {
+  CString s;
+  GetDlgItemText(IDC_OUT, s);
+  return s;
+}
+
+std::wstring CTargetPage::ResultsBrowseFolder() const {
+  return browseStartFolder(toW(OutDir()), fpe::joinPath(fpe::userDataDir(), L"results"));
+}
+
 void CTargetPage::UpdateDllInfo() {
   CString p;
   GetDlgItemText(IDC_DLL, p);
   CString info;
   if (!p.IsEmpty()) {
     if (!fpe::fileExists(toW(p))) {
-      info = L"파일이 없습니다";
+      info = L"DLL 파일 없음";
     } else {
       int bits = fpe::peBitness(toW(p));
       if (bits) {
         info.Format(L"%dbit DLL → FPWorker%d.exe에서 실행", bits, bits);
       } else {
-        info = L"Windows DLL이 아닙니다";
+        info = L"지원되는 Windows DLL 형식 확인 필요";
       }
     }
   }
@@ -115,36 +218,30 @@ void CTargetPage::OnDllChange() { UpdateDllInfo(); }
 void CTargetPage::OnDbKillFocus() { NotifyParent(WM_APP_DB_CHANGED); }
 
 void CTargetPage::OnBrowseDll() {
-  CString p = BrowseFile(this, L"DLL (*.dll)|*.dll||");
+  const auto folder = browseStartFolder(fileFieldFolder(this, IDC_DLL), fpe::joinPath(fpe::exeDir(), L"plugins\\x64"));
+  CString p = BrowseFile(this, L"DLL (*.dll)|*.dll||", folder);
   if (!p.IsEmpty()) SetDlgItemText(IDC_DLL, p);
 }
 
 void CTargetPage::OnBrowseDb() {
-  CString p = BrowseFolder(this);
-  if (!p.IsEmpty()) {
-    SetDlgItemText(IDC_DB, p);
-    NotifyParent(WM_APP_DB_CHANGED);
-  }
+  if (selectFolder(this, IDC_DB, testDbBrowseRoot())) NotifyParent(WM_APP_DB_CHANGED);
 }
 
 void CTargetPage::OnBrowseTpl() {
-  CString p = BrowseFolder(this);
-  if (!p.IsEmpty()) SetDlgItemText(IDC_TPL, p);
+  selectFolder(this, IDC_TPL, ResultsBrowseFolder());
 }
 
 void CTargetPage::OnBrowseOut() {
-  CString p = BrowseFolder(this);
-  if (!p.IsEmpty()) SetDlgItemText(IDC_OUT, p);
+  const CString selected = BrowseFolder(this, ResultsBrowseFolder());
+  if (!selected.IsEmpty()) SetDlgItemText(IDC_OUT, selected);
 }
 
 void CTargetPage::OnBrowseReportDir() {
-  CString p = BrowseFolder(this);
-  if (!p.IsEmpty()) SetDlgItemText(IDC_REPDIR, p);
+  selectFolder(this, IDC_REPDIR, ResultsBrowseFolder());
 }
 
 void CTargetPage::OnBrowseLogDir() {
-  CString p = BrowseFolder(this);
-  if (!p.IsEmpty()) SetDlgItemText(IDC_LOGDIR, p);
+  selectFolder(this, IDC_LOGDIR, ResultsBrowseFolder());
 }
 
 // ============================================================ 탭 2: 시험 규칙
@@ -233,7 +330,8 @@ void CRulePage::OnNewSeed() {
 }
 
 void CRulePage::OnBrowsePairs() {
-  CString p = BrowseFile(this, L"CSV (*.csv;*.txt)|*.csv;*.txt||");
+  const auto folder = browseStartFolder(fileFieldFolder(this, IDC_PAIRS), testDbBrowseRoot());
+  CString p = BrowseFile(this, L"CSV (*.csv;*.txt)|*.csv;*.txt||", folder);
   if (!p.IsEmpty()) {
     SetDlgItemText(IDC_PAIRS, p);
     OnRuleChanged();
@@ -266,6 +364,19 @@ void CRunPage::LoadFrom(const fpe::EvalConfig& c) {
   m_timeout = std::clamp(c.timeoutSec, 1, 3600);
   m_anon = c.anonymize;
   UpdateData(FALSE);
+}
+
+void CRunPage::ShowWorkerForDll(const std::wstring& dllPath) {
+  const int bits = dllPath.empty() ? 0 : fpe::peBitness(dllPath);
+  CString name;
+  if (bits == 32 || bits == 64) {
+    name.Format(L"FPWorker%d.exe  ·  %d비트 DLL", bits, bits);
+  } else if (dllPath.empty()) {
+    name = L"평가 대상에서 DLL 선택 후 표시";
+  } else {
+    name = L"DLL 읽기 실패 또는 지원하지 않는 형식";
+  }
+  SetDlgItemText(IDC_WORKER_INFO, name);
 }
 
 bool CRunPage::SaveTo(fpe::EvalConfig& c) {
@@ -307,7 +418,7 @@ void CReportPage::LoadFrom(const fpe::EvalConfig& c) {
 bool CReportPage::SaveTo(fpe::EvalConfig& c) {
   if (!UpdateData(TRUE)) return false;
   if (!m_html && !m_docx) {
-    AfxMessageBox(L"리포트 형식(HTML 또는 MS-Word)을 하나 이상 선택하세요.", MB_ICONWARNING);
+    AfxMessageBox(L"리포트 형식(HTML 또는 Word) 한 가지 이상 선택 필요", MB_ICONWARNING);
     GetDlgItem(IDC_HTML)->SetFocus();
     return false;
   }

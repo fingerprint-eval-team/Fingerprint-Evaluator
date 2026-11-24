@@ -2,6 +2,7 @@
 
 #include "FPEvalApp.h"
 #include "MainDlg.h"
+#include "SplashWnd.h"
 
 #pragma comment(linker, "\"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
@@ -15,6 +16,11 @@ BOOL CFPEvalApp::InitInstance() {
   InitCommonControlsEx(&icc);
   CWinApp::InitInstance();
   AfxOleInit();  // CFolderPickerDialog(IFileDialog)에 필요한 COM 초기화
+
+  {  // 시작 화면: 실행 환경을 점검하는 동안 띄우고, 끝나면 닫은 뒤 메인 창을 연다
+    CSplashWnd splash;
+    splash.Run();
+  }
 
   CMainDlg dlg;
   m_pMainWnd = &dlg;
