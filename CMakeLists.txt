@@ -68,9 +68,11 @@ target_compile_definitions(FRFXLL PRIVATE _SILENCE_NONFLOATING_COMPLEX_DEPRECATI
 fp_output(FRFXLL ${FP_BIN}/plugins/${FP_ARCH})
 
 # 평가 프로그램 규격(점수 소수점 3자리)에 맞춘 평가용 빌드만 플러그인으로 낸다.
-add_library(FPAlgoV1 SHARED src/algo_v1/minutiae_algorithm.cpp)
-target_compile_definitions(FPAlgoV1 PRIVATE FP_ORIENTATION_TEMPLATE FP_CONTRAST_NORMALIZATION FP_THREE_DECIMAL_SCORE)
-target_link_libraries(FPAlgoV1 PRIVATE FRFXLL)
+# FRFXLL.dll은 링크하지 않고 FPAlgoV1.dll과 같은 폴더에서 추출 시점에 LoadLibraryEx로 연다.
+add_library(FPAlgoV1 SHARED src/algo_v1/algorithm.cpp src/algo_v1/algorithm.def)
+target_include_directories(FPAlgoV1 PRIVATE "${FRFX_ROOT}/include")
+target_compile_definitions(FPAlgoV1 PRIVATE FP_THREE_DECIMAL_SCORE NOMINMAX UNICODE _UNICODE)
+add_dependencies(FPAlgoV1 FRFXLL)
 fp_output(FPAlgoV1 ${FP_BIN}/plugins/${FP_ARCH})
 
 # ---------- 시험용 DLL ----------
