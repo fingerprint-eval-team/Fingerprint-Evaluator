@@ -43,7 +43,7 @@ const COLORREF kWarningTint = RGB(254, 243, 226);
 const COLORREF kDanger = RGB(196, 43, 28);
 
 // 시작 화면·홈 화면·정보 창에 같이 쓰는 버전 표시
-const wchar_t* const kAppVersion = L"0.1.0";
+const wchar_t* const kAppVersion = L"0.5.1";
 
 // 대화상자와 같은 한글 글꼴(맑은 고딕)을 DPI에 맞는 크기로 만든다
 inline void CreateUiFont(CFont& font, int points, int weight, UINT dpi) {

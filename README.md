@@ -144,7 +144,7 @@ Inno Setup 6이 필요하다. 사용자 설치 기준:
 "%LOCALAPPDATA%\Programs\Inno Setup 6\ISCC.exe" installer\FPEval.iss
 ```
 
-`dist/FPEval_Setup_0.1.0.exe`가 만들어진다. 관리자 권한이면 Program Files에, 아니면 "현재 사용자만" 설치를 고르면
+`dist/FPEval_Setup_0.5.1.exe`가 만들어진다. 관리자 권한이면 Program Files에, 아니면 "현재 사용자만" 설치를 고르면
 `%LOCALAPPDATA%\Programs`에 설치된다. Inno Setup을 Program Files에 설치했다면 경로를 `C:\Program Files (x86)\Inno Setup 6\ISCC.exe`로 바꾼다.
 
 ## 검증 결과 (v0.1.0 프로토타입, FVC 공개 DB 각 80장)
