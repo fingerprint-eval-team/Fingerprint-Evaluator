@@ -7,7 +7,7 @@
 #include "Theme.h"
 
 namespace {
-const COLORREF kAccentDisabledFace = RGB(224, 212, 235);
+const COLORREF kAccentDisabledFace = RGB(222, 224, 232);  // 중립 회색 (꺼진 핵심 버튼은 보라를 쓰지 않는다)
 }  // namespace
 
 BEGIN_MESSAGE_MAP(CAccentButton, CButton)
@@ -62,7 +62,7 @@ void CAccentButton::DrawItem(LPDRAWITEMSTRUCT dis) {
     border = face;
     text = disabled ? theme::kTextSecondary : theme::kOnAccent;
   } else {
-    face = disabled ? theme::kCard : pressed ? theme::kSelected : m_hover ? theme::kHover : theme::kPanel;
+    face = disabled ? theme::kCard : pressed ? theme::kPressed : m_hover ? theme::kHover : theme::kPanel;
     border = disabled ? theme::kBorder : theme::kControlBorder;
     text = disabled ? theme::kTextDisabled : theme::kText;
   }
