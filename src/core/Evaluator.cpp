@@ -400,7 +400,7 @@ RunOutcome buildReport(const std::wstring& runDir, const EvalConfig& cfg, IProgr
     }
   }
   if (rm.summary.empty() && rm.figures.empty() && !rm.showErrors)
-    l.onLog("[경고] 선택된 리포트 항목이 없어 평가 환경만 기록합니다");
+    l.onLog("[경고] 선택된 리포트 항목 없음 · 평가 환경만 기록");
 
   if (cfg.html) {
     std::wstring p = joinPath(repDir, L"report.html");
@@ -518,7 +518,7 @@ RunOutcome Evaluator::run(const std::wstring& resumeDir) {
     runDir = resumeDir;
     tee.onLog("이어하기: " + toUtf8(runDir));
   }
-  if (!cfg_.html && !cfg_.docx) return fail("리포트 형식(HTML/Word)을 하나 이상 선택하세요");
+  if (!cfg_.html && !cfg_.docx) return fail("리포트 형식(HTML 또는 Word) 한 가지 이상 선택 필요");
   if (!fileExists(cfg_.dllPath)) return fail("DLL 파일이 없음: " + toUtf8(cfg_.dllPath));
   int bits = peBitness(cfg_.dllPath);
   if (!bits) return fail("Windows DLL이 아니거나 지원하지 않는 플랫폼");
@@ -535,7 +535,7 @@ RunOutcome Evaluator::run(const std::wstring& resumeDir) {
   tee.onLog("DB: 이미지 " + std::to_string(db.images().size()) + "장, 손가락 " + std::to_string(db.fingers().size()) + "개");
 
   if (!resume) {
-    if (cfg_.outputDir.empty()) return fail("결과 폴더를 지정하세요");
+    if (cfg_.outputDir.empty()) return fail("결과 폴더 지정 필요");
     // 같은 초에 시작한 평가끼리 폴더가 겹치지 않도록 이미 있으면 _2, _3 … 을 붙인다
     std::wstring base = joinPath(cfg_.outputDir, fileNameOf(cfg_.dbPath) + L"_" + nowStamp());
     runDir = base;

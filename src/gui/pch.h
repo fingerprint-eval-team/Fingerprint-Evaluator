@@ -16,7 +16,9 @@
 
 #include <uxtheme.h>
 
+#include <filesystem>
 #include <string>
+#include <system_error>
 
 #include "PathUtil.h"
 #include "resource.h"
@@ -27,14 +29,37 @@ inline CString toCS(const std::wstring& w) { return CString(w.c_str()); }
 inline std::wstring toW(const CString& s) { return std::wstring(s.GetString()); }
 
 // 파일·폴더 선택 대화상자
-inline CString BrowseFile(CWnd* parent, LPCTSTR filter, BOOL save = FALSE, LPCTSTR defExt = nullptr) {
+inline std::wstring existingBrowseFolder(const std::wstring& path) {
+  if (path.empty()) return {};
+  std::error_code error;
+  auto folder = std::filesystem::absolute(path, error).lexically_normal();
+  if (error) return {};
+  while (!folder.empty()) {
+    if (fpe::dirExists(folder.native())) return folder.native();
+    const auto parent = folder.parent_path();
+    if (parent == folder) break;
+    folder = parent;
+  }
+  return {};
+}
+
+inline std::wstring browseStartFolder(const std::wstring& current, const std::wstring& fallback) {
+  const auto folder = existingBrowseFolder(current);
+  return folder.empty() ? existingBrowseFolder(fallback) : folder;
+}
+
+inline CString BrowseFile(CWnd* parent, LPCTSTR filter, const std::wstring& folder, BOOL save = FALSE,
+                          LPCTSTR defExt = nullptr) {
   CFileDialog dlg(!save, defExt, nullptr,
-                  save ? (OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY) : (OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST), filter,
-                  parent);
+                  OFN_NOCHANGEDIR | (save ? (OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY)
+                                          : (OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST)),
+                  filter, parent);
+  if (!folder.empty()) dlg.GetOFN().lpstrInitialDir = folder.c_str();
   return dlg.DoModal() == IDOK ? dlg.GetPathName() : CString();
 }
 
-inline CString BrowseFolder(CWnd* parent) {
-  CFolderPickerDialog dlg(nullptr, 0, parent);
+inline CString BrowseFolder(CWnd* parent, const std::wstring& folder) {
+  CFolderPickerDialog dlg(nullptr, OFN_NOCHANGEDIR, parent);
+  if (!folder.empty()) dlg.GetOFN().lpstrInitialDir = folder.c_str();
   return dlg.DoModal() == IDOK ? dlg.GetPathName() : CString();
 }

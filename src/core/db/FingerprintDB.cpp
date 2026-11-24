@@ -32,7 +32,7 @@ bool FingerprintDB::scan(const std::wstring& dir, std::string& err) {
   warnings_.clear();
   // 빈 경로는 joinPath 결과가 "*"가 되어 현재 작업 폴더를 스캔하게 되므로 먼저 거른다
   if (dir.empty()) {
-    err = "테스트 DB 폴더를 지정하세요";
+    err = "테스트 DB 폴더 지정 필요";
     return false;
   }
   WIN32_FIND_DATAW fd;

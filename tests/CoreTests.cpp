@@ -321,7 +321,7 @@ static void testDbEmptyPath() {
   FingerprintDB db;
   std::string err;
   CHECK(!db.scan(L"", err));  // 현재 작업 폴더를 스캔하지 않는다
-  CHECK(err == "테스트 DB 폴더를 지정하세요");
+  CHECK(err == "테스트 DB 폴더 지정 필요");
   CHECK(db.images().empty());
 }
 
