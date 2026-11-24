@@ -22,7 +22,53 @@ inline double compatibility(Point a1, Point a2, Point b1, Point b2) {
         -0.5 * (distance * distance + direction * direction + first * first + second * second));
 }
 
-inline double coherentScore(const Feature& a, const Feature& b, Diagnostics& trace) {
+// Per-comparison lazy geometry cache. No global state, labels or thresholds.
+// Each intra-image point relation is computed once, preserving expression order.
+struct PairGeometry {
+    bool ready = false;
+    double distance = 0, first = 0, second = 0;
+    float direction = 0;
+};
+class GeometryCache {
+    const Feature& a_;
+    const Feature& b_;
+    std::vector<PairGeometry> aPairs_, bPairs_;
+    static const PairGeometry& get(const Feature& f, std::vector<PairGeometry>& values, unsigned i,
+                                   unsigned j) {
+        auto& value = values[size_t(i) * f.count + j];
+        if (!value.ready) {
+            auto p = f.points[i], q = f.points[j];
+            double dx = q.x - p.x, dy = q.y - p.y;
+            double bearing = std::atan2(dy, dx);
+            value.distance = std::hypot(dx, dy);
+            value.direction = q.theta - p.theta;
+            value.first = bearing - p.theta;
+            value.second = bearing + pi - q.theta;
+            value.ready = true;
+        }
+        return value;
+    }
+
+  public:
+    GeometryCache(const Feature& a, const Feature& b)
+        : a_(a), b_(b), aPairs_(size_t(a.count) * a.count), bPairs_(size_t(b.count) * b.count) {}
+    double compatibility(const Pair& p, const Pair& q) {
+        const auto& a = get(a_, aPairs_, p.a, q.a);
+        const auto& b = get(b_, bPairs_, p.b, q.b);
+        if (a.distance < 8 || b.distance < 8)
+            return 0;
+        double distance = (a.distance - b.distance) /
+                          (distanceSigma + relativeDistanceSigma * (a.distance + b.distance) / 2);
+        double direction = wrap(a.direction - b.direction) / relativeAngleSigma;
+        double first = wrap(a.first - b.first) / bearingSigma;
+        double second = wrap(a.second - b.second) / bearingSigma;
+        return std::exp(
+            -0.5 * (distance * distance + direction * direction + first * first + second * second));
+    }
+};
+
+inline double coherentScore(const Feature& a, const Feature& b, Diagnostics& trace,
+                            GeometryCache& geometry) {
     if (!trace.hasAlignment || trace.matches.size() < 3)
         return 0;
     auto original = trace.matches;
@@ -34,8 +80,7 @@ inline double coherentScore(const Feature& a, const Feature& b, Diagnostics& tra
             if (i != j) {
                 auto q = original[j];
                 double weight = q.similarity;
-                sum += weight *
-                       compatibility(a.points[p.a], a.points[q.a], b.points[p.b], b.points[q.b]);
+                sum += weight * geometry.compatibility(p, q);
                 weights += weight;
             }
         double coherence = weights > 0 ? sum / weights : 0;
@@ -65,13 +110,14 @@ inline double compareCandidates(const Feature& a, const Feature& b, std::vector<
             return x.similarity > y.similarity;
         return std::tie(x.a, x.b) < std::tie(y.a, y.b);
     });
+    GeometryCache geometry(a, b);
     double best = 0;
     size_t hypotheses = 0;
     auto evaluate = [&](Transform transform) {
         ++hypotheses;
         Diagnostics candidate;
         scoreTransform(a, b, candidates, transform, &candidate);
-        double score = coherentScore(a, b, candidate);
+        double score = coherentScore(a, b, candidate, geometry);
         if (score > 0 && scale) {
             double factor = scale(a, b, candidate);
             if (!std::isfinite(factor) || factor < 1 || factor > 2.000000001)

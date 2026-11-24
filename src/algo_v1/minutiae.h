@@ -18,22 +18,24 @@ struct Point {
     float x = 0, y = 0, theta = 0, quality = 0;
 };
 struct Feature {
-    uint32_t magic = 0x46504d31, version = 2, count = 0, reserved = 0;
+    uint32_t count = 0;
     Point points[maxPoints]{};
-    float descriptors[maxPoints][descriptorSize]{};
+    std::vector<std::array<float, descriptorSize>> descriptors;
 };
-inline uint32_t checksum(const Feature& f) {
-    uint32_t h = 2166136261u;
-    auto bytes = reinterpret_cast<const unsigned char*>(&f);
-    for (size_t i = 0; i < sizeof(f); ++i)
-        if (i < 12 || i >= 16)
-            h = (h ^ bytes[i]) * 16777619u;
-    return h;
-}
 inline double wrap(double x) {
+    // Most angles already lie in this range. For a quotient of 0 or +/-1,
+    // remainder is exactly x or one rounded subtraction of the same period.
+    // Keep all larger values (including tie cases) on the standard path.
+    if (x >= -pi && x <= pi)
+        return x;
+    if (x > pi && x < 2 * pi)
+        return x - 2 * pi;
+    if (x < -pi && x > -2 * pi)
+        return x + 2 * pi;
     return std::remainder(x, 2 * pi);
 }
 inline void describe(Feature& f) {
+    f.descriptors.assign(f.count, {});
     for (unsigned i = 0; i < f.count; ++i) {
         auto p = f.points[i];
         auto& out = f.descriptors[i];
@@ -47,6 +49,11 @@ inline void describe(Feature& f) {
                 double xx = (cs * dx + sn * dy) / step + (side - 1) / 2.0,
                        yy = (-sn * dx + cs * dy) / step + (side - 1) / 2.0,
                        aa = (wrap(q.theta - p.theta) + pi) * angles / (2 * pi);
+                std::array<double, angles> angularWeights{};
+                for (int b = 0; b < angles; ++b) {
+                    double da = std::remainder(b + 0.5 - aa, double(angles));
+                    angularWeights[b] = std::exp(-da * da / 0.72);
+                }
                 for (int y = std::max(0, int(std::floor(yy)) - 1);
                      y <= std::min(side - 1, int(std::floor(yy)) + 2); ++y)
                     for (int x = std::max(0, int(std::floor(xx)) - 1);
@@ -58,9 +65,7 @@ inline void describe(Feature& f) {
                         double spatial =
                             std::exp(-((x - xx) * (x - xx) + (y - yy) * (y - yy)) / 0.72);
                         for (int b = 0; b < angles; ++b) {
-                            double da = std::remainder(b + 0.5 - aa, double(angles));
-                            double angular = std::exp(-da * da / 0.72);
-                            out[(y * side + x) * angles + b] += float(spatial * angular);
+                            out[(y * side + x) * angles + b] += float(spatial * angularWeights[b]);
                         }
                     }
             }
@@ -74,11 +79,9 @@ inline void describe(Feature& f) {
             for (float& v : out)
                 v = float(v / norm);
     }
-    f.reserved = checksum(f);
 }
 inline bool valid(const Feature& f) {
-    if (f.magic != 0x46504d31 || f.version != 2 || f.count < 3 || f.count > maxPoints ||
-        f.reserved != checksum(f))
+    if (f.count < 3 || f.count > maxPoints || f.descriptors.size() != f.count)
         return false;
     for (unsigned i = 0; i < f.count; ++i) {
         auto p = f.points[i];
@@ -115,21 +118,27 @@ inline double scoreTransform(const Feature& a, const Feature& b,
                              const std::vector<Pair>& candidates, Transform transform,
                              Diagnostics* diagnostics = nullptr) {
     std::vector<Pair> matched;
+    matched.reserve(maxPoints);
+    struct Weighted {
+        Pair pair;
+        double value;
+    };
+    std::vector<Weighted> eligible;
+    eligible.reserve(candidates.size());
     for (int iteration = 0; iteration < 3; ++iteration) {
         matched.clear();
         std::array<bool, maxPoints> usedA{}, usedB{};
         double rotation = std::atan2(transform.sn, transform.cs);
-        struct Weighted {
-            Pair pair;
-            double value;
-        };
-        std::vector<Weighted> eligible;
+        eligible.clear();
         for (auto pair : candidates) {
             auto p = a.points[pair.a], q = b.points[pair.b];
             double dx = transform.cs * p.x - transform.sn * p.y + transform.tx - q.x,
                    dy = transform.sn * p.x + transform.cs * p.y + transform.ty - q.y;
-            double distance = dx * dx + dy * dy, da = std::abs(wrap(p.theta + rotation - q.theta));
-            if (distance > positionTolerance * positionTolerance || da > angleTolerance)
+            double distance = dx * dx + dy * dy;
+            if (distance > positionTolerance * positionTolerance)
+                continue;
+            double da = std::abs(wrap(p.theta + rotation - q.theta));
+            if (da > angleTolerance)
                 continue;
             double weight =
                 pair.similarity * (0.5 + 0.5 * std::exp(-distance / 128 - da * da / 0.32));
@@ -184,61 +193,5 @@ inline double scoreTransform(const Feature& a, const Feature& b,
         diagnostics->matches = matched;
     }
     return score;
-}
-inline double compare(const Feature& a, const Feature& b, Diagnostics* diagnostics = nullptr) {
-    if (diagnostics)
-        *diagnostics = Diagnostics{};
-    if (!valid(a) || !valid(b))
-        throw std::runtime_error("Invalid minutiae template");
-    std::vector<Pair> candidates;
-    for (unsigned i = 0; i < a.count; ++i)
-        for (unsigned j = 0; j < b.count; ++j) {
-            double dot = 0;
-            for (int k = 0; k < descriptorSize; ++k)
-                dot += double(a.descriptors[i][k]) * b.descriptors[j][k];
-            if (dot >= 0.2)
-                candidates.push_back({int(i), int(j), std::min(1.0, dot)});
-        }
-    std::sort(candidates.begin(), candidates.end(), [](auto x, auto y) {
-        if (x.similarity != y.similarity)
-            return x.similarity > y.similarity;
-        return std::tie(x.a, x.b) < std::tie(y.a, y.b);
-    });
-    double best = 0;
-    if (diagnostics)
-        diagnostics->candidateCount = candidates.size();
-    size_t seeds = std::min(size_t(64), candidates.size());
-    for (size_t i = 0; i < seeds; ++i) {
-        auto p = candidates[i];
-        if (diagnostics)
-            ++diagnostics->hypotheses;
-        best = std::max(best,
-                        scoreTransform(a, b, candidates,
-                                       rootTransform(a.points[p.a], b.points[p.b]), diagnostics));
-    }
-    // Two-correspondence seeds estimate rotation from positions, independently
-    // of the potentially imprecise individual minutia orientations.
-    for (size_t i = 0; i < std::min(size_t(24), seeds); ++i)
-        for (size_t j = i + 1; j < std::min(size_t(24), seeds); ++j) {
-            auto p = candidates[i], q = candidates[j];
-            if (p.a == q.a || p.b == q.b)
-                continue;
-            auto a1 = a.points[p.a], a2 = a.points[q.a], b1 = b.points[p.b], b2 = b.points[q.b];
-            double ax = a2.x - a1.x, ay = a2.y - a1.y, bx = b2.x - b1.x, by = b2.y - b1.y,
-                   da = std::hypot(ax, ay), db = std::hypot(bx, by);
-            if (da < 25 || std::abs(da - db) > 8 + 0.05 * da)
-                continue;
-            double angle = std::atan2(by, bx) - std::atan2(ay, ax);
-            if (std::abs(wrap(b1.theta - a1.theta - angle)) > angleTolerance)
-                continue;
-            double cs = std::cos(angle), sn = std::sin(angle);
-            if (diagnostics)
-                ++diagnostics->hypotheses;
-            best = std::max(best, scoreTransform(a, b, candidates,
-                                                 {cs, sn, b1.x - cs * a1.x + sn * a1.y,
-                                                  b1.y - sn * a1.x - cs * a1.y},
-                                                 diagnostics));
-        }
-    return best;
 }
 } // namespace minutiae

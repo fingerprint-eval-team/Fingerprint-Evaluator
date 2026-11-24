@@ -11,32 +11,15 @@ struct Cell {
     float c = 0, s = 0; // Coherence-weighted doubled gradient direction.
 };
 struct Template {
-    uint32_t magic = 0x46504f31, version = 1, bytes = 0, checksum = 0;
-    uint32_t cols = 0, rows = 0, width = 0, height = 0, dpi = 0, reserved = 0;
+    uint32_t cols = 0, rows = 0, width = 0, height = 0, dpi = 0;
     minutiae::Feature base;
-    Cell cells[maxSide * maxSide]{};
+    std::vector<Cell> cells;
 };
-static_assert(sizeof(Template) == 551512 && offsetof(Template, base) == 40);
-
-inline uint32_t checksum(const Template& value) {
-    auto p = reinterpret_cast<const unsigned char*>(&value);
-    uint32_t result = 2166136261u;
-    for (size_t i = 0; i < sizeof(value); ++i)
-        if (i < 12 || i >= 16)
-            result = (result ^ p[i]) * 16777619u;
-    return result;
-}
-inline bool header(const unsigned char* bytes) {
-    uint32_t words[3]{};
-    std::memcpy(words, bytes, sizeof(words));
-    return words[0] == 0x46504f31 && words[1] == 1 && words[2] == sizeof(Template);
-}
 inline bool valid(const Template& t) {
-    if (!header(reinterpret_cast<const unsigned char*>(&t)) || t.reserved || t.width < 150 ||
-        t.height < 150 || t.width > 2000 || t.height > 2000 || t.dpi < 300 || t.dpi > 1024 ||
-        t.cols != (t.width * 500 + t.dpi * cellSize - 1) / (t.dpi * cellSize) ||
+    if (t.width < 150 || t.height < 150 || t.width > 2000 || t.height > 2000 || t.dpi < 300 ||
+        t.dpi > 1024 || t.cols != (t.width * 500 + t.dpi * cellSize - 1) / (t.dpi * cellSize) ||
         t.rows != (t.height * 500 + t.dpi * cellSize - 1) / (t.dpi * cellSize) ||
-        t.cols > maxSide || t.rows > maxSide || t.checksum != checksum(t) ||
+        t.cols > maxSide || t.rows > maxSide || t.cells.size() != size_t(t.cols) * t.rows ||
         !minutiae::valid(t.base))
         return false;
     for (size_t i = 0; i < size_t(t.cols) * t.rows; ++i) {
@@ -60,7 +43,7 @@ inline void encode(Template& out, const minutiae::Feature& base, const unsigned 
     if (out.cols > maxSide || out.rows > maxSide)
         throw std::runtime_error("Orientation grid too large");
     out.base = base;
-    std::fill(std::begin(out.cells), std::end(out.cells), Cell{});
+    out.cells.assign(size_t(out.cols) * out.rows, {});
     struct Tensor {
         double xx = 0, yy = 0, xy = 0;
     };
@@ -80,8 +63,6 @@ inline void encode(Template& out, const minutiae::Feature& base, const unsigned 
         out.cells[i] =
             energy > 0 ? Cell{float((t.xx - t.yy) / energy), float(2 * t.xy / energy)} : Cell{};
     }
-    out.bytes = sizeof(out);
-    out.checksum = checksum(out);
 }
 inline bool sample(const Template& field, double x, double y, Cell& result) {
     x = x / cellSize - .5;

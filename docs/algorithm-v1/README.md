@@ -1,20 +1,24 @@
 # 지문인식 알고리즘 v1 (FPAlgoV1)
 
-`c_project` 저장소(github.com/seungbinlee49-alt/c_project, `main` `1d9b868`)의 `algorithm-v1-20261114`를 옮겨 온 것이다. 소스는 [src/algo_v1/](../../src/algo_v1/)에 그대로 두었고, 7개 파일 모두 [manifest.json](manifest.json)의 SHA-256과 같다. 빌드만 이 저장소의 CMake(`/MT` 정적 런타임)로 바꿨다.
+`c_project` 저장소(github.com/seungbinlee49-alt/c_project, `main` `9887cd5`)의 `algorithm-v1/submission`(`v1-submission-20261123`)을 옮겨 온 것이다. `src/` 11개 파일을 [src/algo_v1/](../../src/algo_v1/)에 그대로 두었고 [manifest.json](manifest.json)의 SHA-256과 같다. 빌드만 이 저장소의 CMake(`/MT` 정적 런타임)로 바꿨다.
+
+2026-11-24 이전 판(`1d9b868`, `algorithm-v1-20261114`)에서 바뀐 점: 추출·정합 규칙과 점수는 같고(최대 차이 1e-17 미만), 템플릿을 가변 길이 v2 형식(평균 약 110KB, FNV 체크섬)으로 줄였으며 비교가 약 2.2배 빨라졌다. `FRFXLL.dll`은 링크하지 않고 `FPAlgoV1.dll`과 같은 폴더에서 추출 시점에 연다. iType은 1·2·3만 받는다(이전 판의 5·7·8·9 제거). 오류 코드는 c_project의 [submission README](https://github.com/seungbinlee49-alt/c_project/tree/main/algorithm-v1/submission)를 따른다. 템플릿 형식이 바뀌었으므로 이전 판으로 만든 결과 폴더는 이어하기 하지 않는다.
 
 ## 구성
 
 | 단계 | 위치 |
 |---|---|
-| DLL 진입점 `KISA_Enroll`·`KISA_Attempt`·`KISA_Compare`, iType → 크기 | [minutiae_algorithm.cpp](../../src/algo_v1/minutiae_algorithm.cpp), [api.h](../../src/algo_v1/api.h) |
+| DLL 진입점 `KISA_Enroll`·`KISA_Attempt`·`KISA_Compare`, iType → 크기, 오류 코드 | [algorithm.cpp](../../src/algo_v1/algorithm.cpp), [api.h](../../src/algo_v1/api.h), [errors.h](../../src/algo_v1/errors.h) |
+| FRFXLL.dll 동적 로드 (DLL 자신의 폴더 기준) | [fingerjet_loader.h](../../src/algo_v1/fingerjet_loader.h) |
 | 1/99 백분위 대비 정규화 | [photometric.h](../../src/algo_v1/photometric.h) |
 | 특징점 추출: FingerJetFX OSE (`FRFXLL.dll`, 외부) | [third_party/FingerJetFXOSE/](../../third_party/FingerJetFXOSE/) |
 | 특징점 주변 8×8×6 기술자, 강체 정렬 | [minutiae.h](../../src/algo_v1/minutiae.h) |
 | 거리·방향 관계 일관성 그래프 정합 | [minutiae_graph.h](../../src/algo_v1/minutiae_graph.h) |
 | 볼록껍질 겹침 보정 (최대 2배) | [minutiae_overlap.h](../../src/algo_v1/minutiae_overlap.h) |
-| 원 영상 방향장 검증, 템플릿 형식 | [minutiae_orientation.h](../../src/algo_v1/minutiae_orientation.h) |
+| 원 영상 방향장 검증 | [minutiae_orientation.h](../../src/algo_v1/minutiae_orientation.h) |
+| 템플릿 v2 직렬화·체크섬 | [template_codec.h](../../src/algo_v1/template_codec.h) |
 
-빌드 정의는 `FP_ORIENTATION_TEMPLATE FP_CONTRAST_NORMALIZATION FP_THREE_DECIMAL_SCORE`다. 평가 프로그램의 소수점 3자리 검사에 맞춘 평가용 빌드(원래 `fingerprint_algorithm_eval.dll`)만 플러그인으로 낸다. `minutiae_algorithm.cpp`의 나머지 `#ifdef` 분기(Bozorth, 단독 graph 등)는 이 빌드에서 쓰지 않는다.
+빌드 정의는 `FP_THREE_DECIMAL_SCORE`다. 평가 프로그램의 소수점 3자리 검사에 맞춘 평가용 빌드(c_project의 `fingerprint_algorithm_eval.dll`)만 플러그인으로 낸다.
 
 ## 빌드와 실행
 
@@ -26,10 +30,10 @@ bin/FPEvalCli.exe --config testdb/base.json --dll bin/plugins/x64/FPAlgoV1.dll -
 
 단독 호출 예제: `build/x64/tools/AlgoV1Compare.exe <dll> <iType> enroll.raw attempt.raw` (헤더 없는 8비트 RAW).
 
-- 템플릿: 551,512바이트 (한도 1,000,000바이트 미만)
+- 템플릿: 가변 길이 v2 (c_project 측정 평균 109,946 / 최대 208,296바이트, 한도 1,000,000바이트 미만)
 - 템플릿 형식이 FPAlgo(FPT1)와 다르므로 두 DLL의 결과 폴더를 섞어 이어하기 하지 않는다.
 
-## 이 저장소 평가기 결과 (2026-11-21)
+## 이 저장소 평가기 결과 (2026-11-21, 2026-11-24 새 판으로 재실행해 같은 값 확인)
 
 `FPEvalCli`, `testdb/base.json`(등록 All, 본인 Symmetric 280쌍, 타인 FirstOne 대칭 제거 45쌍), seed 20261104, workers 4, timeout 10초.
 
@@ -37,7 +41,7 @@ bin/FPEvalCli.exe --config testdb/base.json --dll bin/plugins/x64/FPAlgoV1.dll -
 |---|---:|---:|---:|---:|
 | FVC2000_DB3_B (1) | 2.90% | 3.57% | 0% | 9.09% |
 | FVC2002_DB3_B (2) | 0.00% | 0.00% | 0% | 3.25% |
-| FVC2004_DB1_B (3, 임시) | 4.33% | 7.14% | 0% | 7.80% |
+| FVC2004_DB1_B (3) | 4.33% | 7.14% | 0% | 7.80% |
 
 - x86 FVC2002 결과도 x64와 같았다. 네 실행 모두 325개 작업이 OK이고 실패는 0이었다.
 - 타인 쌍이 DB당 45개뿐이라 해상도가 낮다. FMR100과 FMR1000이 같은 값으로 나온다.
