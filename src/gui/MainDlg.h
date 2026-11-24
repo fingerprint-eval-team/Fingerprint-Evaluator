@@ -34,7 +34,7 @@ class CMainDlg : public CDialogEx {
   afx_msg LRESULT OnNav(WPARAM page, LPARAM);
   afx_msg LRESULT OnNavToggle(WPARAM, LPARAM);
   afx_msg LRESULT OnNavHome(WPARAM, LPARAM);
-  afx_msg LRESULT OnHomeCmd(WPARAM cmd, LPARAM);
+  afx_msg LRESULT OnHomeCmd(WPARAM cmd, LPARAM arg);
   afx_msg void OnStart();
   afx_msg void OnStop();
   afx_msg void OnAbort();

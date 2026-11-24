@@ -7,6 +7,16 @@
 
 #include "Pages.h"
 
+// 홈 화면의 "최근 실행" 한 줄. 결과 폴더의 run_info.json·summary.csv에서 읽는다.
+struct RecentRun {
+  std::wstring path, htmlPath;
+  CString date, dll, db, eer;  // date는 "YYYY-MM-DD hh:mm:ss", eer는 "2.41" (없으면 빈 문자열)
+  bool complete = false;       // summary.csv의 incomplete_jobs가 0
+  bool hasSummary = false;     // summary.csv가 있다 (없으면 중단되었거나 아직 진행 중)
+};
+// roots 바로 아래 실행 폴더를 읽어 시작 시각이 최근인 순서로 최대 limit개 돌려준다.
+std::vector<RecentRun> ScanRecentRuns(const std::vector<std::wstring>& roots, size_t limit);
+
 class CResultsPage : public CPageBase {
  public:
   enum class Mode { Reports, Resume, Configs };

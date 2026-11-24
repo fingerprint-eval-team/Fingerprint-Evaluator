@@ -504,3 +504,60 @@ void CResultsPage::OpenReport(const std::wstring& path) {
   if (reinterpret_cast<INT_PTR>(result) <= 32)
     AfxMessageBox(L"리포트 열기 실패\nWindows 기본 연결 앱 확인 필요", MB_ICONERROR);
 }
+
+// ------------------------------------------------------------ 홈 화면용 최근 실행
+
+std::vector<RecentRun> ScanRecentRuns(const std::vector<std::wstring>& roots, size_t limit) {
+  std::vector<RecentRun> runs;
+  std::vector<std::wstring> seenRoots;
+  for (const auto& root : roots) includeRoot(seenRoots, root);
+  for (const auto& root : seenRoots) {
+    std::error_code error;
+    for (fs::directory_iterator it(root, error), end; !error && it != end; it.increment(error)) {
+      if (!it->is_directory(error)) {
+        error.clear();
+        continue;
+      }
+      const fs::path folder = it->path();
+      if (std::any_of(runs.begin(), runs.end(), [&](const auto& r) { return samePath(r.path, folder.native()); })) continue;
+      std::string parseError;
+      fpe::Json info;
+      if (!fpe::Json::parse(readText(folder / L"run_info.json"), info, parseError)) continue;
+      fpe::EvalConfig config;
+      const bool hasConfig = fpe::EvalConfig::load((folder / L"config.json").native(), config, parseError);
+      RecentRun run;
+      run.path = folder.native();
+      const auto name = folder.filename().native();
+      CString stamp = toCS(info.get("startedAt").asString());
+      if (stamp.IsEmpty() && name.size() >= 15 && isTimestamp(toCS(name.substr(name.size() - 15))))
+        stamp = toCS(name.substr(name.size() - 15));
+      run.date = formatTimestamp(stamp);
+      run.dll = toCS(info.get("dllName").asString(fpe::toUtf8(fpe::fileNameOf(config.dllPath))));
+      run.db = toCS(info.get("dbName").asString(fpe::toUtf8(fpe::fileNameOf(config.dbPath))));
+      std::error_code pathError;
+      const auto reportDir = hasConfig && !config.reportDir.empty() ? fs::absolute(fs::path(config.reportDir) / name, pathError)
+                                                                    : folder;
+      run.htmlPath = findReportFile(pathError ? folder : reportDir, folder, L"report.html");
+      std::istringstream input(readText(folder / L"summary.csv"));
+      std::string header, row;
+      if (std::getline(input, header) && std::getline(input, row)) {
+        const auto keys = fpe::parseCsvLine(header);
+        const auto values = fpe::parseCsvLine(row);
+        auto field = [&](const char* key) {
+          const auto index = static_cast<size_t>(std::find(keys.begin(), keys.end(), key) - keys.begin());
+          return index < keys.size() && index < values.size() ? toCS(values[index]) : CString();
+        };
+        run.hasSummary = true;
+        run.complete = field("incomplete_jobs") == L"0";
+        run.eer = field("eer_percent");
+      }
+      runs.push_back(std::move(run));
+    }
+  }
+  std::sort(runs.begin(), runs.end(), [](const auto& a, const auto& b) {
+    const int byDate = a.date.Compare(b.date);
+    return byDate != 0 ? byDate > 0 : a.path < b.path;
+  });
+  if (runs.size() > limit) runs.resize(limit);
+  return runs;
+}

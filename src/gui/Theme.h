@@ -26,7 +26,6 @@ const COLORREF kNavySelected = RGB(46, 51, 84);
 const COLORREF kNavyLine = RGB(50, 55, 88);
 const COLORREF kOnNavy = RGB(236, 238, 245);
 const COLORREF kOnNavySub = RGB(156, 162, 188);
-const COLORREF kBrand = kNavy;  // 이전 홈 화면 호환 (다음 커밋에서 제거)
 // 보라 (10%)
 const COLORREF kAccent = RGB(124, 58, 237);
 const COLORREF kAccentHover = RGB(109, 40, 217);
