@@ -226,6 +226,50 @@ static void testMetricsUndefined() {
   NEAR(r.rejG, 0.0);
 }
 
+static void testFixedThresholdAndRawScores() {
+  MetricOptions opt;
+  opt.decisionThreshold = 0.65;
+  const std::vector<MatchRecord> separated = {mr('G', 0.508), mr('G', 0.183), mr('I', 0.172)};
+  auto r = MetricsCalculator::compute({}, separated, 2, 1, opt);
+  NEAR(r.eer, 0);
+  CHECK(r.fixedFmr.errors == 0 && r.fixedFmr.total == 1);
+  CHECK(r.fixedFnmr.errors == 2 && r.fixedFnmr.total == 2);
+  opt.decisionThreshold = 0.183;
+  r = MetricsCalculator::compute({}, separated, 2, 1, opt);
+  CHECK(r.fixedFnmr.errors == 0 && r.fixedFmr.errors == 0);
+
+  const double gScore = 0.6000004, iScore = 0.6000001;
+  std::vector<MatchRecord> mismatches = {mr('G', 0.6, Status::Mismatch), mr('I', 0.6, Status::Mismatch),
+                                         mr('G', 0.9, Status::Mismatch)};
+  mismatches[0].errMsg = "score 0.6000004 has more than 3 decimal places";
+  mismatches[1].errMsg = "score 0.6000001 has more than 3 decimal places";
+  mismatches[2].errMsg = "return value 2 (spec: 1 or 0)";
+  opt.decisionThreshold = gScore;
+  r = MetricsCalculator::compute({}, mismatches, 2, 1, opt);
+  CHECK(r.mismatches == 3 && r.precisionMismatches == 2);
+  CHECK(r.gOk == 0 && r.iOk == 0);
+  CHECK(r.fixedFnmr.errors == 2 && r.fixedFnmr.total == 2 && r.fixedFmr.errors == 0);
+  CHECK(r.rawFmr.errors == 0 && r.rawFmr.total == 1 && r.rawFnmr.errors == 0 && r.rawFnmr.total == 1);
+  NEAR(r.rawEer, 0);
+  CHECK(!r.starDefined);
+  opt.decisionThreshold = iScore;
+  r = MetricsCalculator::compute({}, mismatches, 2, 1, opt);
+  CHECK(r.rawFmr.errors == 1);
+  opt.complete = false;
+  r = MetricsCalculator::compute({}, mismatches, 2, 1, opt);
+  CHECK(r.fixedFmr.total == 0 && r.fixedFnmr.total == 0 && isNA(r.rawEer));
+
+  EvalConfig cfg;
+  cfg.decisionThreshold = 0.65;
+  NEAR(EvalConfig::fromJson(cfg.toJson()).decisionThreshold, 0.65);
+  NEAR(EvalConfig::fromJson(Json::object()).decisionThreshold, 0.5);
+  cfg.decisionThreshold = 0.6500000001234567;
+  Json parsed;
+  std::string err;
+  CHECK(Json::parse(cfg.toJson().dump(), parsed, err));
+  CHECK(EvalConfig::fromJson(parsed).decisionThreshold == cfg.decisionThreshold);
+}
+
 static std::wstring tempFile(const wchar_t* name) {
   return (std::filesystem::temp_directory_path() / name).wstring();
 }
@@ -334,6 +378,7 @@ int main() {
                {"PlanReproducible", testPlanReproducible},
                {"Metrics", testMetrics},
                {"MetricsUndefined", testMetricsUndefined},
+               {"FixedThresholdAndRawScores", testFixedThresholdAndRawScores},
                {"PlanLoadAndDuplicates", testPlanLoadAndDuplicates},
                {"ReportItemsConfig", testReportItemsConfig},
                {"JsonCsvZip", testJsonCsvZip},

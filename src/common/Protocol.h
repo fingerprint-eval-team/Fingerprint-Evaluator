@@ -9,7 +9,7 @@ constexpr uint32_t kMagic = 0x56455046;          // 'FPEV'
 constexpr int32_t kMaxTemplateSize = 1000000;    // K-NBTC 규격: 1,000,000 byte 미만
 constexpr int kPathChars = 520;
 
-enum class MsgType : uint32_t { Hello = 1, Enroll = 2, Attempt = 3, Compare = 4, Quit = 9, Reply = 100 };
+enum class MsgType : uint32_t { Hello = 1, Enroll = 2, Attempt = 3, Compare = 4, Recognize = 5, Quit = 9, Reply = 100 };
 
 #pragma pack(push, 1)
 struct MsgHeader {
@@ -36,6 +36,11 @@ struct CompareReq {
   wchar_t attemptPath[kPathChars];
 };
 
+struct RecognizeReq {
+  ExtractReq enroll;
+  ExtractReq attempt;
+};
+
 struct Reply {
   int32_t status;      // fpe::Status
   int32_t retVal;      // DLL 반환값 그대로
@@ -50,5 +55,6 @@ struct Reply {
 #pragma pack(pop)
 
 static_assert(sizeof(wchar_t) == 2, "Windows only");
+static_assert(sizeof(RecognizeReq) == 4184, "Worker recognition request layout");
 
 }  // namespace fpe

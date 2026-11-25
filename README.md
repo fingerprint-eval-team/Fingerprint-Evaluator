@@ -84,6 +84,25 @@ bin/FPEvalCli.exe --resume results/<결과 폴더>
 bin/FPEvalCli.exe --report-only results/<결과 폴더>
 ```
 
+리포트 탭의 FMR/FNMR 임계값(기본 0.5)을 바꾸거나 CLI에 `--threshold 0.65`를 추가할 수 있습니다.
+이 임계값은 FMR·FNMR에만 적용되며, EER은 임계값을 바꿔 가며 계산합니다.
+기존 결과에서 임계값만 바꾸려면 `--report-only <결과 폴더> --threshold 0.65`를 사용합니다.
+리포트는 규격에 맞는 점수 건수와 비교 MISMATCH 건수를 표시합니다. 점수 자릿수만 초과한 경우에는
+반환 점수 기준 참고 지표도 출력하며, 그 지표의 분모는 점수가 있는 비교 쌍입니다.
+
+이미지 두 장으로 인식 1회 시간을 측정할 때는 다음과 같이 `--latency`를 사용합니다.
+
+```powershell
+bin/FPEvalCli.exe --config testdb/base.json --dll bin/plugins/x64/FPAlgo.dll --db testdb/FVC2002_DB3_B --itype 2 --out results/latency --pairs testdb/pairs_sample.csv --latency --timeout 120
+```
+
+한 Worker가 각 쌍에 대해 새로 `Enroll → Attempt → Compare`를 연속 실행합니다.
+`recognition_latency.csv`에 Worker의 첫 호출(first)과 이후 호출(subsequent), 성공 상태, 경과 시간(μs),
+성공하면서 5초 미만인지(`under_5s`)를 기록합니다. 원본 TIFF 캐시 생성과 Worker 시작·DLL 로드는 측정 전에
+진행하며, 함수 호출 중 지연 로딩과 템플릿 파일 처리는 측정에 포함합니다.
+`--timeout`은 이 모드에서 쌍 하나의 Worker 응답 제한입니다. 시간 초과 행의 경과 시간에는 이 제한 값이
+기록됩니다. 5초 기준을 넘긴 호출의 실제 시간을 관측하려면 제한을 더 크게 설정합니다.
+
 라운드별 출력 폴더를 지정해 평가한 후 각 실행의 `summary.csv`를 한 표로 모을 수 있다.
 
 ```powershell

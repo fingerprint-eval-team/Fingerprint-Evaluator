@@ -1,6 +1,7 @@
 #pragma once
 #include <atomic>
 #include <mutex>
+#include <optional>
 #include <string>
 
 #include "config/EvalConfig.h"
@@ -36,10 +37,11 @@ class Evaluator {
   Evaluator(EvalConfig cfg, IProgressListener& listener);
   ~Evaluator();
 
-  RunOutcome run(const std::wstring& resumeDir = L"");
+  RunOutcome run(const std::wstring& resumeDir = L"", bool measureLatency = false);
 
   // 결과 폴더의 로그만으로 리포트 재생성. reportCfg가 있으면 그 리포트 항목·수식 설정을 사용.
-  static RunOutcome reportOnly(const std::wstring& runDir, const EvalConfig* reportCfg, IProgressListener& l);
+  static RunOutcome reportOnly(const std::wstring& runDir, const EvalConfig* reportCfg, IProgressListener& l,
+                               std::optional<double> decisionThreshold = std::nullopt);
 
   void requestStop();
   void abort();

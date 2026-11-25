@@ -7,7 +7,10 @@
 //   FPEvalCli --report-only <결과폴더>
 #include <windows.h>
 
+#include <cmath>
 #include <cstdio>
+#include <cwchar>
+#include <optional>
 #include <string>
 
 #include "Evaluator.h"
@@ -48,9 +51,9 @@ BOOL WINAPI onCtrl(DWORD) {
 void usage() {
   printf(
       "FPEvalCli --config cfg.json [--dll p] [--db d] [--itype n] [--out d] [--report-dir d] [--log-dir d] "
-      "[--workers n] [--timeout s] [--seed n] [--pairs f]\n"
+      "[--workers n] [--timeout s] [--seed n] [--pairs f] [--threshold t] [--latency]\n"
       "FPEvalCli --resume <run dir> [--workers n]\n"
-      "FPEvalCli --report-only <run dir>\n");
+      "FPEvalCli --report-only <run dir> [--threshold t]\n");
 }
 
 }  // namespace
@@ -60,6 +63,8 @@ int wmain(int argc, wchar_t** argv) {
   EvalConfig cfg;
   std::wstring resumeDir, reportDir;
   bool haveCfg = false;
+  bool measureLatency = false;
+  std::optional<double> threshold;
   for (int i = 1; i < argc; ++i) {
     std::wstring a = argv[i];
     auto next = [&]() -> std::wstring { return i + 1 < argc ? argv[++i] : L""; };
@@ -90,6 +95,17 @@ int wmain(int argc, wchar_t** argv) {
       cfg.seed = _wcstoui64(next().c_str(), nullptr, 10);
     } else if (a == L"--pairs") {
       cfg.pairsFile = next();
+    } else if (a == L"--threshold") {
+      const std::wstring arg = next();
+      wchar_t* end = nullptr;
+      double t = std::wcstod(arg.c_str(), &end);
+      if (end == arg.c_str() || *end || !std::isfinite(t) || t < 0 || t > 1) {
+        printf("--threshold: 0~1 사이의 수를 입력하세요.\n");
+        return 2;
+      }
+      threshold = t;
+    } else if (a == L"--latency") {
+      measureLatency = true;
     } else if (a == L"--resume") {
       resumeDir = next();
     } else if (a == L"--report-only") {
@@ -103,16 +119,21 @@ int wmain(int argc, wchar_t** argv) {
     usage();
     return 2;
   }
+  if ((measureLatency && (!resumeDir.empty() || !reportDir.empty())) || (threshold && !resumeDir.empty())) {
+    usage();
+    return 2;
+  }
+  if (threshold) cfg.decisionThreshold = *threshold;
 
   ConsoleListener l;
   RunOutcome out;
   if (!reportDir.empty()) {
-    out = Evaluator::reportOnly(reportDir, nullptr, l);
+    out = Evaluator::reportOnly(reportDir, nullptr, l, threshold);
   } else {
     Evaluator ev(cfg, l);
     g_eval = &ev;
     SetConsoleCtrlHandler(onCtrl, TRUE);
-    out = ev.run(resumeDir);
+    out = ev.run(resumeDir, measureLatency);
     g_eval = nullptr;
   }
   printf("\n결과: %s\n", out.message.c_str());

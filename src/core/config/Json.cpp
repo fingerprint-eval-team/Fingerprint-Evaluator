@@ -1,5 +1,6 @@
 #include "config/Json.h"
 
+#include <charconv>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
@@ -71,12 +72,16 @@ void Json::dumpTo(std::string& out, int indent, int level) const {
     case Type::Bool: out += b_ ? "true" : "false"; break;
     case Type::Number: {
       char b[64];
-      if (std::floor(n_) == n_ && std::fabs(n_) < 1e15) {
+      if (!std::isfinite(n_)) {
+        out += "null";
+      } else if (std::floor(n_) == n_ && std::fabs(n_) < 1e15) {
         snprintf(b, sizeof b, "%lld", static_cast<long long>(n_));
+        out += b;
       } else {
-        snprintf(b, sizeof b, "%.10g", n_);
+        // 임계값이 점수와 같으면 통과한다. 저장 후 같은 double로 돌아와야 판정이 유지된다.
+        const auto result = std::to_chars(b, b + sizeof b, n_);
+        out.append(b, result.ptr);
       }
-      out += b;
       break;
     }
     case Type::String: escape(out, s_); break;

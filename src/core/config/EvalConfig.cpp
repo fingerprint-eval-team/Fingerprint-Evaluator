@@ -1,5 +1,7 @@
 #include "config/EvalConfig.h"
 
+#include <cmath>
+
 #include "PathUtil.h"
 
 namespace fpe {
@@ -55,6 +57,7 @@ Json EvalConfig::toJson() const {
   rep["items"] = it;
   rep["eerMethod"] = eerMethod;
   rep["denominator"] = denominator;
+  rep["decisionThreshold"] = decisionThreshold;
   return j;
 }
 
@@ -105,6 +108,8 @@ EvalConfig EvalConfig::fromJson(const Json& j) {
   }
   c.eerMethod = rep.get("eerMethod").asString(c.eerMethod);
   c.denominator = rep.get("denominator").asString(c.denominator);
+  double t = rep.get("decisionThreshold").asNumber(c.decisionThreshold);
+  if (std::isfinite(t) && t >= 0 && t <= 1) c.decisionThreshold = t;
   return c;
 }
 

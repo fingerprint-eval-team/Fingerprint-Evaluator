@@ -211,6 +211,7 @@ RunOutcome buildReport(const std::wstring& runDir, const EvalConfig& cfg, IProgr
   mo.fvcEer = cfg.eerMethod != "Nearest";
   mo.predefinedDenominator = cfg.denominator != "attempted";
   mo.complete = out.incompleteJobs == 0;
+  mo.decisionThreshold = cfg.decisionThreshold;
   MetricsResult m = MetricsCalculator::compute(ex, mt, plan.nG, plan.nI, mo);
   out.metrics = m;
 
@@ -270,6 +271,10 @@ RunOutcome buildReport(const std::wstring& runDir, const EvalConfig& cfg, IProgr
                   : "N/A — FMR·FNMR 분모가 0 (N_G=" + std::to_string(m.nG) + ", N_I=" + std::to_string(m.nI) + ")";
   auto rateItem = [&](double v) { return m.ratesDefined ? pctOrNA(v) : ratesWhy; };
   auto ratio = [](size_t a, size_t b) { return " (" + std::to_string(a) + "/" + std::to_string(b) + ")"; };
+  auto countedRate = [&](const ErrorCount& count) {
+    return count.total ? fmtPct(static_cast<double>(count.errors) / count.total) + ratio(count.errors, count.total)
+                       : std::string("N/A");
+  };
 
   if (cfg.hasItem(item::FTE)) {
     rm.summary.push_back({"FTE", (isNA(m.fte) ? std::string("N/A (등록 시도 없음)") : fmtPct(m.fte) + ratio(m.nEF, m.nEnroll)) +
@@ -299,9 +304,27 @@ RunOutcome buildReport(const std::wstring& runDir, const EvalConfig& cfg, IProgr
     rm.notes.push_back("시간 초과는 해당 단계의 실패 건수에 포함됩니다. 등록·비교용 추출 실패로 건너뛴 쌍은 비교 호출 수에 포함되지 않습니다.");
   }
   if (cfg.hasItem(item::EER)) {
-    rm.summary.push_back({"EER", m.ratesDefined ? fmtPct(m.eer) + (m.eerExact ? " (정확, t=" : " (추정, t=") + fmtF(m.eerT) +
-                                                      ", 구간 " + fmtPct(m.eerLow) + " ~ " + fmtPct(m.eerHigh) + ")"
-                                                : ratesWhy});
+    std::string eer = m.ratesDefined
+                          ? fmtPct(m.eer) + (m.eerExact ? " (정확, t=" : " (추정, t=") + fmtF(m.eerT) +
+                                ", 구간 " + fmtPct(m.eerLow) + " ~ " + fmtPct(m.eerHigh) + ")"
+                          : ratesWhy;
+    if (m.ratesDefined && m.gOk + m.iOk == 0) eer += " — 유효 점수 0건, 비교 실패가 반영된 값";
+    rm.summary.push_back({"EER", eer});
+  }
+  if (cfg.hasItem(item::EER) || cfg.hasItem(item::Rates)) {
+    const std::string threshold = " (t=" + Json(cfg.decisionThreshold).dump(0) + ")";
+    rm.summary.push_back({"유효 비교 점수", "본인" + ratio(m.gOk, plan.nG) + " · 타인" + ratio(m.iOk, plan.nI) +
+                                               " · 비교 MISMATCH " + std::to_string(m.mismatches) + "건 (자릿수 " +
+                                               std::to_string(m.precisionMismatches) + "건)"});
+    rm.summary.push_back({"FMR" + threshold, countedRate(m.fixedFmr)});
+    rm.summary.push_back({"FNMR" + threshold, countedRate(m.fixedFnmr)});
+    if (m.complete && m.precisionMismatches) {
+      rm.summary.push_back({"참고 EER (반환 점수)", pctOrNA(m.rawEer)});
+      rm.summary.push_back({"참고 FMR" + threshold, countedRate(m.rawFmr)});
+      rm.summary.push_back({"참고 FNMR" + threshold, countedRate(m.rawFnmr)});
+      rm.notes.push_back("참고 지표의 분모는 유효 점수와 자릿수만 위반한 점수가 있는 쌍입니다. 제출 규격 적용 지표는 기존 분모를 따릅니다.");
+    }
+    rm.notes.push_back("FMR·FNMR은 표시된 임계값에서 계산합니다. EER은 임계값을 바꿔 가며 계산합니다.");
   }
   if (cfg.hasItem(item::EERstar)) {
     rm.summary.push_back({"EER*", m.starDefined ? fmtPct(m.eerStar) + " (t=" + fmtF(m.eerStarT) + ")"
@@ -471,7 +494,8 @@ void Evaluator::abort() {
   if (sched_) sched_->abort();
 }
 
-RunOutcome Evaluator::reportOnly(const std::wstring& runDir, const EvalConfig* reportCfg, IProgressListener& l) {
+RunOutcome Evaluator::reportOnly(const std::wstring& runDir, const EvalConfig* reportCfg, IProgressListener& l,
+                                 std::optional<double> decisionThreshold) {
   EvalConfig cfg;
   std::string err;
   if (!EvalConfig::load(joinPath(runDir, L"config.json"), cfg, err)) {
@@ -485,7 +509,9 @@ RunOutcome Evaluator::reportOnly(const std::wstring& runDir, const EvalConfig* r
     cfg.docx = reportCfg->docx;
     cfg.eerMethod = reportCfg->eerMethod;
     cfg.denominator = reportCfg->denominator;
+    cfg.decisionThreshold = reportCfg->decisionThreshold;
   }
+  if (decisionThreshold) cfg.decisionThreshold = *decisionThreshold;
   LogTee tee(l);
   std::wstring logDir = subDirFor(cfg.logDir, runDir);
   if (makeDirs(logDir)) tee.open(joinPath(logDir, L"eval.log"));
@@ -495,7 +521,7 @@ RunOutcome Evaluator::reportOnly(const std::wstring& runDir, const EvalConfig* r
   return o;
 }
 
-RunOutcome Evaluator::run(const std::wstring& resumeDir) {
+RunOutcome Evaluator::run(const std::wstring& resumeDir, bool measureLatency) {
   RunOutcome out;
   LogTee tee(l_);
   auto fail = [&](const std::string& msg) {
@@ -504,6 +530,7 @@ RunOutcome Evaluator::run(const std::wstring& resumeDir) {
     return out;
   };
   const bool resume = !resumeDir.empty();
+  if (resume && measureLatency) return fail("인식 1회 측정은 새 실행에서만 가능");
   std::string err;
 
   // ---------------- STEP 0 사전 검증 ----------------
@@ -518,7 +545,7 @@ RunOutcome Evaluator::run(const std::wstring& resumeDir) {
     runDir = resumeDir;
     tee.onLog("이어하기: " + toUtf8(runDir));
   }
-  if (!cfg_.html && !cfg_.docx) return fail("리포트 형식(HTML 또는 Word) 한 가지 이상 선택 필요");
+  if (!measureLatency && !cfg_.html && !cfg_.docx) return fail("리포트 형식(HTML 또는 Word) 한 가지 이상 선택 필요");
   if (!fileExists(cfg_.dllPath)) return fail("DLL 파일이 없음: " + toUtf8(cfg_.dllPath));
   int bits = peBitness(cfg_.dllPath);
   if (!bits) return fail("Windows DLL이 아니거나 지원하지 않는 플랫폼");
@@ -550,7 +577,7 @@ RunOutcome Evaluator::run(const std::wstring& resumeDir) {
   EvalScheduler::Options so;
   so.workerExe = workerExe;
   so.dllPath = cfg_.dllPath;
-  so.workers = std::max(1, cfg_.workers);
+  so.workers = measureLatency ? 1 : std::max(1, cfg_.workers);
   so.timeoutMs = (DWORD)std::max(1, cfg_.timeoutSec) * 1000;
   EvalScheduler sched(so);
   {
@@ -662,6 +689,62 @@ RunOutcome Evaluator::run(const std::wstring& resumeDir) {
             std::to_string(plan.nGenuine) + ", 타인비교 " + std::to_string(plan.nImpostor) + " (seed " +
             std::to_string(plan.seed) + ", 동일 이미지 비교 제외 " + std::to_string(plan.nSameImageRemoved) + "건)");
   tee.onProgress(1, 1, 0);
+
+  if (measureLatency) {
+    constexpr int64_t kFiveSecondsUs = 5000000;
+    const auto enrollTpl = joinPath(tplDir, L"latency_enroll.tpl");
+    const auto attemptTpl = joinPath(tplDir, L"latency_attempt.tpl");
+    if (enrollTpl.size() >= kPathChars || attemptTpl.size() >= kPathChars ||
+        std::any_of(rawPath.begin(), rawPath.end(), [](const std::wstring& p) { return p.size() >= kPathChars; })) {
+      return fail("인식 1회 측정 경로가 Worker 제한을 초과함");
+    }
+    auto makeExtractReq = [&](int index, const std::wstring& tpl) {
+      ExtractReq req{};
+      req.iType = cfg_.iType;
+      req.width = W;
+      req.height = H;
+      wcscpy_s(req.rawPath, rawPath[index].c_str());
+      wcscpy_s(req.outPath, tpl.c_str());
+      return req;
+    };
+    std::string csv = "jobId,enroll,attempt,type,worker_state,status,elapsed_us,score,under_5s,error\n";
+    size_t measured = 0, passed = 0;
+    bool freshWorker = true;
+    tee.onPhase("인식 1회 시간 측정 (Enroll → Attempt → Compare)", plan.compareJobs.size());
+    bool ran = sched.run(
+        plan.compareJobs.size(),
+        [&](size_t i) {
+          const auto& j = plan.compareJobs[i];
+          RecognizeReq req{makeExtractReq(j.a, enrollTpl), makeExtractReq(j.b, attemptTpl)};
+          WorkItem w;
+          w.jobId = j.id;
+          w.type = MsgType::Recognize;
+          w.body.resize(sizeof req);
+          memcpy(w.body.data(), &req, sizeof req);
+          return w;
+        },
+        [&](size_t i, const WorkResult& r) {
+          const auto& j = plan.compareJobs[i];
+          bool under = r.status == Status::OK && r.reply.elapsedUs < kFiveSecondsUs;
+          if (under) ++passed;
+          csv += csvRow({std::to_string(j.id), imgs[j.a].name(), imgs[j.b].name(), std::string(1, j.type),
+                         freshWorker ? "first" : "subsequent", toString(r.status),
+                         r.reply.elapsedUs > 0 || r.status == Status::OK ? std::to_string(r.reply.elapsedUs) : "",
+                         r.status == Status::OK ? fmtF(r.reply.score) : "", under ? "yes" : "no", acpToUtf8(r.reply.errMsg)});
+          freshWorker = r.status == Status::Timeout || r.status == Status::Crash;
+          ++measured;
+          tee.onProgress(measured, plan.compareJobs.size(), measured - passed);
+        },
+        err);
+    const auto latencyPath = joinPath(runDir, L"recognition_latency.csv");
+    if (!writeText(latencyPath, csv)) return fail("recognition_latency.csv 저장 실패");
+    tee.onLog("시간 측정 결과: " + toUtf8(latencyPath));
+    if (!ran) return fail(err);
+    out.stopped = sched.stopRequested();
+    out.ok = !out.stopped;
+    out.message = "인식 1회 5초 미만 " + std::to_string(passed) + " / " + std::to_string(measured) + "건";
+    return out;
+  }
 
   ResultStore store;
   if (!store.open(runDir, err)) return fail(err);

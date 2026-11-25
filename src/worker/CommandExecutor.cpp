@@ -217,4 +217,29 @@ Reply CommandExecutor::compare(const CompareReq& req) {
   return r;
 }
 
+Reply CommandExecutor::recognize(const RecognizeReq& req) {
+  LARGE_INTEGER start, end;
+  QueryPerformanceCounter(&start);
+  const char* phase = "Enroll";
+  Reply r = extract(true, req.enroll);
+  if (r.status == static_cast<int>(Status::OK)) {
+    phase = "Attempt";
+    r = extract(false, req.attempt);
+  }
+  if (r.status == static_cast<int>(Status::OK)) {
+    phase = "Compare";
+    CompareReq pair{};
+    wcscpy_s(pair.enrollPath, req.enroll.outPath);
+    wcscpy_s(pair.attemptPath, req.attempt.outPath);
+    r = compare(pair);
+  }
+  QueryPerformanceCounter(&end);
+  r.elapsedUs = elapsedUs(start, end);
+  if (r.status != static_cast<int>(Status::OK)) {
+    const std::string detail = std::string(phase) + ": " + r.errMsg;
+    strncpy_s(r.errMsg, detail.c_str(), _TRUNCATE);
+  }
+  return r;
+}
+
 }  // namespace fpe

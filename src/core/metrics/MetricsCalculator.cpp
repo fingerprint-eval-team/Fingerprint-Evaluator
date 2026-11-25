@@ -2,6 +2,8 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstdlib>
+#include <string_view>
 
 namespace fpe {
 
@@ -13,15 +15,15 @@ struct Rates {
   double gFail;                  // FNMR 분자에 더할 실패 수 (N_G,EF + N_G,MF)
   double nG, nI;                 // 분모
 
+  size_t falseMatches(double t) const { return i.end() - std::lower_bound(i.begin(), i.end(), t); }
+  size_t falseNonMatches(double t) const {
+    return static_cast<size_t>(gFail) + (std::lower_bound(g.begin(), g.end(), t) - g.begin());
+  }
   double fmr(double t) const {
-    if (nI <= 0) return 0;
-    size_t ge = i.end() - std::lower_bound(i.begin(), i.end(), t);
-    return ge / nI;
+    return nI > 0 ? falseMatches(t) / nI : 0;
   }
   double fnmr(double t) const {
-    if (nG <= 0) return 0;
-    size_t lt = std::lower_bound(g.begin(), g.end(), t) - g.begin();
-    return (gFail + lt) / nG;
+    return nG > 0 ? falseNonMatches(t) / nG : 0;
   }
 };
 
@@ -96,6 +98,17 @@ void finish(TimeStat& s) {
   if (s.n) s.meanMs /= (double)s.n;
 }
 
+// 기존 로그의 score 열은 표시용 자릿수만 저장하므로 상세 오류 메시지에서 원래 double을 읽는다.
+bool precisionMismatchScore(const MatchRecord& r, double& score) {
+  constexpr std::string_view prefix = "score ";
+  constexpr std::string_view suffix = " has more than 3 decimal places";
+  if (r.status != Status::Mismatch || r.errMsg.compare(0, prefix.size(), prefix) != 0) return false;
+  char* end = nullptr;
+  const char* begin = r.errMsg.c_str() + prefix.size();
+  score = std::strtod(begin, &end);
+  return end != begin && std::string_view(end) == suffix && std::isfinite(score) && score >= 0 && score <= 1;
+}
+
 std::vector<double> histogram(const std::vector<double>& v) {
   std::vector<double> h(100, 0.0);
   for (double s : v) h[std::min<size_t>(99, (size_t)(s * 100))] += 1;
@@ -141,7 +154,7 @@ MetricsResult MetricsCalculator::compute(const std::vector<ExtractRecord>& ex, c
   m.fte = m.nEnroll ? (double)m.nEF / m.nEnroll : kNA;
   m.tplMean = tplN ? tplSum / tplN : 0;
 
-  std::vector<double> g, i;
+  std::vector<double> g, i, rawG, rawI;
   for (const auto& r : mt) {
     if (r.status == Status::Aborted) continue;
     if (r.status == Status::InternalError) {
@@ -163,6 +176,12 @@ MetricsResult MetricsCalculator::compute(const std::vector<ExtractRecord>& ex, c
       addTime(m.matchAll, r.elapsedUs);
       addTime(gen ? m.matchG : m.matchI, r.elapsedUs);
     } else {
+      if (r.status == Status::Mismatch) ++m.mismatches;
+      double score;
+      if (precisionMismatchScore(r, score)) {
+        ++m.precisionMismatches;
+        (gen ? rawG : rawI).push_back(score);
+      }
       ++(gen ? m.nGCallFail : m.nICallFail);
       ++(gen ? m.nGMF : m.nIMF);
     }
@@ -192,6 +211,23 @@ MetricsResult MetricsCalculator::compute(const std::vector<ExtractRecord>& ex, c
   }
   Rates r{g, i, gFail, nG, nI};
   auto cand = candidates(g, i);
+  const double t = opt.decisionThreshold;
+  if (opt.complete) {
+    if (nI > 0) m.fixedFmr = {r.falseMatches(t), static_cast<size_t>(nI)};
+    if (nG > 0) m.fixedFnmr = {r.falseNonMatches(t), static_cast<size_t>(nG)};
+    if (m.precisionMismatches) {
+      rawG.insert(rawG.end(), g.begin(), g.end());
+      rawI.insert(rawI.end(), i.begin(), i.end());
+      std::sort(rawG.begin(), rawG.end());
+      std::sort(rawI.begin(), rawI.end());
+      Rates raw{rawG, rawI, 0, static_cast<double>(rawG.size()), static_cast<double>(rawI.size())};
+      m.rawFmr = {raw.falseMatches(t), rawI.size()};
+      m.rawFnmr = {raw.falseNonMatches(t), rawG.size()};
+      if (!rawG.empty() && !rawI.empty()) {
+        m.rawEer = computeEer(raw, candidates(rawG, rawI), opt.fvcEer).eer;
+      }
+    }
+  }
   // FMR은 N_I, FNMR은 N_G가 분모이므로 한쪽이라도 0이면 두 곡선을 비교하는 지표는 정의되지 않는다
   // 미완료 평가에서는 결과가 없는 계획 건이 FNMR 분자에 들어가지 않아 0%처럼 보이므로 계산하지 않는다
   m.ratesDefined = opt.complete && nG > 0 && nI > 0;
