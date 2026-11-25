@@ -211,7 +211,7 @@ void CNavBar::OnPaint() {
   CBitmap bmp;
   bmp.CreateCompatibleBitmap(&paintDc, client.Width(), client.Height());
   CBitmap* oldBmp = dc.SelectObject(&bmp);
-  dc.FillSolidRect(client, theme::kWindowBg);
+  dc.FillSolidRect(client, theme::kNavy);  // 딥 네이비 사이드바
   dc.SetBkMode(TRANSPARENT);
   CFont* oldFont = dc.SelectObject(&m_titleFont);
 
@@ -221,10 +221,10 @@ void CNavBar::OnPaint() {
     const bool hot = static_cast<int>(i) == m_hot && it.enabled;
     if (it.separatorBefore) {
       const int sy = it.rect.top - Px(7);
-      dc.FillSolidRect(it.rect.left + Px(8), sy, it.rect.Width() - Px(16), 1, theme::kBorder);
+      dc.FillSolidRect(it.rect.left + Px(8), sy, it.rect.Width() - Px(16), 1, theme::kNavyLine);
     }
     if (selected || hot) {
-      const COLORREF fill = selected ? theme::kSelected : theme::kHover;
+      const COLORREF fill = selected ? theme::kNavySelected : theme::kNavyHover;
       theme::FillRoundRect(&dc, it.rect, Px(8), fill, fill);
     }
     if (selected) {  // 선택 표시: 왼쪽 강조색 막대
@@ -239,15 +239,15 @@ void CNavBar::OnPaint() {
       if (m_appIcon) DrawIconEx(dc.m_hDC, ix, iy, m_appIcon, iconSize, iconSize, 0, nullptr, DI_NORMAL);
       if (!m_compact) {
         dc.SelectObject(&m_titleFont);
-        dc.SetTextColor(theme::kText);
+        dc.SetTextColor(theme::kOnNavy);
         CRect label(ix + Px(36), it.rect.top, it.rect.right - Px(4), it.rect.bottom);
         dc.DrawText(L"FPEval", label, DT_LEFT | DT_VCENTER | DT_SINGLELINE | DT_END_ELLIPSIS);
       }
     } else {
-      const COLORREF fg = !it.enabled ? theme::kTextDisabled : theme::kText;
+      const COLORREF fg = !it.enabled ? theme::kOnNavySub : theme::kOnNavy;
       CRect iconRc(it.rect.left + Px(8), it.rect.top, it.rect.left + Px(32), it.rect.bottom);
       dc.SelectObject(&m_iconFont);
-      dc.SetTextColor(selected ? theme::kAccent : fg);
+      dc.SetTextColor(selected ? theme::kAccentOnNavy : it.enabled ? theme::kOnNavySub : fg);
       const wchar_t glyph[2] = {it.glyph, 0};
       dc.DrawText(glyph, iconRc, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
       if (m_compact) {
@@ -260,7 +260,7 @@ void CNavBar::OnPaint() {
         CRect textRc(it.rect.left + Px(42), it.rect.top, it.rect.right - Px(8), it.rect.bottom);
         if (!it.badge.IsEmpty()) {
           dc.SelectObject(&m_smallFont);
-          dc.SetTextColor(theme::kAccent);
+          dc.SetTextColor(theme::kAccentOnNavy);
           dc.DrawText(it.badge, textRc, DT_RIGHT | DT_VCENTER | DT_SINGLELINE);
         }
         dc.SelectObject(&m_textFont);
@@ -271,7 +271,8 @@ void CNavBar::OnPaint() {
     if (m_hasFocus && static_cast<int>(i) == m_focus) {
       CRect focus(it.rect);
       focus.DeflateRect(Px(2), Px(2));
-      dc.SetTextColor(theme::kText);
+      dc.SetTextColor(theme::kOnNavy);
+      dc.SetBkColor(theme::kNavy);
       dc.DrawFocusRect(focus);
     }
   }

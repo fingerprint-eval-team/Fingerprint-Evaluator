@@ -233,8 +233,8 @@ END
 // 버전 정보
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0,1,0,0
- PRODUCTVERSION 0,1,0,0
+ FILEVERSION 0,5,1,0
+ PRODUCTVERSION 0,5,1,0
  FILEFLAGSMASK 0x3fL
  FILEOS 0x40004L
  FILETYPE 0x1L
@@ -245,9 +245,9 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "SME3007 Team"
             VALUE "FileDescription", "FPEval 지문인식 알고리즘 평가 프로그램"
-            VALUE "FileVersion", "0.1.0"
+            VALUE "FileVersion", "0.5.1"
             VALUE "ProductName", "FPEval"
-            VALUE "ProductVersion", "0.1.0"
+            VALUE "ProductVersion", "0.5.1"
         END
     END
     BLOCK "VarFileInfo"

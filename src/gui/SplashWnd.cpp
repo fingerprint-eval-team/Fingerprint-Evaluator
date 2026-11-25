@@ -144,9 +144,9 @@ void CSplashWnd::OnPaint() {
   dc.SetBkMode(TRANSPARENT);
   dc.FillSolidRect(client, theme::kPanel);
 
-  // 왼쪽 강조색 패널
+  // 왼쪽 딥 네이비 브랜드 패널
   CRect brand(client.left, client.top, client.left + Px(190), client.bottom);
-  dc.FillSolidRect(brand, theme::kBrand);
+  dc.FillSolidRect(brand, theme::kNavy);
   const int pad = Px(22);
   if (m_icon) {  // 아이콘은 흰 원 배경 위에 (파란 바탕에서 지문 아이콘이 묻히지 않게)
     CRect badge(brand.left + pad, brand.top + pad, brand.left + pad + Px(64), brand.top + pad + Px(64));
@@ -154,10 +154,10 @@ void CSplashWnd::OnPaint() {
     DrawIconEx(dc.m_hDC, badge.left + Px(4), badge.top + Px(4), m_icon, Px(56), Px(56), 0, nullptr, DI_NORMAL);
   }
   CFont* oldFont = dc.SelectObject(&m_titleFont);
-  dc.SetTextColor(theme::kOnAccent);
+  dc.SetTextColor(theme::kOnNavy);
   dc.TextOut(brand.left + pad, brand.top + pad + Px(76), L"FPEval");
   dc.SelectObject(&m_textFont);
-  dc.SetTextColor(theme::kOnAccentSub);
+  dc.SetTextColor(theme::kOnNavySub);
   dc.TextOut(brand.left + pad, brand.top + pad + Px(110), L"지문인식 알고리즘 평가");
   dc.SelectObject(&m_smallFont);
   CString version;

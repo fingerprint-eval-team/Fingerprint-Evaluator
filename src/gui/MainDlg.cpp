@@ -215,6 +215,8 @@ void CMainDlg::ShowHome() {
   for (int id : kChromeIds) GetDlgItem(id)->ShowWindow(SW_HIDE);
   for (int id : kRunBarIds) GetDlgItem(id)->ShowWindow(SW_HIDE);
   for (int i = 0; i < kPageCount; ++i) Page(i)->ShowWindow(SW_HIDE);
+  // 최근 실행은 홈을 열 때마다 기본 결과 폴더와 지금 설정된 결과 폴더에서 다시 읽는다
+  m_home.SetRunRoots({fpe::joinPath(fpe::userDataDir(), L"results"), toW(m_target.OutDir())});
   LayoutPages();
   m_home.ShowWindow(SW_SHOW);
   m_home.SetFocus();
@@ -265,7 +267,7 @@ LRESULT CMainDlg::OnNavHome(WPARAM, LPARAM) {
   return 0;
 }
 
-LRESULT CMainDlg::OnHomeCmd(WPARAM cmd, LPARAM) {
+LRESULT CMainDlg::OnHomeCmd(WPARAM cmd, LPARAM arg) {
   switch (cmd) {
     case CHomeView::kCmdRunning:
       ShowPage(kDashPage);
@@ -281,6 +283,17 @@ LRESULT CMainDlg::OnHomeCmd(WPARAM cmd, LPARAM) {
       break;
     case CHomeView::kCmdResults:
       ShowPage(kResultsPage);
+      break;
+    case CHomeView::kCmdOpenRun:  // 최근 실행: 끝난 실행은 리포트, 아니면 이어하기 목록
+      if (const RecentRun* run = m_home.RunAt(static_cast<int>(arg))) {
+        if (run->complete && !run->htmlPath.empty()) {
+          ShellExecute(m_hWnd, L"open", run->htmlPath.c_str(), nullptr, nullptr, SW_SHOWNORMAL);
+        } else if (m_running) {
+          ShowPage(kDashPage);
+        } else {
+          ShowPage(run->complete ? kResultsPage : kResumePage);
+        }
+      }
       break;
     case CHomeView::kCmdAbout:
       OnAbout();
@@ -754,5 +767,6 @@ LRESULT CMainDlg::OnDone(WPARAM, LPARAM l) {
   SetRunning(false);
   if (!o->runDir.empty()) m_results.IncludeRoot(std::filesystem::path(o->runDir).parent_path().native());
   if (!m_homeShown && m_page == kResultsPage) m_results.Refresh();
+  if (m_homeShown) m_home.ReloadRuns();
   return 0;
 }

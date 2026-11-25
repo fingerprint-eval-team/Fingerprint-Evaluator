@@ -57,7 +57,7 @@ void CFlatCombo::OnPaint() {
 
   const bool disabled = !IsWindowEnabled();
   const bool focused = GetFocus() == this;
-  const COLORREF face = disabled ? theme::kCard : m_dropped ? theme::kSelected : m_hover ? theme::kHover : theme::kPanel;
+  const COLORREF face = disabled ? theme::kCard : m_dropped ? theme::kPressed : m_hover ? theme::kHover : theme::kPanel;
   const COLORREF border = disabled ? theme::kBorder : (focused || m_dropped) ? theme::kAccent : theme::kControlBorder;
 
   dc.FillSolidRect(rc, m_parentBg);

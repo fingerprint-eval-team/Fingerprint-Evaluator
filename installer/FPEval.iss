@@ -3,7 +3,7 @@
 ; 정적 런타임(/MT)으로 빌드하므로 VC++ 재배포 패키지는 필요 없다.
 
 #define AppName "FPEval"
-#define AppVersion "0.1.0"
+#define AppVersion "0.5.1"
 
 [Setup]
 AppId={{6B0F2E3A-9C1D-4E57-9B7A-FPEVAL000001}
