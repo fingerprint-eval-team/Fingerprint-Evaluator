@@ -65,6 +65,7 @@ struct EvalConfig {
   std::set<std::string> items = defaultReportItems();
   std::string eerMethod = "FVC";         // FVC | Nearest
   std::string denominator = "predefined"; // predefined | attempted
+  double decisionThreshold = 0.5;
 
   Json toJson() const;
   static EvalConfig fromJson(const Json& j);

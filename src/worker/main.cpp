@@ -92,6 +92,14 @@ int wmain(int argc, wchar_t** argv) {
         r = exec.compare(*req);
         break;
       }
+      case MsgType::Recognize: {
+        if (hdr.bodyLen != sizeof(RecognizeReq)) return 1;
+        auto* req = reinterpret_cast<RecognizeReq*>(body.data());
+        req->enroll.rawPath[kPathChars - 1] = req->enroll.outPath[kPathChars - 1] = 0;
+        req->attempt.rawPath[kPathChars - 1] = req->attempt.outPath[kPathChars - 1] = 0;
+        r = exec.recognize(*req);
+        break;
+      }
       case MsgType::Quit:
         return 0;
       default:

@@ -17,6 +17,7 @@ class CommandExecutor {
 
   Reply extract(bool isEnroll, const ExtractReq& req);
   Reply compare(const CompareReq& req);
+  Reply recognize(const RecognizeReq& req);
 
  private:
   HMODULE dll_ = nullptr;

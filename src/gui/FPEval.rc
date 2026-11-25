@@ -216,7 +216,7 @@ BEGIN
     CONTROL         "Score Distribution", IDC_ITEM0 + 11, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 156, 90, 136, 10
     CONTROL         "FMR(t)·FNMR(t)", IDC_ITEM0 + 12, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 298, 90, 138, 10
 
-    GROUPBOX        "리포트 형식 · 계산 방식", IDC_STATIC, 6, 110, 438, 48
+    GROUPBOX        "리포트 형식 · 계산 방식", IDC_STATIC, 6, 110, 438, 68
     LTEXT           "형식", IDC_STATIC, 14, 125, 68, 10
     CONTROL         "HTML", IDC_HTML, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 85, 124, 60, 10
     CONTROL         "MS-Word (.docx)", IDC_DOCX, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 150, 124, 90, 10
@@ -225,6 +225,8 @@ BEGIN
     COMBOBOX        IDC_EER_METHOD, 85, 138, 100, 60, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     LTEXT           "FMR/FNMR 분모", IDC_STATIC, 205, 141, 60, 10
     COMBOBOX        IDC_DENOM, 268, 138, 100, 60, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "FMR/FNMR 임계값 (0~1)", IDC_STATIC, 14, 159, 108, 11
+    EDITTEXT        IDC_DECISION_THRESHOLD, 125, 156, 58, 14, ES_AUTOHSCROLL | WS_TABSTOP
 END
 
 /////////////////////////////////////////////////////////////////////////////

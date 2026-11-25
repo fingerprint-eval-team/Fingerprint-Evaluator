@@ -13,6 +13,7 @@ struct MetricOptions {
   // false: 계획 중 결과가 없는 작업이 있음(중단된 평가). 계획 수를 분모로 쓰는 오류율은
   // 아직 비교하지 않은 건을 성공처럼 취급하게 되므로 EER·FMRxxx 등 최종 지표를 계산하지 않는다.
   bool complete = true;
+  double decisionThreshold = 0.5;
 };
 
 // 계산할 수 없는 지표 값 (분모가 0이거나 조건을 만족하는 임계값이 없음)
@@ -29,6 +30,10 @@ struct TimeStat {
   size_t n = 0;
 };
 
+struct ErrorCount {
+  size_t errors = 0, total = 0;
+};
+
 struct MetricsResult {
   // 등록
   size_t nEnroll = 0, nEF = 0;
@@ -43,6 +48,10 @@ struct MetricsResult {
   size_t nGCalled = 0, nICalled = 0;     // 실제로 DLL을 호출한 수
   size_t nGCallFail = 0, nICallFail = 0;
   size_t gOk = 0, iOk = 0;
+  size_t mismatches = 0, precisionMismatches = 0;
+  ErrorCount fixedFmr, fixedFnmr;
+  ErrorCount rawFmr, rawFnmr;
+  double rawEer = kNA;
   double rejG = 0, rejI = 0;             // 호출 건수가 0이면 kNA
   // 오류율. 계산할 수 없으면 kNA (예: 부분 평가에서 genuine 또는 impostor 쌍이 없음)
   bool complete = true;                  // MetricOptions::complete. false면 아래 최종 지표는 모두 kNA

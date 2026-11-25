@@ -3,6 +3,7 @@
 #include "Pages.h"
 
 #include <algorithm>
+#include <cmath>
 #include <vector>
 
 #include "Theme.h"
@@ -403,6 +404,12 @@ void CReportPage::DoDataExchange(CDataExchange* pDX) {
   DDX_Check(pDX, IDC_DOCX, m_docx);
   DDX_CBIndex(pDX, IDC_EER_METHOD, m_eer);
   DDX_CBIndex(pDX, IDC_DENOM, m_denom);
+  DDX_Text(pDX, IDC_DECISION_THRESHOLD, m_threshold);
+  if (pDX->m_bSaveAndValidate && !std::isfinite(m_threshold)) {
+    AfxMessageBox(L"FMR/FNMR 임계값은 0~1 사이의 수를 입력하세요.", MB_ICONWARNING);
+    pDX->Fail();
+  }
+  DDV_MinMaxDouble(pDX, m_threshold, 0, 1);
 }
 
 void CReportPage::LoadFrom(const fpe::EvalConfig& c) {
@@ -411,6 +418,7 @@ void CReportPage::LoadFrom(const fpe::EvalConfig& c) {
   m_html = c.html;
   m_docx = c.docx;
   m_eer = indexOf(kEerMethods, c.eerMethod);
+  m_threshold = c.decisionThreshold;
   m_denom = indexOf(kDenoms, c.denominator);
   UpdateData(FALSE);
 }
@@ -429,6 +437,7 @@ bool CReportPage::SaveTo(fpe::EvalConfig& c) {
   c.html = m_html != FALSE;
   c.docx = m_docx != FALSE;
   c.eerMethod = valueAt(kEerMethods, m_eer);
+  c.decisionThreshold = m_threshold;
   c.denominator = valueAt(kDenoms, m_denom);
   return true;
 }

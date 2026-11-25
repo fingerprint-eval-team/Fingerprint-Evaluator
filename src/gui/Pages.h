@@ -117,4 +117,5 @@ class CReportPage : public CPageBase {
   BOOL m_items[kItems] = {};
   BOOL m_html = TRUE, m_docx = TRUE;
   int m_eer = 0, m_denom = 0;
+  double m_threshold = 0.5;
 };

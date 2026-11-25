@@ -55,6 +55,7 @@
 #define IDC_HTML          1350
 #define IDC_DOCX          1351
 #define IDC_EER_METHOD    1352
+#define IDC_DECISION_THRESHOLD 1354
 #define IDC_DENOM         1353
 
 // 메인 대화상자
