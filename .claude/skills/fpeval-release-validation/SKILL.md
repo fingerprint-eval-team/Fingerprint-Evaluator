@@ -12,7 +12,7 @@ license: "MIT"
 
 1. Win32/x64 Release를 빌드하고 CoreTests를 실행한다. Debug·ASan·프로파일 진단 바이너리가 `bin/`을 덮어썼는지 확인한다.
 2. GUI·CLI·Worker32/64·`plugins/x86`과 `plugins/x64`의 FPAlgo 및 의도한 시험 DLL을 점검한다. Inno의 `*.dll` wildcard가 실험용 외부 DLL까지 포함하지 않는지 실제 목록을 확인한다.
-3. `/MT`와 정적 MFC를 유지한다. 외부 평가 DLL의 자체 의존성은 별도다. FVC·캐시·템플릿·로컬 결과·AlgoDebug를 설치 파일에 넣지 않는다.
+3. `/MT`와 정적 MFC를 유지한다. 외부 평가 DLL의 자체 의존성은 별도다. 캐시·템플릿·로컬 결과·AlgoDebug를 설치 파일에 넣지 않는다. 시험 DB(FVC)는 `testdb/`가 있으면 `FPEval_Setup_<버전>_DB.exe`에 들어간다. 저장소가 공개이므로 GitHub Release 등 공개 배포에는 `/DNoTestDb`로 만든 DB 없는 설치 파일만 올린다.
 4. 실제 설치된 Inno Setup 6의 ISCC 경로를 찾아 `& "<ISCC.exe 절대 경로>" .\installer\FPEval.iss`를 실행하고 종료 코드·생성 파일·버전을 기록한다. 생성만으로 설치 성공이라고 하지 않는다.
 5. 전용 Windows VM에서 현재 사용자/관리자 설치 중 변경에 관련된 경로를 검증한다. 설치 위치 쓰기 권한 없이 실행, 문서 폴더 설정·결과, 정상 평가·리포트 열기, 제거를 확인한다.
 6. 업그레이드/제거 변경이면 앱 파일과 사용자의 설정·결과 보존 정책을 따로 확인한다. 실제 사용자의 설치본에서 임의 제거 시험을 하지 않는다.
