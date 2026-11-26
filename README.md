@@ -163,7 +163,15 @@ Inno Setup 6이 필요하다. 사용자 설치 기준:
 "%LOCALAPPDATA%\Programs\Inno Setup 6\ISCC.exe" installer\FPEval.iss
 ```
 
-`dist/FPEval_Setup_0.5.1.exe`가 만들어진다. 관리자 권한이면 Program Files에, 아니면 "현재 사용자만" 설치를 고르면
+`testdb/`에 FVC DB가 있으면 `dist/FPEval_Setup_0.5.1_DB.exe`(시험 DB 포함), 없으면 `dist/FPEval_Setup_0.5.1.exe`가 만들어진다.
+DB 포함본은 설치할 때 `설치 폴더\testdb`에 DB를 함께 깔고, GUI 첫 실행 때 그 DB를 기본으로 고른다.
+FVC 이미지가 들어 있으므로 DB 포함본은 USB·과제 제출처럼 직접 전달할 때만 쓰고, 공개 GitHub Release에는 DB 없는 설치 파일을 올린다.
+
+```bash
+"%LOCALAPPDATA%\Programs\Inno Setup 6\ISCC.exe" /DNoTestDb installer\FPEval.iss
+```
+
+관리자 권한이면 Program Files에, 아니면 "현재 사용자만" 설치를 고르면
 `%LOCALAPPDATA%\Programs`에 설치된다. Inno Setup을 Program Files에 설치했다면 경로를 `C:\Program Files (x86)\Inno Setup 6\ISCC.exe`로 바꾼다.
 
 ## 검증 결과 (v0.1.0 프로토타입, FVC 공개 DB 각 80장)
